@@ -13,6 +13,7 @@
 #       If `src` is a directory (ends with /), the `dest` in linux default to "~/src",
 #       and in windows defaults to "AppData/Roaming/<src-suffix>",
 #       where <src-suffix> is the part after ".config/".
+#   If provided as a empty string, it means no syncing on that platform.
 #
 #   For example: `".vimrc": { dest: { windows: "_vimrc" } }` describes that the source file is
 #   ".vimrc" in the dotfiles repository, and the destination path in Windows is "_vimrc" in the user's home directory.
@@ -31,7 +32,7 @@
     ".inputrc": { dest: { windows: "" } },
     ".tmux.conf": { dest: { windows: "" } },
     ".gitconfig",
-    ".config/nvim/": { windows: "AppData/Local/nvim" },
+    ".config/nvim/": { dest: { windows: "AppData/Local/nvim" } },
     ".config/helix/",
     ".config/yazi/",
 }

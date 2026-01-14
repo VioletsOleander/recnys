@@ -2,3 +2,6 @@ root = true
 
 [recnys.example.yaml]
 indent_size = 4
+
+[tests/**.yaml]
+indent_size = 4
