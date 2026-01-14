@@ -38,6 +38,15 @@ class TaskSyncState:
     last_sync_time: str
     sync_decision: SyncDecision
 
+    @classmethod
+    def from_dict(cls, data: dict) -> TaskSyncState:
+        return cls(
+            dst=data["dst"],
+            file_hash=data["file_hash"],
+            last_sync_time=data["last_sync_time"],
+            sync_decision=SyncDecision(data["sync_decision"]),
+        )
+
     def __str__(self) -> str:
         return json.dumps(dataclasses.asdict(self), indent=4)
 
@@ -58,29 +67,28 @@ class SyncState(MutableMapping[Path, TaskSyncState]):
     def from_json(cls, file_path: Path) -> SyncState:
         """Load sync state from a JSON file.
 
+        If the file does not exist, return an empty SyncState instance.
+
         Returns:
             SyncState: Loaded sync state instance.
         """
-        if not file_path.exists():
-            logger.error("Sync state file not found: %s", file_path)
-            raise FileNotFoundError(f"Sync state file not found: {file_path}")
-
-        with file_path.open("r", encoding="utf-8") as f:
-            loaded_state = json.load(f)
-        logger.info("Loaded sync state from %s", file_path)
-
         sync_state = cls()
-        sync_state._state = loaded_state
+        if not file_path.exists():
+            logger.info("Sync state file not found: %s, initializing an empty state.", file_path)
+        else:
+            with file_path.open("r", encoding="utf-8") as f:
+                data = json.load(f)
+            sync_state._state = {k: TaskSyncState.from_dict(v) for k, v in data.items()}
+            logger.info("Loaded sync state from %s", file_path)
+
         return sync_state
 
     def save(self, file_path: Path) -> None:
-        """Save the current sync state to the JSON file.
+        """Save the current sync state to the JSON file."""
+        serializable_data = {k: dataclasses.asdict(v) for k, v in self._state.items()}
 
-        Raises:
-            IOError: If there is an error writing to the file.
-        """
-        with file_path.open("w") as f:
-            json.dump(self._state, f, indent=4)
+        with file_path.open("w", encoding="utf-8") as f:
+            json.dump(serializable_data, f, indent=4)
         logger.info("Saved sync state to %s", file_path)
 
     @override

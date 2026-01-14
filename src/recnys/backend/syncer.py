@@ -52,8 +52,9 @@ def _make_sync_decision(task: SyncTask, state: SyncState) -> SyncDecision:
     match task.policy:
         case Policy.SOURCE:
             expected_statement = f'source "{src}"\n'
-            dst_lines = dst.open("r", encoding="utf-8").readlines()
-            if len(dst_lines) < 1 or dst_lines[0] != expected_statement:
+            with dst.open("r", encoding="utf-8") as f:
+                first_line = f.readline()
+            if not first_line or first_line != expected_statement:
                 return SyncDecision.DST_MODIFIED
         case Policy.OVERWRITE:
             src_hash = curr_hash
@@ -91,7 +92,7 @@ class Syncer:
 
     def __init__(self, sync_state: SyncState, sync_tasks: list[RawSyncTask]) -> None:
         self.sync_state = sync_state
-        self.syn_task = canonicalize_sync_tasks(sync_tasks)
+        self.sync_tasks = canonicalize_sync_tasks(sync_tasks)
 
     def sync(self, *, force: bool = False) -> SyncState:
         """Perform the sync operations for all sync tasks.

@@ -9,8 +9,11 @@ __all__ = ["get_file_hash", "prompt_for_confirmation"]
 
 
 def get_file_hash(file_path: Path) -> str:
+    sha256 = hashlib.sha256()
     with file_path.open("rb") as f:
-        return hashlib.sha256(f.read()).hexdigest()
+        while chunk := f.read(8192):
+            sha256.update(chunk)
+    return sha256.hexdigest()
 
 
 def prompt_for_confirmation(message: str, confirm_signals: Sequence[str]) -> bool:
