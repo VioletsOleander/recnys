@@ -94,3 +94,11 @@ convention = "google"
 [tool.pylint."messages control"]
 disable = "all"
 enable = ["cyclic-import"]
+
+[tool.pytest]
+addopts = ["--import-mode=importlib", "-s"]
+
+[dependency-groups]
+dev = [
+    "pytest-mock>=3.15.1",
+]

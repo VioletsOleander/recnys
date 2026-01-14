@@ -5,7 +5,8 @@ from pathlib import Path
 
 from .backend.state import SyncState
 from .backend.syncer import Syncer
-from .frontend.parse import load, parse
+from .frontend.load import load
+from .frontend.parse import parse
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -38,6 +39,9 @@ def main() -> int:
         sync_tasks = parse(load(config_file))
     except FileNotFoundError:
         logger.exception("Configuration file not found.")
+        return 1
+    except (TypeError, ValueError):
+        logger.exception("Configuration file is malformed.")
         return 1
     except Exception:
         logger.exception("Failed to parse configuration file.")

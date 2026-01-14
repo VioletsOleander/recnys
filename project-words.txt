@@ -5,3 +5,4 @@ recnys
 Syncer
 vimrc
 yazi
+pytest

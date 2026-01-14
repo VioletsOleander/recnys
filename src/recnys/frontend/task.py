@@ -22,6 +22,17 @@ class SyncTask:
     dst: Dst
     policy: Policy
 
+    def __str__(self) -> str:
+        return f"SyncTask(src={self.src}, dst={self.dst}, policy={self.policy})"
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, SyncTask):
+            return NotImplemented
+        return self.src == other.src and self.dst == other.dst and self.policy == other.policy
+
+    def __hash__(self) -> int:
+        return hash((self.src, self.dst, self.policy))
+
 
 class Src:
     """Source of file synchronization.
@@ -42,62 +53,70 @@ class Src:
     def __str__(self) -> str:
         return str(self.path)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Src):
+            return NotImplemented
+        return self.path == other.path and self.is_dir == other.is_dir
+
+    def __hash__(self) -> int:
+        return hash((self.path, self.is_dir))
+
 
 class Dst:
     """Destination of file synchronization.
 
     Attributes:
-        path (Path): The absolute path to the destination file or directory.
+        path (Path | None): The absolute path to the destination file or directory, or
+            None if not specified.
     """
 
-    path: Path
+    path: Path | None
 
-    def __init__(
-        self, linux: str | None = None, windows: str | None = None, src: Src | None = None
-    ) -> None:
+    def __init__(self, src: str, linux: str | None = None, windows: str | None = None) -> None:
         """Initialize the destination path based on the current OS.
 
         If the path for the current OS is not provided, the dest path will be derived from
         the `src` argument. In this case, the `src` argument must be provided.
 
         If the path for the current OS is provided, it is used directly to derive the dest path.
-        In this case, the `src` argument is optional.
 
         Current supported OS are Linux and Windows.
 
         Args:
+            src (str): Source path to derive destination from.
             linux (str | None): Relative path for Linux systems.
             windows (str | None): Relative path for Windows systems.
-            src (Src | None): Source object to derive default path if needed.
         """
         current_os = platform.system()
         match current_os:
-            case "Linux":
-                if linux is not None:
-                    relative_path = linux
-                elif src is None:
-                    raise ValueError("src must be provided if dest is not specified")
-                else:
-                    # default to the same as src.path
-                    relative_path = src.path
             case "Windows":
-                if windows is not None:
-                    relative_path = windows
-                elif src is None:
-                    raise ValueError("src must be provided if dest is not specified")
+                if windows is None:
+                    if src.endswith("/"):
+                        relative_path = "AppData/Roaming/" + src.lstrip(".config/")
+                    else:
+                        relative_path = src
                 else:
-                    # default to "AppData/Roaming/" for directory src
-                    # e.g. ".config/helix" -> "AppData/Roaming/helix"
-                    relative_path = (
-                        "AppData/Roaming/" / Path(*src.path.parts[1:]) if src.is_dir else src.path
-                    )
+                    relative_path = windows
+            case "Linux":
+                relative_path = src if linux is None else linux
             case _:
                 raise NotImplementedError(f"Unsupported OS: {current_os}")
 
-        self.path = Path.home() / relative_path
+        if relative_path == "":
+            self.path = None
+        else:
+            self.path = Path.home() / relative_path
 
     def __str__(self) -> str:
         return str(self.path)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Dst):
+            return NotImplemented
+        return self.path == other.path
+
+    def __hash__(self) -> int:
+        return hash(self.path)
 
 
 class Policy(StrEnum):
