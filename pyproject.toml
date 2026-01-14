@@ -1,7 +1,7 @@
 [project]
 name = "recnys"
 version = "0.1.0"
-description = "Dotfile synchronizion helper"
+description = "Dotfile synchronization helper"
 authors = [{ name = "VioletsOleander", email = "1377232072@qq.com" }]
 readme = "README.md"
 requires-python = ">=3.14"
