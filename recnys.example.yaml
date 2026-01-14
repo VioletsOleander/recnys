@@ -1,0 +1,37 @@
+# recnys.yaml
+# 1. This file should be placed in the root of the dotfiles repository.
+#
+# 2. Each entry's format is "src: { dest: {linux: dest_linux, windows: dest_windows}, policy: policy }",
+#   `src` is required, `dest` and `policy` are optional.
+#
+#   'src' can be a single file or a directory (ending with /), it describes the source path of the
+#   files/directories to sync in the dotfiles repository.
+#
+#   'dest' describes the destination path on different platforms.
+#   If not provided for a platform, the default destination will be derived as follows:
+#       If `src` is a single file, the `dest` in linux/windows default to "~/src".
+#       If `src` is a directory (ends with /), the `dest` in linux default to "~/src",
+#       and in windows defaults to "AppData/Roaming/<src-suffix>",
+#       where <src-suffix> is the part after ".config/".
+#
+#   For example: `".vimrc": { dest: { windows: "_vimrc" } }` describes that the source file is
+#   ".vimrc" in the dotfiles repository, and the destination path in Windows is "_vimrc" in the user's home directory.
+#   The destination path in Linux is not provided, so it defaults to "~/.vimrc
+#
+#   Notice that all paths (i.e. `src`, `dest_linux`, `dest_windows`) should be relative to
+#   the root directory of the dotfiles repository, i.e. the parent directory of this file.
+#
+#   `policy` can be "overwrite" (default) or "source".
+#   "source" means add a source statement on top of the existing file instead of overwriting it.
+#   for example, for .bashrc, it will add "source ~/path/to/dotfiles/.bashrc" on top of existing .bashrc.
+#
+{
+    ".vimrc": { dest: { windows: "_vimrc" } },
+    ".bashrc": { dest: { windows: "" }, policy: "source" },
+    ".inputrc": { dest: { windows: "" } },
+    ".tmux.conf": { dest: { windows: "" } },
+    ".gitconfig",
+    ".config/nvim/": { windows: "AppData/Local/nvim" },
+    ".config/helix/",
+    ".config/yazi/",
+}
