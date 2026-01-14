@@ -1,0 +1,4 @@
+root = true
+
+[recnys.example.yaml]
+indent_size = 4

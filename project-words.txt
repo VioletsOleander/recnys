@@ -1,1 +1,6 @@
+inputrc
+nvim
 recnys
+Syncer
+vimrc
+yazi

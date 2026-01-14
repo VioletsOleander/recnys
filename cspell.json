@@ -10,10 +10,11 @@
   ],
   "dictionaries": ["project-words"],
   "ignorePaths": [
+    "cspell.json",
     "project-words.txt",
     "uv.lock",
     "pyproject.toml",
-    ".gitignore",
-    "config-schema.json"
+    ".pre-commit-config.yaml",
+    ".gitignore"
   ]
 }
