@@ -1,5 +1,6 @@
 inputrc
 nvim
+pylint
 recnys
 Syncer
 vimrc
