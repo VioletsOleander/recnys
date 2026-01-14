@@ -7,6 +7,7 @@ from recnys.frontend.task import Policy
 
 if TYPE_CHECKING:
     from unittest.mock import Mock
+
     from pytest_mock import MockerFixture
 
     from recnys.frontend.load import LoadedConfig
@@ -64,7 +65,4 @@ def test_parse(input_config: LoadedConfig, reference_config: LoadedConfig, platf
     ref_tasks = parse(reference_config)
 
     for sync_task, ref_task in zip(sync_tasks, ref_tasks, strict=True):
-        print("Comparing tasks:")
-        print(sync_task)
-        print(ref_task)
         assert sync_task == ref_task

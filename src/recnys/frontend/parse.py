@@ -58,7 +58,7 @@ def parse(config: LoadedConfig) -> list[SyncTask]:
     All paths in the configuration should be relative paths from the parent directory of the
     configuration file.
 
-    If a empty string "" is given as destination path for a platform, it means no syncing
+    If an empty string "" is given as destination path for a platform, it means no syncing
     for that platform.
 
     Source paths can point to either files or directories, determined by

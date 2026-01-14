@@ -25,14 +25,6 @@ class SyncTask:
     def __str__(self) -> str:
         return f"SyncTask(src={self.src}, dst={self.dst}, policy={self.policy})"
 
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, SyncTask):
-            return NotImplemented
-        return self.src == other.src and self.dst == other.dst and self.policy == other.policy
-
-    def __hash__(self) -> int:
-        return hash((self.src, self.dst, self.policy))
-
 
 class Src:
     """Source of file synchronization.
@@ -92,7 +84,7 @@ class Dst:
             case "Windows":
                 if windows is None:
                     if src.endswith("/"):
-                        relative_path = "AppData/Roaming/" + src.lstrip(".config/")
+                        relative_path = "AppData/Roaming/" + src.removeprefix(".config/")
                     else:
                         relative_path = src
                 else:
