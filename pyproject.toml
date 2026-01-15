@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Dotfile synchronization helper"
 authors = [{ name = "VioletsOleander", email = "1377232072@qq.com" }]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 dependencies = ["pyyaml>=6.0.3"]
 
 [project.scripts]

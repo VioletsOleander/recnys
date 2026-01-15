@@ -20,9 +20,9 @@ class SyncTask:
         policy (Policy): Policy of the synchronization.
     """
 
-    src: "Src"
-    dst: "Dst"
-    policy: "Policy"
+    src: Src
+    dst: Dst
+    policy: Policy
 
     def __str__(self) -> str:
         return f"SyncTask(src={self.src}, dst={self.dst}, policy={self.policy})"

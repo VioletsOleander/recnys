@@ -25,9 +25,9 @@ class CanonicalSyncTask:
         policy (Policy): Policy of the synchronization.
     """
 
-    src: "Path"
-    dst: "Path"
-    policy: "Policy"
+    src: Path
+    dst: Path
+    policy: Policy
 
     def __str__(self) -> str:
         return f"CanonicalSyncTask(src={self.src}, dst={self.dst}, policy={self.policy})"
