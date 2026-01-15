@@ -142,7 +142,7 @@ def test_repeated_sync_with_mixed_line_endings(tmp_path: Path) -> None:
     # First sync
     sync_state = SyncState()
     syncer = Syncer(sync_state, [sync_task])
-    syncer.sync(force=True)
+    updated_state = syncer.sync(force=True)
     
     # Verify exact copy
     assert dst_file.read_bytes() == src_file.read_bytes()
@@ -152,5 +152,5 @@ def test_repeated_sync_with_mixed_line_endings(tmp_path: Path) -> None:
     from recnys.backend.state import SyncDecision
     
     canonical_tasks = canonicalize_sync_tasks([sync_task])
-    decision = _make_sync_decision(canonical_tasks[0], sync_state)
+    decision = _make_sync_decision(canonical_tasks[0], updated_state)
     assert decision == SyncDecision.SKIP
