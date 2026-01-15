@@ -1,13 +1,12 @@
 """Tests for syncer module, particularly line ending preservation."""
 
-import tempfile
 from pathlib import Path
 
 import pytest
 
-from recnys.backend.state import SyncState
+from recnys.backend.state import SyncDecision, SyncState
 from recnys.backend.syncer import Syncer, _make_sync_decision
-from recnys.backend.task import CanonicalSyncTask
+from recnys.backend.task import CanonicalSyncTask, canonicalize_sync_tasks
 from recnys.backend.utils import get_file_hash
 from recnys.frontend.task import Policy, SyncTask
 from recnys.testing.frontend.utils import make_sync_task
@@ -109,12 +108,10 @@ def test_repeated_sync_with_crlf_does_not_retrigger(tmp_path: Path) -> None:
     syncer2 = Syncer(updated_state, [sync_task])
     
     # Check sync decision
-    from recnys.backend.task import canonicalize_sync_tasks
     canonical_tasks = canonicalize_sync_tasks([sync_task])
     decision = _make_sync_decision(canonical_tasks[0], updated_state)
     
     # Should skip because nothing changed
-    from recnys.backend.state import SyncDecision
     assert decision == SyncDecision.SKIP, f"Expected SKIP but got {decision}"
     
     # Verify hashes still match
@@ -148,9 +145,6 @@ def test_repeated_sync_with_mixed_line_endings(tmp_path: Path) -> None:
     assert dst_file.read_bytes() == src_file.read_bytes()
     
     # Second sync should skip
-    from recnys.backend.task import canonicalize_sync_tasks
-    from recnys.backend.state import SyncDecision
-    
     canonical_tasks = canonicalize_sync_tasks([sync_task])
     decision = _make_sync_decision(canonical_tasks[0], updated_state)
     assert decision == SyncDecision.SKIP
