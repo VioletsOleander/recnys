@@ -54,9 +54,7 @@ def sync_tasks(fs: FakeFilesystem, platform: Mock) -> list[SyncTask]:
 
 
 @pytest.fixture
-def canonical_sync_tasks(
-    fs: FakeFilesystem, platform: Mock
-) -> list[CanonicalSyncTask]:
+def canonical_sync_tasks(fs: FakeFilesystem, platform: Mock) -> list[CanonicalSyncTask]:
     """Create canonical sync tasks with fake filesystem to avoid polluting real filesystem."""
     from pathlib import Path
 
