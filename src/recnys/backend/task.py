@@ -1,5 +1,7 @@
 """Define `CanonicalSyncTask` and related data structures for describing canonicalized sync tasks."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -23,9 +25,9 @@ class CanonicalSyncTask:
         policy (Policy): Policy of the synchronization.
     """
 
-    src: Path
-    dst: Path
-    policy: Policy
+    src: "Path"
+    dst: "Path"
+    policy: "Policy"
 
     def __str__(self) -> str:
         return f"CanonicalSyncTask(src={self.src}, dst={self.dst}, policy={self.policy})"

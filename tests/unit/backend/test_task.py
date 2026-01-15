@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from recnys.backend.task import CanonicalSyncTask, canonicalize_sync_tasks

@@ -1,5 +1,7 @@
 """Provide `load` for loading YAML configuration files."""
 
+from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING
 
