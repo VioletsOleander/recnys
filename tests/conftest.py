@@ -6,7 +6,6 @@ from recnys.backend.task import CanonicalSyncTask
 from recnys.testing.frontend.utils import make_sync_task
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
     from unittest.mock import Mock
 
     from pyfakefs.fake_filesystem import FakeFilesystem
@@ -55,7 +54,9 @@ def sync_tasks(fs: FakeFilesystem, platform: Mock) -> list[SyncTask]:
 
 
 @pytest.fixture
-def canonical_sync_tasks(fs: FakeFilesystem, platform: Mock) -> Generator[list[CanonicalSyncTask]]:
+def canonical_sync_tasks(
+    fs: FakeFilesystem, platform: Mock
+) -> list[CanonicalSyncTask]:
     """Create canonical sync tasks with fake filesystem to avoid polluting real filesystem."""
     from pathlib import Path
 

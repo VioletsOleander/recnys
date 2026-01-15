@@ -53,7 +53,7 @@ class TestTaskSyncState:
             sync_decision=SyncDecision.NEW_FILE,
         )
 
-        with pytest.raises(Exception):  # noqa: B017, PT011
+        with pytest.raises(AttributeError):
             state.dst = "/home/user/other"  # type: ignore[misc]
 
 
