@@ -170,12 +170,15 @@ class Syncer:
 
         match policy:
             case Policy.OVERWRITE:
-                content = src.read_text(encoding="utf-8")
+                content = src.read_text(encoding="utf-8", newline="")
             case Policy.SOURCE:
                 origin_content = dst.open("r", encoding="utf-8").read() if dst.exists() else ""
                 source_statement = f'source "{src}"'
                 content = source_statement + "\n\n" + origin_content
 
         dst.parent.mkdir(parents=True, exist_ok=True)
-        dst.write_text(content, encoding="utf-8")
+        if policy == Policy.OVERWRITE:
+            dst.write_text(content, encoding="utf-8", newline="")
+        else:
+            dst.write_text(content, encoding="utf-8")
         logger.info("Successfully %s to %s", policy.lower(), dst)
