@@ -15,6 +15,7 @@
     "uv.lock",
     "pyproject.toml",
     ".pre-commit-config.yaml",
-    ".gitignore"
+    ".gitignore",
+    "cliff.toml"
   ]
 }
