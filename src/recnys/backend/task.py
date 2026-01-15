@@ -27,6 +27,9 @@ class CanonicalSyncTask:
     dst: Path
     policy: Policy
 
+    def __str__(self) -> str:
+        return f"CanonicalSyncTask(src={self.src}, dst={self.dst}, policy={self.policy})"
+
 
 def canonicalize_sync_tasks(sync_tasks: list[SyncTask]) -> list[CanonicalSyncTask]:
     """Canonicalize a list of sync tasks.
