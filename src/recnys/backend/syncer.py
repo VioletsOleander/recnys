@@ -11,7 +11,7 @@ from recnys.frontend.task import SyncTask as RawSyncTask
 from .state import SyncDecision, TaskSyncState
 from .task import CanonicalSyncTask as SyncTask
 from .task import canonicalize_sync_tasks
-from .utils import get_file_hash, prompt_for_confirmation
+from .utils import get_normalized_file_hash, prompt_for_confirmation
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -41,7 +41,7 @@ def _make_sync_decision(task: SyncTask, state: SyncState) -> SyncDecision:
     if task_sync_state is None:
         return SyncDecision.NEW_FILE
 
-    curr_hash = get_file_hash(task.src)
+    curr_hash = get_normalized_file_hash(task.src)
     prev_hash = task_sync_state.file_hash
     if prev_hash != curr_hash:
         return SyncDecision.SRC_MODIFIED
@@ -58,7 +58,7 @@ def _make_sync_decision(task: SyncTask, state: SyncState) -> SyncDecision:
                 return SyncDecision.DST_MODIFIED
         case Policy.OVERWRITE:
             src_hash = curr_hash
-            dst_hash = get_file_hash(dst)
+            dst_hash = get_normalized_file_hash(dst)
             if src_hash != dst_hash:
                 return SyncDecision.DST_MODIFIED
 
@@ -68,7 +68,7 @@ def _make_sync_decision(task: SyncTask, state: SyncState) -> SyncDecision:
 def _make_task_sync_state(task: SyncTask, decision: SyncDecision) -> TaskSyncState:
     """Create a new TaskSyncState based on given the sync task and decision."""
     timestamp = datetime.now().isoformat()
-    file_hash = get_file_hash(task.src)
+    file_hash = get_normalized_file_hash(task.src)
     return TaskSyncState(
         dst=str(task.dst), file_hash=file_hash, last_sync_time=timestamp, sync_decision=decision
     )
@@ -112,7 +112,7 @@ class Syncer:
                 logger.info("Skipping sync for %s", task.src)
                 continue
 
-            logger.info("Syncing %s with reason %s", task.src, decision.value)
+            logger.info("Syncing %s with reason: '%s'", task.src, decision.value)
             if Syncer._execute_sync_task(task, force=force) == _ExecutionResult.SUCCESS:
                 self.sync_state[task.src] = _make_task_sync_state(task, decision)
                 logger.info("Updated sync state for %s", task.src)
@@ -132,10 +132,20 @@ class Syncer:
         Returns:
             _ExecutionResult: The result of the sync operation.
         """
-        tmp_dst = task.dst.with_suffix(task.dst.suffix + ".tmp_sync")
+        if task.dst.exists():
+            prompt = f"> Do you want to execute action: '{task.policy.upper()}' to existing file: {task.dst}?\n"
+        else:
+            prompt = f"> Do you want to create file {task.dst} and copy content to it?\n"
+        prompt = prompt + "(Press Enter to confirm, and any other key to refuse): "
 
+        if not force and not prompt_for_confirmation(message=prompt, confirm_signal=""):
+            logger.info("Received denial from user, skipping sync for %s", task.src)
+            return _ExecutionResult.FAILURE
+
+        logger.info("User confirmed sync for %s, proceeding...", task.src)
+        tmp_dst = task.dst.with_suffix(task.dst.suffix + ".tmp_sync")
         try:
-            Syncer._sync_file(src=task.src, dst=tmp_dst, policy=task.policy, force=force)
+            Syncer._sync_file(src=task.src, dst=tmp_dst, policy=task.policy)
             tmp_dst.replace(task.dst)
             logger.info("Successfully synced file %s to %s", task.src, task.dst)
         except Exception:
@@ -148,26 +158,14 @@ class Syncer:
             logger.info("Cleaned up temporary file %s", tmp_dst)
 
     @staticmethod
-    def _sync_file(src: Path, dst: Path, policy: Policy, *, force: bool = False) -> None:
+    def _sync_file(src: Path, dst: Path, policy: Policy) -> None:
         """Sync a single file from src to dst according to the specified policy.
 
         Args:
             src (Path): Source file path.
             dst (Path): Destination file path.
             policy (Policy): Sync policy to apply.
-            force (bool): If True, skip user confirmation prompts.
         """
-        prompt = (
-            f"{policy.capitalize} to existing file: {dst}?\n"
-            if dst.exists()
-            else f"Destination file does not exist. Create {dst} and copy content?\n"
-        )
-        prompt = prompt + "(Press Enter to confirm, and any other key to refuse): "
-
-        if not force and not prompt_for_confirmation(message=prompt, confirm_signals=("")):
-            logger.info("User declined to %s to %s", policy.lower(), dst)
-            return
-
         match policy:
             case Policy.OVERWRITE:
                 content = src.read_text(encoding="utf-8")
@@ -178,4 +176,3 @@ class Syncer:
 
         dst.parent.mkdir(parents=True, exist_ok=True)
         dst.write_text(content, encoding="utf-8")
-        logger.info("Successfully %s to %s", policy.lower(), dst)
