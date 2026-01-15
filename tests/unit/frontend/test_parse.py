@@ -58,7 +58,7 @@ class TestParse:
     ) -> None:
         sync_tasks = parse(input_config)
 
-        assert platform.assert_called_once
+        platform.assert_called()
         assert isinstance(sync_tasks, list)
         assert len(sync_tasks) == len(input_config)
 
