@@ -8,8 +8,6 @@ from recnys.frontend.task import Policy
 if TYPE_CHECKING:
     from unittest.mock import Mock
 
-    from pytest_mock import MockerFixture
-
     from recnys.frontend.load import LoadedConfig
 
 DEFAULT_POLICY = Policy.OVERWRITE
@@ -45,11 +43,6 @@ REFERENCE_CONFIGS = [
         }
     },
 ]
-
-
-@pytest.fixture(params=["Linux", "Windows"])
-def platform(mocker: MockerFixture, request: pytest.FixtureRequest) -> Mock:
-    return mocker.patch("recnys.frontend.task.platform.system", return_value=request.param)
 
 
 class TestParse:
