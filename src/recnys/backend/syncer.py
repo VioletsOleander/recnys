@@ -133,12 +133,12 @@ class Syncer:
             _ExecutionResult: The result of the sync operation.
         """
         if task.dst.exists():
-            prompt = f"Do you want to {task.policy.lower()} to existing file: {task.dst}?\n"
+            prompt = f"Do you want to execute action: '{task.policy.upper()}' to existing file: {task.dst}?\n"
         else:
             prompt = f"Do you want to create file {task.dst} and copy content to it?\n"
         prompt = prompt + "(Press Enter to confirm, and any other key to refuse): "
 
-        if not force and not prompt_for_confirmation(message=prompt, confirm_signals=("")):
+        if not force and not prompt_for_confirmation(message=prompt, confirm_signal=""):
             logger.info("Received denial from user, skipping sync for %s", task.src)
             return _ExecutionResult.FAILURE
 

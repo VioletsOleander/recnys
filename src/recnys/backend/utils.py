@@ -2,7 +2,6 @@ import hashlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
     from pathlib import Path
 
 __all__ = ["get_normalized_file_hash", "prompt_for_confirmation"]
@@ -20,6 +19,6 @@ def get_normalized_file_hash(file_path: Path) -> str:
     return sha256.hexdigest()
 
 
-def prompt_for_confirmation(message: str, confirm_signals: Sequence[str]) -> bool:
+def prompt_for_confirmation(message: str, confirm_signal: str) -> bool:
     response = input(message).strip().lower()
-    return response in confirm_signals
+    return response == confirm_signal
