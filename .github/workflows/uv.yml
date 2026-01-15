@@ -27,10 +27,10 @@ jobs:
         run: uv sync --locked --dev
 
       - name: ty check
-        run: uvx ty check
+        run: uv run ty check
 
       - name: pylint check
-        run: uvx pylint src
+        run: uv run pylint src
 
       - name: pytest
-        run: uvx pytest tests
+        run: uv run pytest tests
