@@ -7,7 +7,7 @@ on:
       - main
 
 jobs:
-  ty:
+  uv:
     runs-on: ubuntu-latest
 
     steps:
@@ -31,3 +31,6 @@ jobs:
 
       - name: pylint check
         run: uvx pylint src
+
+      - name: pytest
+        run: uvx pytest tests
