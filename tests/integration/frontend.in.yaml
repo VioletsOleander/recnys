@@ -1,0 +1,10 @@
+{
+    ".vimrc": { dest: { windows: "_vimrc" } },
+    ".bashrc": { dest: { windows: "" }, policy: "source" },
+    ".inputrc": { dest: { windows: "" } },
+    ".tmux.conf": { dest: { windows: "" } },
+    ".gitconfig",
+    ".config/nvim/": { dest: { windows: "AppData/Local/nvim" } },
+    ".config/helix/",
+    ".config/yazi/",
+}

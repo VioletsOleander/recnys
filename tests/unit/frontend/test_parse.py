@@ -52,17 +52,44 @@ def platform(mocker: MockerFixture, request: pytest.FixtureRequest) -> Mock:
     return mocker.patch("recnys.frontend.task.platform.system", return_value=request.param)
 
 
-@pytest.mark.parametrize(
-    ("input_config", "reference_config"), zip(INPUT_CONFIGS, REFERENCE_CONFIGS, strict=True)
-)
-def test_parse(input_config: LoadedConfig, reference_config: LoadedConfig, platform: Mock) -> None:
-    sync_tasks = parse(input_config)
+class TestParse:
+    def parse_test(
+        self, input_config: LoadedConfig, reference_config: LoadedConfig, platform: Mock
+    ) -> None:
+        sync_tasks = parse(input_config)
 
-    assert platform.assert_called_once
-    assert isinstance(sync_tasks, list)
-    assert len(sync_tasks) == len(input_config)
+        platform.assert_called()
+        assert isinstance(sync_tasks, list)
+        assert len(sync_tasks) == len(input_config)
 
-    ref_tasks = parse(reference_config)
+        ref_tasks = parse(reference_config)
 
-    for sync_task, ref_task in zip(sync_tasks, ref_tasks, strict=True):
-        assert sync_task == ref_task
+        for sync_task, ref_task in zip(sync_tasks, ref_tasks, strict=True):
+            assert sync_task == ref_task
+
+    @pytest.mark.parametrize(
+        ("input_config", "reference_config"), zip(INPUT_CONFIGS, REFERENCE_CONFIGS, strict=True)
+    )
+    def test_individual(
+        self, input_config: LoadedConfig, reference_config: LoadedConfig, platform: Mock
+    ) -> None:
+        self.parse_test(input_config, reference_config, platform)
+
+    @pytest.mark.parametrize(
+        ("input_configs", "reference_configs"), [(INPUT_CONFIGS, REFERENCE_CONFIGS)]
+    )
+    def test_merged(
+        self,
+        input_configs: list[LoadedConfig],
+        reference_configs: list[LoadedConfig],
+        platform: Mock,
+    ) -> None:
+        merged_input_config: LoadedConfig = {}
+        for input_config in input_configs:
+            merged_input_config.update(input_config)
+
+        merged_reference_config: LoadedConfig = {}
+        for reference_config in reference_configs:
+            merged_reference_config.update(reference_config)
+
+        self.parse_test(merged_input_config, merged_reference_config, platform)
