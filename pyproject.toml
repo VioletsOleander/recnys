@@ -87,7 +87,15 @@ convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
 # allow using asserts in tests
-"tests/**" = ["S101"]
+"tests/**" = [
+    "S101",  # assert usage
+    "S108",  # hardcoded /tmp in tests (using fake filesystem)
+    "ARG002",  # unused fixture arguments (needed for pyfakefs)
+    "PLR2004",  # magic values in tests
+    "PLC0415",  # imports in functions (needed for fixtures)
+    "FBT001",  # boolean positional args in test helpers
+    "FBT003",  # boolean positional values in test calls
+]
 # allow using asserts in testing module
 "src/naive_speculate/testing/**" = ["S101"]
 

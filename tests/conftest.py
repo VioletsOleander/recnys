@@ -25,14 +25,14 @@ def sync_tasks(fs: FakeFilesystem, platform: Mock) -> list[SyncTask]:
     """Create sync tasks with fake filesystem to ensure consistent paths."""
     from pathlib import Path
 
-    from recnys.testing.frontend.constants import DST_PARAMS, POLICIES  # noqa: PLC0415
+    from recnys.testing.frontend.constants import DST_PARAMS, POLICIES
 
     # Set up fake filesystem with proper cwd
     real_cwd = "/home/runner/work/recnys/recnys"
     if not fs.exists(real_cwd):
         fs.create_dir(real_cwd)
     fs.cwd = real_cwd
-    
+
     # Define source params that match the pattern
     src_params_raw = (
         (Path(".vimrc"), False),
@@ -55,22 +55,20 @@ def sync_tasks(fs: FakeFilesystem, platform: Mock) -> list[SyncTask]:
 
 
 @pytest.fixture
-def canonical_sync_tasks(
-    fs: FakeFilesystem, platform: Mock
-) -> Generator[list[CanonicalSyncTask], None, None]:
+def canonical_sync_tasks(fs: FakeFilesystem, platform: Mock) -> Generator[list[CanonicalSyncTask]]:
     """Create canonical sync tasks with fake filesystem to avoid polluting real filesystem."""
     from pathlib import Path
 
-    from recnys.testing.backend.constants import DST_PATHS, POLICIES  # noqa: PLC0415
+    from recnys.testing.backend.constants import DST_PATHS, POLICIES
 
     curr_os = platform.return_value
-    
+
     # Set up fake filesystem with proper cwd
     real_cwd = "/home/runner/work/recnys/recnys"
     if not fs.exists(real_cwd):
         fs.create_dir(real_cwd)
     fs.cwd = real_cwd
-    
+
     # Define source paths relative to fake cwd
     src_paths_linux = (
         Path(".vimrc"),
@@ -83,7 +81,7 @@ def canonical_sync_tasks(
         Path(".config/yazi/foo"),
     )
     src_paths_linux = tuple(Path(real_cwd) / p for p in src_paths_linux)
-    
+
     src_paths_windows = (
         Path(".vimrc"),
         None,
@@ -95,14 +93,14 @@ def canonical_sync_tasks(
         Path(".config/yazi/foo"),
     )
     src_paths_windows = tuple(Path(real_cwd) / p for p in src_paths_windows if p is not None)
-    
+
     src_paths = {"Linux": src_paths_linux, "Windows": src_paths_windows}
-    
+
     # Create source files in fake filesystem
     for src_path in src_paths[curr_os]:
         fs.create_file(src_path)
 
-    yield [
+    return [
         CanonicalSyncTask(src=src_path, dst=dst_path, policy=policy)
         for src_path, dst_path, policy in zip(
             src_paths[curr_os], DST_PATHS[curr_os], POLICIES[curr_os], strict=True
