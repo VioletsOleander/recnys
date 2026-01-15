@@ -16,6 +16,7 @@
     "pyproject.toml",
     ".pre-commit-config.yaml",
     ".gitignore",
-    "cliff.toml"
+    "cliff.toml",
+    "CHANGELOG.md"
   ]
 }

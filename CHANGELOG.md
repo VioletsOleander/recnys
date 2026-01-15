@@ -1,4 +1,10 @@
-## 0.1.0
+## [0.1.1] - 2026-01-15
+
+### Bug Fixes
+
+- Hash inconsistency issue caused by newlines change (#12)
+
+## [0.1.0] - 2026-01-15
 
 ### Features
 
@@ -16,5 +22,6 @@
 
 ### ️ Miscellaneous Tasks
 
-- Maintenance utility update (#1)
+- Maintaince utility update (#1)
 - Add workflows (#4)
+- Release v0.1.0 (#9)
