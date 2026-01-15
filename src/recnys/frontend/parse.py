@@ -1,7 +1,5 @@
 """Provide `parse` for parsing loaded configuration into SyncTask objects."""
 
-from __future__ import annotations
-
 import logging
 from typing import TYPE_CHECKING
 

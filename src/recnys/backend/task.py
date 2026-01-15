@@ -1,7 +1,5 @@
 """Define `CanonicalSyncTask` and related data structures for describing canonicalized sync tasks."""
 
-from __future__ import annotations
-
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 

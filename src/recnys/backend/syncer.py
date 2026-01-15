@@ -1,7 +1,5 @@
 """Provide `Syncer` to execute sync tasks and manage sync state."""
 
-from __future__ import annotations
-
 import logging
 from datetime import datetime
 from enum import Enum

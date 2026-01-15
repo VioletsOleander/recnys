@@ -1,7 +1,5 @@
 """Define `SyncTask` and related data structures for describing synchronization tasks."""
 
-from __future__ import annotations
-
 import platform
 from dataclasses import dataclass
 from enum import StrEnum
