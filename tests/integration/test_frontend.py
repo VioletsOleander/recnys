@@ -7,6 +7,8 @@ from recnys.frontend.load import load
 from recnys.frontend.parse import parse
 
 if TYPE_CHECKING:
+    from pyfakefs.fake_filesystem import FakeFilesystem
+
     from recnys.frontend.task import SyncTask
 
 
@@ -14,8 +16,12 @@ IN_FILE = Path(__file__).parent / "frontend.in.yaml"
 
 
 class TestFrontEnd:
-    def test_frontend(self, sync_tasks: list[SyncTask]) -> None:
+    def test_frontend(self, fs: FakeFilesystem, sync_tasks: list[SyncTask]) -> None:
+        """Test frontend load and parse with fake filesystem."""
         expected_tasks = sync_tasks
+
+        # Copy the real test file into fake filesystem
+        fs.add_real_file(IN_FILE)
 
         # load
         loaded_config = load(IN_FILE)
