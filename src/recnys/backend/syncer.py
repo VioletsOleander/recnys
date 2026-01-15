@@ -112,7 +112,7 @@ class Syncer:
                 logger.info("Skipping sync for %s", task.src)
                 continue
 
-            logger.info("Syncing %s with reason: %s", task.src, decision.value)
+            logger.info("Syncing %s with reason: '%s'", task.src, decision.value)
             if Syncer._execute_sync_task(task, force=force) == _ExecutionResult.SUCCESS:
                 self.sync_state[task.src] = _make_task_sync_state(task, decision)
                 logger.info("Updated sync state for %s", task.src)
@@ -133,9 +133,9 @@ class Syncer:
             _ExecutionResult: The result of the sync operation.
         """
         if task.dst.exists():
-            prompt = f"Do you want to execute action: '{task.policy.upper()}' to existing file: {task.dst}?\n"
+            prompt = f"> Do you want to execute action: '{task.policy.upper()}' to existing file: {task.dst}?\n"
         else:
-            prompt = f"Do you want to create file {task.dst} and copy content to it?\n"
+            prompt = f"> Do you want to create file {task.dst} and copy content to it?\n"
         prompt = prompt + "(Press Enter to confirm, and any other key to refuse): "
 
         if not force and not prompt_for_confirmation(message=prompt, confirm_signal=""):
