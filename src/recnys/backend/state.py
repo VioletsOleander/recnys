@@ -1,5 +1,7 @@
 """Provide `SyncState` for managing synchronization state."""
 
+from __future__ import annotations
+
 import dataclasses
 import json
 import logging
