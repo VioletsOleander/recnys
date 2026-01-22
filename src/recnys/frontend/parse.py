@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 __all__ = ["parse"]
 
 
-def _parse_value(sync_src: str, value: dict) -> tuple[Dst, Policy]:
-    sync_dst = value.get("dest")
+def _parse_value(sync_src: str, sync_rule: dict) -> tuple[Dst, Policy]:
+    sync_dst = sync_rule.get("dest")
     match sync_dst:
         case None:
             dst = Dst(src=sync_src)
@@ -25,9 +25,11 @@ def _parse_value(sync_src: str, value: dict) -> tuple[Dst, Policy]:
         case _:
             raise ValueError(f"Invalid destination format: {sync_dst}")
 
-    sync_policy = value.get("policy")
+    sync_policy = sync_rule.get("policy")
     match sync_policy:
-        case "overwrite" | None:
+        case None:
+            policy = Policy.DEFAULT
+        case "overwrite":
             policy = Policy.OVERWRITE
         case "source":
             policy = Policy.SOURCE
@@ -65,20 +67,18 @@ def parse(config: LoadedConfig) -> list[SyncTask]:
     whether it is ended with a '/' (directory) or not (file).
     If pointed to a directory, it should be started with `.config/`.
 
-    The value for each source path can be either:
+    The value for each source path represents the syncing rule, which can be either:
     - `None`, in which case default values for `dst` and `policy` will be used.
     - A dictionary containing optional `dest` and `policy` keys.
 
     For file, the default dest path for linux and windows platform are both `~/<source_path>`.
 
     For directory, the default dest paths are:
-    - linux platform: `~/<source_path>/`
-    - windows platform: `~/AppData/Roaming/<source_path_relative_to_'.config'>`,
-    where `<source_path_relative_to_'.config'>` is the source path relative to the
-    `.config/` directory.
+    - linux platform: `~/.config/<source_path>/`
+    - windows platform: `~/AppData/Roaming/<source_path>`
 
-    For example, `.config/helix/` will be synced to `~/AppData/Roaming/helix/` on windows platform,
-    if no destination is specified.
+    For example, `helix/` will be synced to `~/AppData/Roaming/helix/` on windows platform,
+    and be synced to `~/.config/helix/` on linux platform, if no destination is specified.
 
     Policy can be either:
     - `overwrite`: overwrite the destination with the source (default).
@@ -94,23 +94,21 @@ def parse(config: LoadedConfig) -> list[SyncTask]:
     """
     sync_tasks = []
 
-    for sync_src, value in config.items():
+    for sync_src, sync_rule in config.items():
         logger.info("Parsing entry for source: %s", sync_src)
-
         if not isinstance(sync_src, str):
             raise TypeError(f"Source path must be a string, got: {type(sync_src)}")
 
         src = Src(sync_src)
-
-        match value:
+        match sync_rule:
             case None:
                 dst = Dst(sync_src)
-                policy = Policy.OVERWRITE
+                policy = Policy.DEFAULT
             case dict():
-                dst, policy = _parse_value(sync_src, value)
+                dst, policy = _parse_value(sync_src, sync_rule)
             case _:
                 raise TypeError(
-                    f"Value for source path must be either None or a dict, got: {type(value)}"
+                    f"Value for source path must be either None or a dict, got: {type(sync_rule)}"
                 )
 
         sync_tasks.append(SyncTask(src=src, dst=dst, policy=policy))

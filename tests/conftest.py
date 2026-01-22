@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from recnys.backend.task import CanonicalSyncTask
-from recnys.testing.frontend.utils import make_sync_task
+from recnys.testing.frontend.constants import LOADED_CONFIG, PARSED_SYNC_TASKS
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 
     from pytest_mock import MockerFixture
 
+    from recnys.frontend.load import LoadedConfig
     from recnys.frontend.task import SyncTask
 
 
@@ -20,15 +21,13 @@ def platform(mocker: MockerFixture, request: pytest.FixtureRequest) -> Mock:
 
 
 @pytest.fixture
-def sync_tasks(platform: Mock) -> list[SyncTask]:
-    from recnys.testing.frontend.constants import DST_PARAMS, POLICIES, SRC_PARAMS  # noqa: PLC0415
+def loaded_config() -> LoadedConfig:
+    return LOADED_CONFIG
 
-    return [
-        make_sync_task(src_path=src_path, src_is_dir=src_is_dir, dst_path=dst_path, policy=policy)
-        for (src_path, src_is_dir), dst_path, policy in zip(
-            SRC_PARAMS, DST_PARAMS[platform.return_value], POLICIES, strict=True
-        )
-    ]
+
+@pytest.fixture
+def parsed_sync_tasks(platform: Mock) -> list[SyncTask]:
+    return PARSED_SYNC_TASKS[platform.return_value]
 
 
 @pytest.fixture

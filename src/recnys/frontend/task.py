@@ -38,7 +38,11 @@ class Src:
     is_dir: bool
 
     def __init__(self, path: str) -> None:
-        """Resolve source path relative to the current working directory."""
+        """Resolve source path relative to the current working directory.
+
+        Args:
+            path (str): Relative path to the source file or directory.
+        """
         self.is_dir = path.endswith("/")
         self.path = Path.cwd() / path
 
@@ -79,20 +83,20 @@ class Dst:
             linux (str | None): Relative path for Linux systems.
             windows (str | None): Relative path for Windows systems.
         """
-        current_os = platform.system()
-        match current_os:
+        system = platform.system()
+        match system:
             case "Windows":
                 if windows is None:
-                    if src.endswith("/"):
-                        relative_path = "AppData/Roaming/" + src.removeprefix(".config/")
-                    else:
-                        relative_path = src
+                    relative_path = "AppData/Roaming/" + src if src.endswith("/") else src
                 else:
                     relative_path = windows
             case "Linux":
-                relative_path = src if linux is None else linux
+                if linux is None:
+                    relative_path = ".config/" + src if src.endswith("/") else src
+                else:
+                    relative_path = linux
             case _:
-                raise NotImplementedError(f"Unsupported OS: {current_os}")
+                raise NotImplementedError(f"Unsupported OS: {system}")
 
         if relative_path == "":
             self.path = None
@@ -121,3 +125,4 @@ class Policy(StrEnum):
 
     OVERWRITE = "overwrite"
     SOURCE = "prepend a source statement"
+    DEFAULT = OVERWRITE
