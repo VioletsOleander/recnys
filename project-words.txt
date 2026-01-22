@@ -1,8 +1,9 @@
 inputrc
 nvim
 pylint
+pytest
 recnys
 Syncer
+usefixtures
 vimrc
 yazi
-pytest

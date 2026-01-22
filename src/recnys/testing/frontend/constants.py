@@ -1,40 +1,95 @@
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from recnys.frontend.task import Policy
 
-__all__ = ["DST_PARAMS", "POLICIES", "SRC_PARAMS"]
+from .utils import SrcAttr, make_sync_task
 
-_SRC_PARAMS = (
-    (Path(".vimrc"), False),
-    (Path(".bashrc"), False),
-    (Path(".inputrc"), False),
-    (Path(".tmux.conf"), False),
-    (Path(".gitconfig"), False),
-    (Path(".config/nvim/"), True),
-    (Path(".config/helix/"), True),
-    (Path(".config/yazi/"), True),
-)
-SRC_PARAMS = tuple((Path.cwd() / p, is_dir) for p, is_dir in _SRC_PARAMS)
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
-_DST_PARAMS_LINUX = (Path.home() / p for p, _ in _SRC_PARAMS)
-_DST_PARAMS_LINUX = tuple(p.expanduser() for p in _DST_PARAMS_LINUX)
+    from recnys.frontend.task import SyncTask
 
-_DST_PARAMS_WINDOWS = (
-    Path("~/_vimrc"),
-    None,
-    None,
-    None,
-    Path("~/.gitconfig"),
-    Path("~/AppData/Local/nvim"),
-    Path("~/AppData/Roaming/helix"),
-    Path("~/AppData/Roaming/yazi"),
-)
-_DST_PARAMS_WINDOWS = tuple(p.expanduser() if p is not None else None for p in _DST_PARAMS_WINDOWS)
-DST_PARAMS = {
-    "Linux": _DST_PARAMS_LINUX,
-    "Windows": _DST_PARAMS_WINDOWS,
+__all__ = ["LOADED_CONFIG", "PARSED_SYNC_TASKS"]
+
+LOADED_CONFIG = {
+    ".vimrc": {"dest": {"windows": "_vimrc"}},
+    ".bashrc": {"dest": {"windows": ""}, "policy": "source"},
+    ".gitconfig": None,
+    "nvim/": {"dest": {"windows": "AppData/Local/nvim"}},
+    "yazi/": None,
 }
 
-_POLICIES = [Policy.OVERWRITE] * len(SRC_PARAMS)
-_POLICIES[1] = Policy.SOURCE
-POLICIES = tuple(_POLICIES)
+
+def _src_attrs() -> Generator[SrcAttr]:
+    for sync_src in LOADED_CONFIG:
+        absolute_path = Path.cwd() / sync_src
+        is_dir = sync_src.endswith("/")
+        yield SrcAttr(path=absolute_path, is_dir=is_dir)
+
+
+def _make_default_dst(sync_src: str, system: str) -> Path:
+    src_is_dir = sync_src.endswith("/")
+    default_config_dir = {
+        "Windows": "AppData/Roaming",
+        "Linux": ".config",
+    }
+    dst_dir = Path.home() / default_config_dir[system] if src_is_dir else Path.home()
+    return dst_dir / sync_src
+
+
+def _dst_paths(system: str) -> Generator[Path | None]:
+    if system not in ("Windows", "Linux"):
+        raise NotImplementedError(f"Unsupported OS: {system}")
+
+    for sync_src, sync_rule in LOADED_CONFIG.items():
+        match sync_rule:
+            case None:
+                yield _make_default_dst(sync_src, system)
+            case dict():
+                dest = sync_rule.get("dest")
+                if not isinstance(dest, dict):
+                    raise TypeError(
+                        "The 'dest' field must be a dictionary mapping OS names to paths."
+                    )
+                dest_path = dest.get(system.lower())
+                match dest_path:
+                    case None:
+                        yield _make_default_dst(sync_src, system)
+                    case "":
+                        yield None
+                    case str():
+                        yield Path.home() / dest_path
+                    case _:
+                        raise TypeError(
+                            "The destination path must be a string, None, or empty string."
+                        )
+
+
+def _policies() -> Generator[Policy]:
+    for sync_rule in LOADED_CONFIG.values():
+        match sync_rule:
+            case None:
+                yield Policy.DEFAULT
+            case dict():
+                policy = sync_rule.get("policy")
+                match policy:
+                    case None:
+                        yield Policy.DEFAULT
+                    case str():
+                        yield Policy[policy.upper()]
+                    case _:
+                        raise TypeError("The 'policy' field must be a string or leave it unset.")
+
+
+def _parsed_sync_tasks(system: str) -> list[SyncTask]:
+    return [
+        make_sync_task(src_attr, dst, policy)
+        for src_attr, dst, policy in zip(_src_attrs(), _dst_paths(system), _policies(), strict=True)
+    ]
+
+
+PARSED_SYNC_TASKS = {
+    "Windows": _parsed_sync_tasks("Windows"),
+    "Linux": _parsed_sync_tasks("Linux"),
+}
