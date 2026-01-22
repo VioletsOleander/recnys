@@ -48,7 +48,7 @@ split_commits = false
 # An array of regex based parsers to modify commit messages prior to further processing.
 commit_preprocessors = [
     # Fix incorrect use of exclamation mark for breaking changes.
-    { pattern = "refactor!(frontend): remove .config/ structure assumption for source repository (#14)", replace = "refactor(frontend)!: remove .config/ structure assumption for source repository (#14)" },
+    { pattern = "^([a-z]+)!\\(([a-z]+)\\): (.*)", replace = "$1($2)!: $3" },
     # Replace issue numbers with link templates to be updated in `changelog.postprocessors`.
     #{ pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](<REPO>/issues/${2}))"},
     # Check spelling of the commit message using https://github.com/crate-ci/typos.
