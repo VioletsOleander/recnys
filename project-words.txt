@@ -1,3 +1,4 @@
+autouse
 inputrc
 nvim
 pylint
