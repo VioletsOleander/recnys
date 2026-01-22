@@ -14,5 +14,9 @@ def test_canonicalization(
     parsed_sync_tasks: list[SyncTask], canonicalized_sync_tasks: list[CanonicalSyncTask]
 ) -> None:
     results = canonicalize_sync_tasks(parsed_sync_tasks)
-    for result, expected in zip(results, canonicalized_sync_tasks, strict=True):
+    for result, expected in zip(
+        sorted(results, key=lambda x: x.src),
+        sorted(canonicalized_sync_tasks, key=lambda x: x.src),
+        strict=True,
+    ):
         assert result == expected

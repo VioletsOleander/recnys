@@ -6,7 +6,7 @@ from recnys.testing.frontend.utils import SrcAttr, make_sync_task
 
 __all__ = ["CANONICALIZED_SYNC_TASKS", "FILES_UNDER_DIR", "PARSED_SYNC_TASKS"]
 
-_STC_ATTRS = (
+_SRC_ATTRS = (
     SrcAttr(path=Path("/source/file_with_dest"), is_dir=False),
     SrcAttr(path=Path("/source/file_without_dest"), is_dir=False),
     SrcAttr(path=Path("/source/dir_with_dest/"), is_dir=True),
@@ -29,7 +29,7 @@ _POLICIES = (
 
 PARSED_SYNC_TASKS = [
     make_sync_task(src_attr, dst_path, policy)
-    for src_attr, dst_path, policy in zip(_STC_ATTRS, _DST_PATHS, _POLICIES, strict=True)
+    for src_attr, dst_path, policy in zip(_SRC_ATTRS, _DST_PATHS, _POLICIES, strict=True)
 ]
 
 FILES_UNDER_DIR = (
@@ -41,7 +41,7 @@ FILES_UNDER_DIR = (
 
 def _canonicalized_sync_tasks() -> list[CanonicalSyncTask]:
     tasks = []
-    for src_attr, dst_path, policy in zip(_STC_ATTRS, _DST_PATHS, _POLICIES, strict=True):
+    for src_attr, dst_path, policy in zip(_SRC_ATTRS, _DST_PATHS, _POLICIES, strict=True):
         if not src_attr.is_dir:
             if dst_path is None:
                 continue
