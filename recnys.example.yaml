@@ -11,13 +11,13 @@
 #   If not provided for a platform, the default destination will be derived as follows:
 #       If `src` is a single file, the `dest` in linux/windows default to "~/src".
 #       If `src` is a directory (ends with /), the `dest` in linux default to "~/.config/src",
-#       and in windows defaults to "~/AppData/Roaming/<src>",
-#   If provided as a empty string, it means no syncing on that platform.
+#       and in windows defaults to "~/AppData/Roaming/<src>".
+#   If provided as an empty string, it means no syncing on that platform.
 #
 #   For example: `".vimrc": { dest: { windows: "_vimrc" } }` describes that:
 #   - the source file is ".vimrc" in the dotfiles repository.
 #   - the destination path in Windows is "_vimrc" in the user's home directory.
-#   - the destination path in Linux is not provided, so it defaults to "~/.vimrc
+#   - the destination path in Linux is not provided, so it defaults to "~/.vimrc"
 #
 #   Notice that all paths (i.e. `src`, `dest_linux`, `dest_windows`) should be relative to
 #   the root directory of the dotfiles repository, i.e. the parent directory of this file.

@@ -65,7 +65,6 @@ def parse(config: LoadedConfig) -> list[SyncTask]:
 
     Source paths can point to either files or directories, determined by
     whether it is ended with a '/' (directory) or not (file).
-    If pointed to a directory, it should be started with `.config/`.
 
     The value for each source path represents the syncing rule, which can be either:
     - `None`, in which case default values for `dst` and `policy` will be used.
