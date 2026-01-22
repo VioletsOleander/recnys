@@ -1,28 +1,19 @@
 from typing import TYPE_CHECKING
 
 import pytest
-
-from recnys.testing.frontend.constants import LOADED_CONFIG, PARSED_SYNC_TASKS
+from pyfakefs.fake_filesystem import FakeFilesystem, OSType
 
 if TYPE_CHECKING:
-    from unittest.mock import Mock
-
     from pytest_mock import MockerFixture
-
-    from recnys.frontend.load import LoadedConfig
-    from recnys.frontend.task import SyncTask
 
 
 @pytest.fixture(params=["Linux", "Windows"])
-def platform(mocker: MockerFixture, request: pytest.FixtureRequest) -> Mock:
-    return mocker.patch("recnys.frontend.task.platform.system", return_value=request.param)
+def system(mocker: MockerFixture, request: pytest.FixtureRequest) -> str:
+    mock = mocker.patch("recnys.frontend.task.platform.system", return_value=request.param)
+    return mock.return_value
 
 
 @pytest.fixture
-def loaded_config() -> LoadedConfig:
-    return LOADED_CONFIG
-
-
-@pytest.fixture
-def parsed_sync_tasks(platform: Mock) -> list[SyncTask]:
-    return PARSED_SYNC_TASKS[platform.return_value]
+def filesystem(fs: FakeFilesystem, system: str) -> FakeFilesystem:
+    fs.os = OSType(system.lower())
+    return fs
