@@ -1,7 +1,6 @@
 # git-cliff ~ configuration file
 # https://git-cliff.org/docs/configuration
 
-
 [changelog]
 # A Tera template to be rendered for each release in the changelog.
 # See https://keats.github.io/tera/docs/#introduction
@@ -19,6 +18,7 @@ body = """
             {{ commit.message | upper_first }}\
     {% endfor %}
 {% endfor %}
+
 """
 # Remove leading and trailing whitespaces from the changelog's body.
 trim = true
@@ -39,7 +39,7 @@ postprocessors = [
 # See https://www.conventionalcommits.org
 conventional_commits = true
 # Exclude commits that do not match the conventional commits specification.
-filter_unconventional = true
+filter_unconventional = false
 # Require all commits to be conventional.
 # Takes precedence over filter_unconventional.
 require_conventional = false
@@ -47,6 +47,8 @@ require_conventional = false
 split_commits = false
 # An array of regex based parsers to modify commit messages prior to further processing.
 commit_preprocessors = [
+    # Fix incorrect use of exclamation mark for breaking changes.
+    { pattern = "refactor!(frontend): remove .config/ structure assumption for source repository (#14)", replace = "refactor(frontend)!: remove .config/ structure assumption for source repository (#14)" },
     # Replace issue numbers with link templates to be updated in `changelog.postprocessors`.
     #{ pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](<REPO>/issues/${2}))"},
     # Check spelling of the commit message using https://github.com/crate-ci/typos.
