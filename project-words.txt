@@ -3,6 +3,7 @@ inputrc
 nvim
 pipx
 pylint
+pypi
 pytest
 recnys
 Syncer
