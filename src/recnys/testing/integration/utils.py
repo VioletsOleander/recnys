@@ -13,7 +13,7 @@ from .constants import (
 if TYPE_CHECKING:
     from recnys.frontend.task import Policy
 
-__all__ = ["make_dest_files", "make_source_files"]
+__all__ = ["make_dest_files", "make_policies", "make_source_files"]
 
 
 def make_source_files(system: str) -> list[Path]:
