@@ -24,7 +24,7 @@ After installation, there will be two executable named `recnys` and `syncer`, wi
 
 ## Usage
 
-Recnys requires there is a `recnys.yaml` configuration file defined in the root of the dotfile repository.
+Recnys requires a `recnys.yaml` configuration file defined in the root of the dotfile repository.
 This configuration file gives instruction on which files to sync, where to sync, and how to sync.
 
 See `recnys.example.yaml` for detailed introduction about the configuration syntax.
