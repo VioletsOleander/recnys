@@ -1,6 +1,7 @@
 autouse
 inputrc
 nvim
+pipx
 pylint
 pytest
 recnys

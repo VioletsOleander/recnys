@@ -8,8 +8,16 @@ It is called as "Recnys" because it is the reverse of "Syncer".
 
 ## Installation
 
+Use [uv](https://github.com/astral-sh/uv) or [pipx](https://github.com/pypa/pipx) for installation:
+
 ```shell
 uv tool install recnys
+```
+
+or
+
+```shell
+pipx install recnys
 ```
 
 After installation, there will be two executable named `recnys` and `syncer`, with the same functionality.
