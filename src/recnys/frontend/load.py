@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = ["LoadedConfig", "load"]
 
-type LoadedConfig = dict[str, None | dict[str, object]]
+type LoadedConfig = dict[str, None | dict[str, dict | str]]
 
 
 def load(file_path: Path) -> LoadedConfig:

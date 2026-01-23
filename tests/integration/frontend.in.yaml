@@ -1,7 +1,0 @@
-{
-    ".vimrc": { dest: { windows: "_vimrc" } },
-    ".bashrc": { dest: { windows: "" }, policy: "source" },
-    ".gitconfig",
-    "nvim/": { dest: { windows: "AppData/Local/nvim" } },
-    "yazi/",
-}
