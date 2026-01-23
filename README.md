@@ -1,6 +1,6 @@
 # Recnys
 
-Recnys is a simple dotfiles synchronization helper, mainly for personal use.
+Recnys is a simple dotfiles synchronization helper. I code it primarily for personal use.
 
 It supports Windows and Linux platform.
 
@@ -22,7 +22,15 @@ This configuration file gives instruction on which files to sync, where to sync,
 See `recnys.example.yaml` for detailed introduction about the configuration syntax.
 
 With configuration file correctly set, run `recnys` or `syncer` in the dotfile repository root, the
-synchronization will start.
+synchronization will start. For example:
+
+```shell
+syncer
+```
 
 Recnys will pop out confirmation request for each files' synchronization, specify `-f` or `--force` to
-disable the behavior.
+disable the behavior. For example:
+
+```shell
+syncer -f
+```
