@@ -4,9 +4,8 @@ import pytest
 
 from recnys.backend.state import SyncState
 from recnys.backend.task import canonicalize_sync_tasks
-from recnys.frontend.task import Policy
 from recnys.testing.backend.constants import CANONICALIZED_SYNC_TASKS, PARSED_SYNC_TASKS
-from recnys.testing.backend.utils import make_syncer
+from recnys.testing.backend.utils import make_syncer, prepare_filesystem, sync_test
 
 if TYPE_CHECKING:
     from pyfakefs.fake_filesystem import FakeFilesystem
@@ -34,10 +33,9 @@ def canonicalized_sync_tasks() -> list[CanonicalSyncTask]:
 def filesystem(
     filesystem: FakeFilesystem, canonicalized_sync_tasks: list[CanonicalSyncTask]
 ) -> FakeFilesystem:
-    for task in canonicalized_sync_tasks:
-        source_file = task.src
-        filesystem.create_file(file_path=source_file, contents="dummy content")
-    return filesystem
+    return prepare_filesystem(
+        filesystem=filesystem, canonicalized_sync_tasks=canonicalized_sync_tasks
+    )
 
 
 @pytest.mark.usefixtures("filesystem")
@@ -47,10 +45,4 @@ def test_backend(sync_state: SyncState, parsed_sync_tasks: list[SyncTask]) -> No
     syncer = make_syncer(state=sync_state, tasks=tasks)
     syncer.sync(force=True)
 
-    for task in tasks:
-        assert task.dst.exists()
-        with task.src.open("r") as src_file, task.dst.open("r") as dst_file:
-            if task.policy == Policy.OVERWRITE:
-                assert src_file.read() == dst_file.read()
-            elif task.policy == Policy.SOURCE:
-                assert dst_file.read().strip() == f'source "{task.src}"'
+    sync_test(canonicalized_sync_tasks=tasks)

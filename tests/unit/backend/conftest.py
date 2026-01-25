@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from recnys.testing.backend.constants import CANONICALIZED_SYNC_TASKS
+from recnys.testing.backend.utils import prepare_filesystem
 
 if TYPE_CHECKING:
     from pyfakefs.fake_filesystem import FakeFilesystem
@@ -19,7 +20,6 @@ def canonicalized_sync_tasks() -> list[CanonicalSyncTask]:
 def filesystem(
     filesystem: FakeFilesystem, canonicalized_sync_tasks: list[CanonicalSyncTask]
 ) -> FakeFilesystem:
-    for task in canonicalized_sync_tasks:
-        source_file = task.src
-        filesystem.create_file(file_path=source_file, contents="dummy content")
-    return filesystem
+    return prepare_filesystem(
+        filesystem=filesystem, canonicalized_sync_tasks=canonicalized_sync_tasks
+    )

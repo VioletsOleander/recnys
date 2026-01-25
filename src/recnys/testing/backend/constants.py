@@ -4,7 +4,16 @@ from recnys.backend.task import CanonicalSyncTask
 from recnys.frontend.task import Policy
 from recnys.testing.frontend.utils import SrcAttr, make_sync_task
 
-__all__ = ["CANONICALIZED_SYNC_TASKS", "FILES_UNDER_DIR", "PARSED_SYNC_TASKS"]
+__all__ = [
+    "CANONICALIZED_SYNC_TASKS",
+    "DST_CONTENT",
+    "FILES_UNDER_DIR",
+    "PARSED_SYNC_TASKS",
+    "SRC_CONTENT",
+]
+
+SRC_CONTENT = "Sample content for source files."
+DST_CONTENT = "Sample content for destination files."
 
 _SRC_ATTRS = (
     SrcAttr(path=Path("/source/file_with_dest"), is_dir=False),
