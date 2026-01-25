@@ -1,8 +1,18 @@
+## [0.2.1] - 2026-01-25
+
+### Bug Fixes
+
+- Prepend policy overwrite the original content of dest file (#20)
+
+### ️ Miscellaneous Tasks
+
+- Fix permission of publish workflow (#19)
+
 ## [0.2.0] - 2026-01-23
 
 ### Refactor
 
-- _(frontend)_ [**breaking**] Remove .config/ structure assumption for source repository (#14)
+- *(frontend)* [**breaking**] Remove .config/ structure assumption for source repository (#14)
 
 ### Testing
 
@@ -12,6 +22,7 @@
 ### ️ Miscellaneous Tasks
 
 - Update changelog body and processors in cliff.toml (#16)
+- Release v0.2.0 (#18)
 
 ## [0.1.1] - 2026-01-15
 
@@ -27,12 +38,12 @@
 
 ### Features
 
-- _(frontend)_ Add initial implementation (#2)
-- _(backend)_ Add initial implementation (#3)
+- *(frontend)* Add initial implementation (#2)
+- *(backend)* Add initial implementation (#3)
 
 ### Bug Fixes
 
-- _(frontend)_ Parse failure issue (#5)
+- *(frontend)* Parse failure issue (#5)
 
 ### Other
 
@@ -40,11 +51,12 @@
 
 ### Testing
 
-- _(frontend)_ Add integration and unit test (#6)
-- _(backend)_ Add initial backend test (#7)
+- *(frontend)* Add integration and unit test (#6)
+- *(backend)* Add initial backend test (#7)
 
 ### ️ Miscellaneous Tasks
 
 - Maintaince utility update (#1)
 - Add workflows (#4)
 - Release v0.1.0 (#9)
+
