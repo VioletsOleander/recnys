@@ -121,9 +121,10 @@ class Syncer:
 
     @staticmethod
     def _execute_sync_task(task: SyncTask, *, force: bool = False) -> _ExecutionResult:
-        """Execute the sync task by syncing the source file to a temporary destination.
+        """Execute the sync task.
 
-        This is an atomic operation, if the sync fails, the original destination file remains unchanged.
+        This method prompts the user for confirmation (unless `force` is True) and, if
+        confirmed, delegates the actual file synchronization to `_sync_file`.
 
         Args:
             task (SyncTask): The sync task to execute.
@@ -142,37 +143,44 @@ class Syncer:
             logger.info("Received denial from user, skipping sync for %s", task.src)
             return _ExecutionResult.FAILURE
 
-        logger.info("User confirmed sync for %s, proceeding...", task.src)
-        tmp_dst = task.dst.with_suffix(task.dst.suffix + ".tmp_sync")
+        return Syncer._sync_file(src=task.src, dst=task.dst, policy=task.policy)
+
+    @staticmethod
+    def _sync_file(src: Path, dst: Path, policy: Policy) -> _ExecutionResult:
+        """Sync a single file from src to dst according to the specified policy.
+
+        This is an atomic operation, if the sync fails, the original destination file remains unchanged.
+
+        Args:
+            src (Path): Source file path.
+            dst (Path): Destination file path.
+            policy (Policy): Sync policy to apply.
+
+        Returns:
+            _ExecutionResult: The result of the sync operation.
+        """
+        logger.info("Executing synchronization for %s...", src)
+        tmp_dst = dst.with_suffix(dst.suffix + ".tmp_sync")
+
         try:
-            Syncer._sync_file(src=task.src, dst=tmp_dst, policy=task.policy)
-            tmp_dst.replace(task.dst)
-            logger.info("Successfully synced file %s to %s", task.src, task.dst)
+            match policy:
+                case Policy.OVERWRITE:
+                    content = src.read_text(encoding="utf-8")
+                case Policy.SOURCE:
+                    origin_content = dst.read_text(encoding="utf-8") if dst.exists() else ""
+                    source_statement = f'source "{src}"'
+                    content = source_statement + "\n\n" + origin_content
+
+            tmp_dst.parent.mkdir(parents=True, exist_ok=True)
+            tmp_dst.write_text(content, encoding="utf-8")
+
+            tmp_dst.replace(dst)
+            logger.info("Successfully synced file %s to %s", src, dst)
         except Exception:
-            logger.exception("Failed to sync file %s to %s", task.src, task.dst)
+            logger.exception("Failed to sync file %s to %s", src, dst)
             return _ExecutionResult.FAILURE
         else:
             return _ExecutionResult.SUCCESS
         finally:
             tmp_dst.unlink(missing_ok=True)
             logger.info("Cleaned up temporary file %s", tmp_dst)
-
-    @staticmethod
-    def _sync_file(src: Path, dst: Path, policy: Policy) -> None:
-        """Sync a single file from src to dst according to the specified policy.
-
-        Args:
-            src (Path): Source file path.
-            dst (Path): Destination file path.
-            policy (Policy): Sync policy to apply.
-        """
-        match policy:
-            case Policy.OVERWRITE:
-                content = src.read_text(encoding="utf-8")
-            case Policy.SOURCE:
-                origin_content = dst.open("r", encoding="utf-8").read() if dst.exists() else ""
-                source_statement = f'source "{src}"'
-                content = source_statement + "\n\n" + origin_content
-
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        dst.write_text(content, encoding="utf-8")

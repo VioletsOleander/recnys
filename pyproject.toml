@@ -89,7 +89,7 @@ convention = "google"
 # allow using asserts in tests
 "tests/**" = ["S101"]
 # allow using asserts in testing module
-"src/naive_speculate/testing/**" = ["S101"]
+"src/recnys/testing/**" = ["S101"]
 
 [tool.pylint."messages control"]
 disable = "all"
