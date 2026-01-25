@@ -121,10 +121,11 @@ class Syncer:
 
     @staticmethod
     def _execute_sync_task(task: SyncTask, *, force: bool = False) -> _ExecutionResult:
-        """Execute the sync task by handling confirmation and delegating to `_sync_file`.
+        """Execute the sync task.
 
         This method prompts the user for confirmation (unless `force` is True) and, if
         confirmed, delegates the actual file synchronization to `_sync_file`.
+
         Args:
             task (SyncTask): The sync task to execute.
             force (bool): If True, skip user confirmation prompts.

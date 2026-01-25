@@ -47,7 +47,10 @@ def sync_test(canonicalized_sync_tasks: list[CanonicalSyncTask]) -> None:
     """
     for task in canonicalized_sync_tasks:
         assert task.dst.exists()
-        with task.src.open("r") as src_file, task.dst.open("r") as dst_file:
+        with (
+            task.src.open("r", encoding="utf-8") as src_file,
+            task.dst.open("r", encoding="utf-8") as dst_file,
+        ):
             if task.policy == Policy.OVERWRITE:
                 assert src_file.read() == dst_file.read()
             elif task.policy == Policy.SOURCE:
