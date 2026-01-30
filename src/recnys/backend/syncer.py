@@ -43,6 +43,7 @@ def _make_sync_decision(task: SyncTask, state: SyncState) -> SyncDecision:
 
     # For SOURCE policy, we only check if the destination file has the source statement,
     # not if the source file content has changed
+    curr_hash = None
     if task.policy != Policy.SOURCE:
         curr_hash = get_normalized_file_hash(task.src)
         prev_hash = task_sync_state.file_hash
@@ -60,10 +61,9 @@ def _make_sync_decision(task: SyncTask, state: SyncState) -> SyncDecision:
             if not first_line or first_line != expected_statement:
                 return SyncDecision.DST_MODIFIED
         case Policy.OVERWRITE:
-            curr_hash = get_normalized_file_hash(task.src)
-            src_hash = curr_hash
+            # curr_hash was already computed above for non-SOURCE policies
             dst_hash = get_normalized_file_hash(dst)
-            if src_hash != dst_hash:
+            if curr_hash != dst_hash:
                 return SyncDecision.DST_MODIFIED
 
     return SyncDecision.SKIP
