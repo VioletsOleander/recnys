@@ -74,10 +74,7 @@ def _make_task_sync_state(task: SyncTask, decision: SyncDecision) -> TaskSyncSta
     timestamp = datetime.now().isoformat()
     # For SOURCE policy, we don't need to track the source file hash since we only care
     # about the existence of the source statement in the destination file
-    if task.policy == Policy.SOURCE:
-        file_hash = "N/A"
-    else:
-        file_hash = get_normalized_file_hash(task.src)
+    file_hash = "N/A" if task.policy == Policy.SOURCE else get_normalized_file_hash(task.src)
     return TaskSyncState(
         dst=str(task.dst), file_hash=file_hash, last_sync_time=timestamp, sync_decision=decision
     )
