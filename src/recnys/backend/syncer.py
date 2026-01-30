@@ -41,10 +41,13 @@ def _make_sync_decision(task: SyncTask, state: SyncState) -> SyncDecision:
     if task_sync_state is None:
         return SyncDecision.NEW_FILE
 
-    curr_hash = get_normalized_file_hash(task.src)
-    prev_hash = task_sync_state.file_hash
-    if prev_hash != curr_hash:
-        return SyncDecision.SRC_MODIFIED
+    # For SOURCE policy, we only check if the destination file has the source statement,
+    # not if the source file content has changed
+    if task.policy != Policy.SOURCE:
+        curr_hash = get_normalized_file_hash(task.src)
+        prev_hash = task_sync_state.file_hash
+        if prev_hash != curr_hash:
+            return SyncDecision.SRC_MODIFIED
 
     if not dst.exists():
         return SyncDecision.DST_MISSING
@@ -57,6 +60,7 @@ def _make_sync_decision(task: SyncTask, state: SyncState) -> SyncDecision:
             if not first_line or first_line != expected_statement:
                 return SyncDecision.DST_MODIFIED
         case Policy.OVERWRITE:
+            curr_hash = get_normalized_file_hash(task.src)
             src_hash = curr_hash
             dst_hash = get_normalized_file_hash(dst)
             if src_hash != dst_hash:
@@ -68,7 +72,12 @@ def _make_sync_decision(task: SyncTask, state: SyncState) -> SyncDecision:
 def _make_task_sync_state(task: SyncTask, decision: SyncDecision) -> TaskSyncState:
     """Create a new TaskSyncState based on given the sync task and decision."""
     timestamp = datetime.now().isoformat()
-    file_hash = get_normalized_file_hash(task.src)
+    # For SOURCE policy, we don't need to track the source file hash since we only care
+    # about the existence of the source statement in the destination file
+    if task.policy == Policy.SOURCE:
+        file_hash = "N/A"
+    else:
+        file_hash = get_normalized_file_hash(task.src)
     return TaskSyncState(
         dst=str(task.dst), file_hash=file_hash, last_sync_time=timestamp, sync_decision=decision
     )
