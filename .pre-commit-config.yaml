@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/streetsidesoftware/cspell-cli
-    rev: v9.4.0
+    rev: v9.6.0
     hooks:
       - id: cspell # Spell check changed files
         name: Cspell (Files)
@@ -12,10 +12,11 @@ repos:
           - --no-summary
           - --files
           - .git/COMMIT_EDITMSG
-        stages: [commit-msg]
         always_run: true
+        pass_filenames: false
+        stages: [commit-msg]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.10
+    rev: v0.14.14
     hooks:
       - id: ruff-check # Ruff Linter
         name: Ruff Lint
