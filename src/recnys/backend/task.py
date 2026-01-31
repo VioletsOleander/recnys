@@ -36,7 +36,7 @@ def canonicalize_sync_tasks(sync_tasks: list[SyncTask]) -> list[CanonicalSyncTas
 
     Canonicalization means:
     - Expanding directory sync tasks into individual file sync tasks,
-    - Removes sync tasks with None destinations.
+    - Removing sync tasks with None destinations.
         (i.e. files that are required not to be synced)
     - Deduplicating sync tasks, latter task overrides former one.
 
