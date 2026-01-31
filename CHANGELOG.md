@@ -1,3 +1,17 @@
+## [0.3.0] - 2026-01-31
+
+### Features
+
+- Support de-duplication in task canonicalization (#27)
+
+### Refactor
+
+- Files with prepend policy does not require hash information (#25)
+
+### ️ Miscellaneous Tasks
+
+- Make workflows more clear (#24)
+
 ## [0.2.1] - 2026-01-25
 
 ### Bug Fixes
@@ -7,6 +21,7 @@
 ### ️ Miscellaneous Tasks
 
 - Fix permission of publish workflow (#19)
+- Release v0.2.1 (#21)
 
 ## [0.2.0] - 2026-01-23
 
