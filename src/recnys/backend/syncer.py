@@ -138,7 +138,7 @@ class Syncer:
             _ExecutionResult: The result of the sync operation.
         """
         if task.dst.exists():
-            prompt = f"> Do you want to execute action: '{task.policy.upper()}' to existing file: {task.dst}?\n"
+            prompt = f"> Do you want to execute action: '{task.policy.description}' to existing file: {task.dst}?\n"
         else:
             prompt = f"> Do you want to create file {task.dst} and copy content to it?\n"
         prompt = prompt + "(Press Enter to confirm, and any other key to refuse): "

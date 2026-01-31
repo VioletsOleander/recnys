@@ -34,8 +34,11 @@ class CanonicalSyncTask:
 def canonicalize_sync_tasks(sync_tasks: list[SyncTask]) -> list[CanonicalSyncTask]:
     """Canonicalize a list of sync tasks.
 
-    Canonicalization means expanding directory sync tasks into individual file sync tasks,
-    also removes sync tasks with None destinations.
+    Canonicalization means:
+    - Expanding directory sync tasks into individual file sync tasks,
+    - Removes sync tasks with None destinations.
+        (i.e. files that are required not to be synced)
+    - Deduplicating sync tasks, latter task overrides former one.
 
     Args:
         sync_tasks (list[SyncTask]): List of sync tasks to be canonicalized.
@@ -43,15 +46,15 @@ def canonicalize_sync_tasks(sync_tasks: list[SyncTask]) -> list[CanonicalSyncTas
     Returns:
         list[CanonicalSyncTask]: List of canonicalized sync tasks.
     """
-    canonicalized_tasks = []
+    canonicalized_tasks: dict[Path, CanonicalSyncTask] = {}
     for task in sync_tasks:
         if task.dst.path is None:
             continue
 
         # For file, just add it directly
         if not task.src.is_dir:
-            canonicalized_tasks.append(
-                CanonicalSyncTask(src=task.src.path, dst=task.dst.path, policy=task.policy)
+            canonicalized_tasks[task.src.path] = CanonicalSyncTask(
+                src=task.src.path, dst=task.dst.path, policy=task.policy
             )
             continue
 
@@ -60,12 +63,10 @@ def canonicalize_sync_tasks(sync_tasks: list[SyncTask]) -> list[CanonicalSyncTas
             if not file_path.is_file():
                 continue
 
-            canonicalized_tasks.append(
-                CanonicalSyncTask(
-                    src=file_path,
-                    dst=task.dst.path / file_path.relative_to(task.src.path),
-                    policy=task.policy,
-                )
+            canonicalized_tasks[file_path] = CanonicalSyncTask(
+                src=file_path,
+                dst=task.dst.path / file_path.relative_to(task.src.path),
+                policy=task.policy,
             )
 
-    return canonicalized_tasks
+    return list(canonicalized_tasks.values())
