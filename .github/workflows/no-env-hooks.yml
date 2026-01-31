@@ -1,4 +1,4 @@
-name: Run pre-commit hooks that does not require project environment
+name: Run pre-commit hooks that do not require project environment
 
 on:
   pull_request:
