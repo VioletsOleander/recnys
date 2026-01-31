@@ -120,9 +120,19 @@ class Policy(StrEnum):
 
     Attributes:
         OVERWRITE: Replace existing file/directory.
-        SOURCE: Prepend a "source" line to the existing file.
+        SOURCE: Prepend a "source" statement to the existing file.
+        DEFAULT: Default policy (OVERWRITE).
     """
 
     OVERWRITE = "overwrite"
-    SOURCE = "prepend a source statement"
+    SOURCE = "source"
     DEFAULT = OVERWRITE
+
+    @property
+    def description(self) -> str:
+        """Get a human-readable description of the policy."""
+        match self:
+            case Policy.OVERWRITE:
+                return "Overwrite contents"
+            case Policy.SOURCE:
+                return 'Prepend a "source" statement'

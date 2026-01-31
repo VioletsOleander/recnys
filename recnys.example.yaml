@@ -26,6 +26,11 @@
 #   "source" means add a source statement on top of the existing file instead of overwriting it.
 #   for example, for .bashrc, it will add "source ~/path/to/dotfiles/.bashrc" on top of existing .bashrc.
 #
+# 3. In case of conflict, the latter entry takes precedence.
+#   For example, after we have specified a "dir/" entry, if we specify a "dir/file" entry later, with
+#   a different destination or policy, the latter entry will take precedence for "dir/file".
+#   (currently only supports overriding policy, destination overriding is not supported yet)
+#
 {
     ".vimrc": { dest: { windows: "_vimrc" } },
     ".bashrc": { dest: { windows: "" }, policy: "source" },

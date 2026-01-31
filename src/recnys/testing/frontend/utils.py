@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
     from recnys.frontend.load import LoadedConfig
 
-__all__ = ["SrcAttr", "make_parsed_sync_tasks", "make_sync_task"]
+__all__ = ["SrcAttr", "SyncTaskAttr", "make_parsed_sync_tasks", "make_sync_task"]
 
 
 class SrcAttr(NamedTuple):
@@ -16,16 +16,22 @@ class SrcAttr(NamedTuple):
     is_dir: bool
 
 
-def make_sync_task(src_attr: SrcAttr, dst_path: Path | None, policy: Policy) -> SyncTask:
+class SyncTaskAttr(NamedTuple):
+    src: SrcAttr
+    dst: Path | None
+    policy: Policy
+
+
+def make_sync_task(sync_task_attr: SyncTaskAttr) -> SyncTask:
     """Create custom SyncTask by injecting given parameters."""
     src = object.__new__(Src)
-    src.path = src_attr.path
-    src.is_dir = src_attr.is_dir
+    src.path = sync_task_attr.src.path
+    src.is_dir = sync_task_attr.src.is_dir
 
     dst = object.__new__(Dst)
-    dst.path = dst_path
+    dst.path = sync_task_attr.dst
 
-    return SyncTask(src=src, dst=dst, policy=policy)
+    return SyncTask(src=src, dst=dst, policy=sync_task_attr.policy)
 
 
 def _make_src_attrs(loaded_config: LoadedConfig) -> Generator[SrcAttr]:
@@ -96,6 +102,6 @@ def make_parsed_sync_tasks(loaded_config: LoadedConfig, system: str) -> list[Syn
     policies = _make_policies(loaded_config)
 
     return [
-        make_sync_task(src_attr, dst, policy)
+        make_sync_task(SyncTaskAttr(src=src_attr, dst=dst, policy=policy))
         for src_attr, dst, policy in zip(src_attrs, dst_paths, policies, strict=True)
     ]
