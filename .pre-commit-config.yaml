@@ -29,13 +29,9 @@ repos:
         entry: uv run ty check
         language: unsupported
         types: [python]
-      - id: pylint-cyclic-import # Pylint Cyclic Import Check
-        name: Pylint Cyclic Import Check
-        entry: uv run pylint
+      - id: import-linter
+        name: Import Linter
+        entry: uv run lint-imports
         language: unsupported
         types: [python]
-        require_serial: true
-        args: [
-            "-rn", # Only display messages
-            "-sn", # Don't display the score
-          ]
+        pass_filenames: false

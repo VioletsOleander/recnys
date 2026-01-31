@@ -2,6 +2,7 @@ autouse
 inputrc
 nvim
 pipx
+prek
 pylint
 pypi
 pytest

@@ -15,6 +15,14 @@ syncer = "recnys.main:main"
 requires = ["uv_build>=0.9.10,<0.10.0"]
 build-backend = "uv_build"
 
+[dependency-groups]
+dev = [
+    "import-linter>=2.9",
+    "pyfakefs>=6.0.0",
+    "pytest-mock>=3.15.1",
+    "ty>=0.0.12",
+]
+
 [tool.ruff]
 line-length = 100
 
@@ -95,13 +103,17 @@ convention = "google"
 disable = "all"
 enable = ["cyclic-import"]
 
+[tool.importlinter]
+root_package = "recnys"
+include_external_packages = true
+exclude_type_checking_imports = true
+
+[[tool.importlinter.contracts]]
+name = "Acyclic Imports"
+type = "acyclic_siblings"
+ancestors = ["recnys"]
+
+
 [tool.pytest]
 addopts = ["--import-mode=importlib", "-s"]
 
-[dependency-groups]
-dev = [
-    "pyfakefs>=6.0.0",
-    "pylint>=4.0.4",
-    "pytest-mock>=3.15.1",
-    "ty>=0.0.12",
-]

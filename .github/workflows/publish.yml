@@ -1,4 +1,4 @@
-name: publish
+name: Publish project to PyPI
 
 on:
   release:
@@ -14,19 +14,13 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v6
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      - uses: actions/setup-python@v6
         with:
           python-version-file: ".python-version"
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
+      - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
-
       - name: Build project
         run: uv build
-
       - name: Publish project
         run: uv publish
