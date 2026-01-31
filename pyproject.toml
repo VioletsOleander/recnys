@@ -99,10 +99,6 @@ convention = "google"
 # allow using asserts in testing module
 "src/recnys/testing/**" = ["S101"]
 
-[tool.pylint."messages control"]
-disable = "all"
-enable = ["cyclic-import"]
-
 [tool.importlinter]
 root_package = "recnys"
 include_external_packages = true
@@ -112,7 +108,6 @@ exclude_type_checking_imports = true
 name = "Acyclic Imports"
 type = "acyclic_siblings"
 ancestors = ["recnys"]
-
 
 [tool.pytest]
 addopts = ["--import-mode=importlib", "-s"]
