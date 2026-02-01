@@ -16,13 +16,7 @@ requires = ["uv_build>=0.9.10,<0.10.0"]
 build-backend = "uv_build"
 
 [dependency-groups]
-dev = [
-    "import-linter>=2.9",
-    "pyfakefs>=6.0.0",
-    "pytest-cov>=7.0.0",
-    "pytest-mock>=3.15.1",
-    "ty>=0.0.12",
-]
+dev = ["import-linter>=2.9", "pyfakefs>=6.0.0", "pytest-cov>=7.0.0", "pytest-mock>=3.15.1", "ty>=0.0.12"]
 
 [tool.ruff]
 line-length = 100
@@ -114,7 +108,5 @@ ancestors = ["recnys"]
 addopts = ["--import-mode=importlib", "-s"]
 
 [tool.coverage.run]
-omit = [
-    "tests/**",
-    "src/recnys/testing/**",
-]
+source = ["src"]
+omit = ["src/recnys/testing/**"]
