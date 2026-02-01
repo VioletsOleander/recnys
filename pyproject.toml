@@ -19,6 +19,7 @@ build-backend = "uv_build"
 dev = [
     "import-linter>=2.9",
     "pyfakefs>=6.0.0",
+    "pytest-cov>=7.0.0",
     "pytest-mock>=3.15.1",
     "ty>=0.0.12",
 ]
@@ -112,3 +113,8 @@ ancestors = ["recnys"]
 [tool.pytest]
 addopts = ["--import-mode=importlib", "-s"]
 
+[tool.coverage.run]
+omit = [
+    "tests/**",
+    "src/recnys/testing/**",
+]
