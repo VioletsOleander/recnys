@@ -140,7 +140,7 @@ class Syncer:
         if task.dst.exists():
             prompt = f"> Do you want to execute action: '{task.policy.description}' to existing file: {task.dst}?\n"
         else:
-            prompt = f"> Do you want to create file {task.dst} and copy content to it?\n"
+            prompt = f"> Do you want to create file {task.dst} and write content to it?\n"
         prompt = prompt + "(Press Enter to confirm, and any other key to refuse): "
 
         if not force and not prompt_for_confirmation(message=prompt, confirm_signal=""):
