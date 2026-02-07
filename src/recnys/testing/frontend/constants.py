@@ -7,7 +7,6 @@ CONFIG_FILE_CONTENT = r"""{
     "nvim/": { dest: { windows: "AppData/Local/nvim" } },
     "yazi/",
     "nushell/",
-    "nushell/config.nu",
 }
 """
 
@@ -18,5 +17,4 @@ LOADED_CONFIG = {
     "nvim/": {"dest": {"windows": "AppData/Local/nvim"}},
     "yazi/": None,
     "nushell/": None,
-    "nushell/config.nu": None,
 }

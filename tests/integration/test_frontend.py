@@ -6,7 +6,7 @@ import pytest
 from recnys.frontend.load import load
 from recnys.frontend.parse import parse
 from recnys.testing.frontend.constants import CONFIG_FILE_CONTENT, LOADED_CONFIG
-from recnys.testing.frontend.utils import make_sync_tasks
+from recnys.testing.frontend.arranger import make_sync_tasks
 
 if TYPE_CHECKING:
     from pyfakefs.fake_filesystem import FakeFilesystem
