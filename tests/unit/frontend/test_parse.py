@@ -11,16 +11,12 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def parsed_sync_tasks(loaded_config: LoadedConfig, system: str) -> list[SyncTask]:
-    return make_parsed_sync_tasks(loaded_config, system)
+def parsed_sync_tasks(system: str) -> list[SyncTask]:
+    return make_parsed_sync_tasks(system)
 
 
 @pytest.mark.usefixtures("filesystem")
 def test_parse(loaded_config: LoadedConfig, parsed_sync_tasks: list[SyncTask]) -> None:
     sync_tasks = parse(loaded_config)
-
-    assert isinstance(sync_tasks, list)
-    assert len(sync_tasks) == len(loaded_config)
-
     for result_task, expected_task in zip(sync_tasks, parsed_sync_tasks, strict=True):
         assert result_task == expected_task

@@ -21,8 +21,8 @@ def loaded_config() -> LoadedConfig:
 
 
 @pytest.fixture
-def parsed_sync_tasks(loaded_config: LoadedConfig, system: str) -> list[SyncTask]:
-    return make_parsed_sync_tasks(loaded_config, system)
+def parsed_sync_tasks(system: str) -> list[SyncTask]:
+    return make_parsed_sync_tasks(system)
 
 
 def test_frontend(filesystem: FakeFilesystem, parsed_sync_tasks: list[SyncTask]) -> None:
