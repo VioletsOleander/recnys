@@ -31,4 +31,10 @@ def test_integration(filesystem: FakeFilesystem, system: str) -> None:
     syncer = Syncer(sync_state=state, sync_tasks=tasks)
     syncer.sync(force=True)
 
+    for result, expected in zip(
+        sorted(syncer.sync_tasks, key=lambda x: x.src),
+        sorted(expected_canonical_sync_tasks, key=lambda x: x.src),
+        strict=True,
+    ):
+        assert result == expected
     sync_test(canonical_sync_tasks=expected_canonical_sync_tasks)

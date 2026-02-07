@@ -12,14 +12,7 @@ __all__ = ["sync_test"]
 
 
 def sync_test(canonical_sync_tasks: list[CanonicalSyncTask]) -> None:
-    """Test that files are synced correctly by the given sync tasks.
-
-    It is assumed that the given tasks are correct. Therefore this function
-    mainly used for backend testing where the tasks are directly given.
-
-    The overall integration test should not rely on this function, because
-    it does not test the task parsing and canonicalization logics.
-    """
+    """Test that files are synced correctly by the given sync tasks."""
     for task in canonical_sync_tasks:
         assert task.dst.exists()
         with (

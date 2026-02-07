@@ -22,4 +22,10 @@ def test_backend(filesystem: FakeFilesystem, system: str) -> None:
     syncer = make_syncer(state=SyncState(), tasks=canonical_sync_tasks)
     syncer.sync(force=True)
 
+    for result, expected in zip(
+        sorted(canonical_sync_tasks, key=lambda x: x.src),
+        sorted(expected_canonical_sync_tasks, key=lambda x: x.src),
+        strict=True,
+    ):
+        assert result == expected
     sync_test(canonical_sync_tasks=expected_canonical_sync_tasks)
