@@ -1,11 +1,11 @@
-"""Provide `make_parsed_sync_tasks` to defer the construction of expected SyncTask objects after fake filesystem is set up."""
+"""Provide `make_sync_tasks` to defer the construction of expected SyncTask objects after fake filesystem is set up."""
 
 from pathlib import Path
 from typing import NamedTuple
 
 from recnys.frontend.task import Dst, Policy, Src, SyncTask
 
-__all__ = ["make_parsed_sync_tasks"]
+__all__ = ["make_sync_tasks"]
 
 
 class _SrcAttr(NamedTuple):
@@ -67,7 +67,7 @@ def _make_dst_paths(system: str) -> tuple[Path | None, ...]:
             raise ValueError(f"Unsupported system: {system}")
 
 
-def make_parsed_sync_tasks(system: str) -> list[SyncTask]:
+def make_sync_tasks(system: str) -> list[SyncTask]:
     src_attrs_and_policies = _make_src_attrs_and_policies()
     dst_paths = _make_dst_paths(system)
 
