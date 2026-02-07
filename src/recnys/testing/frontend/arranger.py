@@ -1,11 +1,14 @@
-"""Provide `make_sync_tasks` to defer the construction of expected SyncTask objects after fake filesystem is set up."""
-
 from pathlib import Path
-from typing import NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 
 from recnys.frontend.task import Dst, Policy, Src, SyncTask
 
-__all__ = ["make_sync_tasks"]
+from .constants import CONFIG_FILE_CONTENT
+
+if TYPE_CHECKING:
+    from pyfakefs.fake_filesystem import FakeFilesystem
+
+__all__ = ["init_filesystem", "make_sync_tasks"]
 
 
 class _SrcAttr(NamedTuple):
@@ -37,7 +40,6 @@ def _make_src_attrs_and_policies() -> tuple[tuple[_SrcAttr, Policy], ...]:
         (_SrcAttr(path=Path.cwd() / "nvim/", is_dir=True), Policy.OVERWRITE),
         (_SrcAttr(path=Path.cwd() / "yazi/", is_dir=True), Policy.OVERWRITE),
         (_SrcAttr(path=Path.cwd() / "nushell/", is_dir=True), Policy.OVERWRITE),
-        (_SrcAttr(path=Path.cwd() / "nushell/config.nu", is_dir=False), Policy.OVERWRITE),
     )
 
 
@@ -51,7 +53,6 @@ def _make_dst_paths(system: str) -> tuple[Path | None, ...]:
                 Path.home() / "AppData/Local/nvim",
                 Path.home() / "AppData/Roaming/yazi",
                 Path.home() / "AppData/Roaming/nushell",
-                Path.home() / "AppData/Roaming/nushell/config.nu",
             )
         case "Linux":
             return (
@@ -61,13 +62,16 @@ def _make_dst_paths(system: str) -> tuple[Path | None, ...]:
                 Path.home() / ".config/nvim",
                 Path.home() / ".config/yazi",
                 Path.home() / ".config/nushell",
-                Path.home() / ".config/nushell/config.nu",
             )
         case _:
             raise ValueError(f"Unsupported system: {system}")
 
 
 def make_sync_tasks(system: str) -> list[SyncTask]:
+    """Construct the expected SyncTask objects.
+
+    This function should be called after the fake filesystem is set up.
+    """
     src_attrs_and_policies = _make_src_attrs_and_policies()
     dst_paths = _make_dst_paths(system)
 
@@ -75,3 +79,9 @@ def make_sync_tasks(system: str) -> list[SyncTask]:
         _make_sync_task(src_attr, dst_path, policy)
         for (src_attr, policy), dst_path in zip(src_attrs_and_policies, dst_paths, strict=True)
     ]
+
+
+def init_filesystem(filesystem: FakeFilesystem, file_path: Path) -> FakeFilesystem:
+    """Initialize the fake filesystem with a config file at the given path."""
+    filesystem.create_file(file_path, contents=CONFIG_FILE_CONTENT)
+    return filesystem
