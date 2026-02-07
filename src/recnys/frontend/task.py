@@ -87,12 +87,12 @@ class Dst:
         match system:
             case "Windows":
                 if windows is None:
-                    relative_path = "AppData/Roaming/" + src if src.endswith("/") else src
+                    relative_path = "AppData/Roaming/" + src if "/" in src else src
                 else:
                     relative_path = windows
             case "Linux":
                 if linux is None:
-                    relative_path = ".config/" + src if src.endswith("/") else src
+                    relative_path = ".config/" + src if "/" in src else src
                 else:
                     relative_path = linux
             case _:

@@ -12,6 +12,8 @@
 #       If `src` is a single file, the `dest` in linux/windows default to "~/src".
 #       If `src` is a directory (ends with /), the `dest` in linux default to "~/.config/src",
 #       and in windows defaults to "~/AppData/Roaming/<src>".
+#       If `src` is a file under a directory, the `dest` in linux defaults to "~/.config/<source_parent_dir>/<source_file>",
+#       and in windows defaults to "~/AppData/Roaming/<source_parent_dir>/<source_file>".
 #   If provided as an empty string, it means no syncing on that platform.
 #
 #   For example: `".vimrc": { dest: { windows: "_vimrc" } }` describes that:
@@ -40,4 +42,6 @@
     "nvim/": { dest: { windows: "AppData/Local/nvim" } },
     "helix/",
     "yazi/",
+    "nushell/",
+    "nushell/config.nu",
 }

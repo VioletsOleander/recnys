@@ -76,6 +76,10 @@ def parse(config: LoadedConfig) -> list[SyncTask]:
     - linux platform: `~/.config/<source_path>/`
     - windows platform: `~/AppData/Roaming/<source_path>`
 
+    For file under a directory, the default dest paths are:
+    - linux platform: `~/.config/<source_parent_dir>/<source_file>`
+    - windows platform: `~/AppData/Roaming/<source_parent_dir>/<source_file>`
+
     For example, `helix/` will be synced to `~/AppData/Roaming/helix/` on windows platform,
     and be synced to `~/.config/helix/` on linux platform, if no destination is specified.
 
