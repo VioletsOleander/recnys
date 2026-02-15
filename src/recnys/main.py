@@ -22,8 +22,8 @@ def parse_arguments() -> argparse.Namespace:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
-        "-f",
-        "--force",
+        "-s",
+        "--skip-confirmation",
         action="store_true",
         help="Skip confirmation prompts",
     )
@@ -33,13 +33,37 @@ def parse_arguments() -> argparse.Namespace:
         action="store_true",
         help="Enable verbose logging",
     )
+    parser.add_argument(
+        "-r",
+        "--force-render",
+        action="store_true",
+        help="Force execute all render tasks, ignoring execution decisions",
+    )
+    parser.add_argument(
+        "-s",
+        "--force-sync",
+        action="store_true",
+        help="Force execute all sync tasks, ignoring execution decisions",
+    )
+    parser.add_argument(
+        "-o",
+        "--render-only",
+        action="store_true",
+        help="Only perform rendering without synchronization",
+    )
     return parser.parse_args()
 
 
+# TODO: based on configuration entry change to make execution decision
+# in addition to current implementation
+# This may again incur significant refactoring, because current implementation
+# separates the decision making from the configuration parsing. The decision
+# making is purely based on the task and the execution record.
+# Current workaround is to add a `force_execute` attribute to the task.
 def main() -> int:
     args = parse_arguments()
     if args.verbose:
-        logger.setLevel(logging.DEBUG)
+        logging.getLogger().setLevel(logging.DEBUG)
 
     project_data_dir = Path.cwd() / ".recnys"
 
@@ -52,9 +76,8 @@ def main() -> int:
     canonical_config = canonicalizer.canonicalize(loaded_config=config)
 
     # Render
-    logger.debug("Starting rendering...")
-
-    render_tasks = build_render_tasks(config=canonical_config)
+    logger.info("Starting rendering...")
+    render_tasks = build_render_tasks(config=canonical_config, force_execute=args.force_render)
 
     if render_tasks:
         variables_file = Path.cwd() / "variables.yaml"
@@ -67,18 +90,21 @@ def main() -> int:
         render_record = renderer.render(tasks=render_tasks, last_record=render_record)
         render_record.save(file_path=render_record_file)
 
-        logger.debug("Rendering complete.")
-        logger.debug("Render record saved to %s", render_record_file)
+    logger.info("Rendering complete.")
+    logger.info("Render record saved to %s", render_record_file)
+
+    if args.render_only:
+        logger.info("Render-only mode enabled, skipping synchronization.")
+        return 0
 
     # Sync
     logger.info("Starting synchronization...")
-
-    sync_tasks = build_sync_tasks(config=canonical_config)
+    sync_tasks = build_sync_tasks(config=canonical_config, force_execute=args.force_sync)
 
     sync_record_file = project_data_dir / "sync_record.json"
     sync_record = ExecutionRecord.from_json(file_path=sync_record_file)
 
-    syncer = FileSyncer(force=args.force)
+    syncer = FileSyncer(skip=args.skip_confirmation)
     sync_record = syncer.sync(tasks=sync_tasks, last_record=sync_record)
     sync_record.save(file_path=sync_record_file)
 

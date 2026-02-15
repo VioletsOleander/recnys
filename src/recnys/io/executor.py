@@ -1,5 +1,6 @@
 """Provide `FileIOTaskExecutor` and execution related data structures."""
 
+import logging
 from abc import abstractmethod
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol
@@ -11,6 +12,8 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from .task import FileIOTask
+
+logger = logging.getLogger(__name__)
 
 __all__ = ["FileIOTaskExecutor"]
 
@@ -51,13 +54,16 @@ class FileIOTaskExecutor[T_contra: FileIOTask](Protocol):
         record = ExecutionRecord()
 
         for task in tasks:
-            key = str(task.src)
+            logger.debug("Executing task: %s", task)
 
+            key = str(task.src)
             decision = self._make_execution_decision(
                 task=task, last_task_record=last_record.get(key)
             )
             result = self._execute_task(task=task, decision=decision)
             record[key] = self._make_execution_record(task=task, decision=decision, result=result)
+
+            logger.debug("Finished executing task: %s")
 
         return record
 
@@ -74,6 +80,12 @@ class FileIOTaskExecutor[T_contra: FileIOTask](Protocol):
         Returns:
             TaskExecutionDecision: The decision on whether and why to execute the task.
         """
+        if task.force_execute:
+            return TaskExecutionDecision(
+                ok=True,
+                reason=f"Task '{task.name}' is forced to execute, ignoring execution decisions",
+            )
+
         if last_task_record is None:
             return TaskExecutionDecision(
                 ok=True,

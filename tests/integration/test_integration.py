@@ -41,7 +41,7 @@ def test_integration(system: str, filesystem: FakeFilesystem) -> None:
 
     sync_tasks = build_sync_tasks(config=canonical_config)
     sync_record = make_sync_record()
-    syncer = FileSyncer(force=True)
+    syncer = FileSyncer(skip=True)
     sync_record = syncer.sync(tasks=sync_tasks, last_record=sync_record)
 
     assert_synced_correctly(tasks=make_sync_tasks(system=system))

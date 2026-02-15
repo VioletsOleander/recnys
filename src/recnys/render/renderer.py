@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, override
 from jinja2 import Environment
 
 from recnys.io.executor import FileIOTaskExecutor
-from recnys.io.record import TaskExecutionDecision, TaskExecutionResult
+from recnys.io.record import TaskExecutionDecision, TaskExecutionRecord, TaskExecutionResult
 
 from .task import TemplateRenderTask
 
@@ -54,6 +54,12 @@ class TemplateRenderer(FileIOTaskExecutor[TemplateRenderTask]):
                 which will be used for future reference
         """
         return self.execute(tasks, last_record)
+
+    @override
+    def _make_execution_decision(
+        self, task: TemplateRenderTask, last_task_record: TaskExecutionRecord | None
+    ) -> TaskExecutionDecision:
+        return super()._make_execution_decision(task, last_task_record)
 
     @override
     def _execute_task(

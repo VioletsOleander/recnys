@@ -40,9 +40,15 @@ synchronization will start. For example:
 syncer
 ```
 
-Recnys will prompt for confirmation request for each file's synchronization, specify `-f` or `--force` to
+Recnys will prompt for confirmation request for each file's synchronization, specify `-s` or `--skip` to
 disable the behavior. For example:
 
 ```shell
 syncer -f
+```
+
+For more options, run:
+
+```shell
+syncer --help
 ```
