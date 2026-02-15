@@ -29,6 +29,12 @@ This configuration file gives instructions on which files to sync, where to sync
 
 See `recnys.example.yaml` for detailed introduction about the configuration syntax.
 
+Recnys supports using variables. When using variables, it requires a `variables.yaml` file defined in
+the root of the dotfile repository, and the files that required to be rendered using the variables defined
+in `variables.yaml` should has suffix `.template`.
+
+See `recnys.example.yaml` and `variables.yaml` for detailed introduction about the configuration syntax.
+
 With configuration file correctly set, run `recnys` or `syncer` in the dotfile repository root, the
 synchronization will start. For example:
 
