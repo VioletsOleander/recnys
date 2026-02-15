@@ -1,0 +1,6 @@
+# variables.yaml
+# 1. This file should be placed in the root of the dotfiles repository.
+#
+# 2. This file contains key-value pairs for Jinja2 template rendering.
+#   Each key is the variable name, and the corresponding value is the variable value.
+{ proxy_url: "http://proxy.example.com:8080" }
