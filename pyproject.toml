@@ -1,6 +1,6 @@
 [project]
 name = "recnys"
-version = "0.3.0"
+version = "0.4.0"
 description = "A simple dotfile synchronization helper"
 authors = [{ name = "VioletsOleander", email = "1377232072@qq.com" }]
 readme = "README.md"
