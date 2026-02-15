@@ -37,11 +37,11 @@ def test_integration(system: str, filesystem: FakeFilesystem) -> None:
     render_record = make_render_record()
     variables = load_variables(file_path=variables_path)
     renderer = TemplateRenderer(variables=variables)
-    renderer.render(tasks=render_tasks, last_record=render_record)
+    render_record = renderer.render(tasks=render_tasks, last_record=render_record)
 
     sync_tasks = build_sync_tasks(config=canonical_config)
     sync_record = make_sync_record()
     syncer = FileSyncer(force=True)
-    syncer.sync(tasks=sync_tasks, last_record=sync_record)
+    sync_record = syncer.sync(tasks=sync_tasks, last_record=sync_record)
 
     assert_synced_correctly(tasks=make_sync_tasks(system=system))

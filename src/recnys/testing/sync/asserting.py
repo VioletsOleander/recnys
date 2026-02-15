@@ -1,3 +1,4 @@
+from recnys.io.record import ExecutionRecord
 from recnys.sync.task import FileSyncPolicy, FileSyncTask
 from recnys.testing.render.constants import RENDERED_CONTENT
 
@@ -22,3 +23,9 @@ def assert_synced_correctly(tasks: list[FileSyncTask]) -> None:
         assert content == expected_content, (
             f"Expected content of {file_path} to be '{expected_content}', but got '{content}'."
         )
+
+
+def assert_sync_record_io(sync_record: ExecutionRecord) -> None:
+    sync_record.save(file_path=LazyConstants.record_file_path)
+    loaded_sync_record = ExecutionRecord.from_json(file_path=LazyConstants.record_file_path)
+    assert loaded_sync_record == sync_record, "Loaded sync record does not match the original."

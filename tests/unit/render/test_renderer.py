@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 from recnys.testing.build.arrange import make_render_tasks
 from recnys.testing.render.arrange import create_source_files, make_render_record, make_renderer
-from recnys.testing.render.asserting import assert_rendered_correctly
+from recnys.testing.render.asserting import assert_render_record_io, assert_rendered_correctly
 
 if TYPE_CHECKING:
     from pyfakefs.fake_filesystem import FakeFilesystem
@@ -14,6 +14,7 @@ def test_render(system: str, filesystem: FakeFilesystem) -> None:
     record = make_render_record()
     renderer = make_renderer()
 
-    renderer.render(tasks=render_tasks, last_record=record)
+    record = renderer.render(tasks=render_tasks, last_record=record)
 
     assert_rendered_correctly(tasks=render_tasks)
+    assert_render_record_io(render_record=record)

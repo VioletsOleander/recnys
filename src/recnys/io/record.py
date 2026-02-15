@@ -7,8 +7,6 @@ from collections.abc import Iterator, MutableMapping
 from enum import StrEnum
 from typing import TYPE_CHECKING
 
-from .task import FileIOTask
-
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -67,15 +65,15 @@ class TaskExecutionRecord:
         return json.dumps(dataclasses.asdict(self), indent=4)
 
 
-class ExecutionRecord(MutableMapping[FileIOTask, TaskExecutionRecord]):
+class ExecutionRecord(MutableMapping[str, TaskExecutionRecord]):
     """Container for a batch of file I/O task execution records.
 
-    Map FileIOTask to TaskExecutionRecord, allowing dict-like access and modification.
+    Map str(FileIOTask.src) to TaskExecutionRecord, allowing dict-like access and modification.
 
     Support serialization to and from specified JSON file.
     """
 
-    _mapping: dict[FileIOTask, TaskExecutionRecord]
+    _mapping: dict[str, TaskExecutionRecord]
 
     def __init__(self) -> None:
         self._mapping = {}
@@ -99,7 +97,7 @@ class ExecutionRecord(MutableMapping[FileIOTask, TaskExecutionRecord]):
             with file_path.open("r", encoding="utf-8") as f:
                 data = json.load(f)
             execution_record._mapping = {
-                FileIOTask(**k): TaskExecutionRecord.from_dict(v) for k, v in data.items()
+                k: TaskExecutionRecord.from_dict(v) for k, v in data.items()
             }
             logger.info("Loaded execution record from %s", file_path)
 
@@ -107,22 +105,22 @@ class ExecutionRecord(MutableMapping[FileIOTask, TaskExecutionRecord]):
 
     def save(self, file_path: Path) -> None:
         """Save the current execution record to the JSON file."""
-        serializable_data = {str(k.src): dataclasses.asdict(v) for k, v in self._mapping.items()}
+        serializable_data = {k: dataclasses.asdict(v) for k, v in self._mapping.items()}
 
         with file_path.open("w", encoding="utf-8") as f:
             json.dump(serializable_data, f, indent=4)
         logger.info("Saved execution record to %s", file_path)
 
-    def __getitem__(self, key: FileIOTask) -> TaskExecutionRecord:
+    def __getitem__(self, key: str) -> TaskExecutionRecord:
         return self._mapping[key]
 
-    def __setitem__(self, key: FileIOTask, value: TaskExecutionRecord) -> None:
+    def __setitem__(self, key: str, value: TaskExecutionRecord) -> None:
         self._mapping[key] = value
 
-    def __delitem__(self, key: FileIOTask) -> None:
+    def __delitem__(self, key: str) -> None:
         del self._mapping[key]
 
-    def __iter__(self) -> Iterator[FileIOTask]:
+    def __iter__(self) -> Iterator[str]:
         return iter(self._mapping)
 
     def __len__(self) -> int:
