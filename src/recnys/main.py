@@ -56,18 +56,19 @@ def main() -> int:
 
     render_tasks = build_render_tasks(config=canonical_config)
 
-    variables_file = Path.cwd() / "variables.yaml"
-    variables = load_variables(file_path=variables_file)
+    if render_tasks:
+        variables_file = Path.cwd() / "variables.yaml"
+        variables = load_variables(file_path=variables_file)
 
-    render_record_file = project_data_dir / "render_record.json"
-    render_record = ExecutionRecord.from_json(file_path=render_record_file)
+        render_record_file = project_data_dir / "render_record.json"
+        render_record = ExecutionRecord.from_json(file_path=render_record_file)
 
-    renderer = TemplateRenderer(variables=variables)
-    render_record = renderer.render(tasks=render_tasks, last_record=render_record)
-    render_record.save(file_path=render_record_file)
+        renderer = TemplateRenderer(variables=variables)
+        render_record = renderer.render(tasks=render_tasks, last_record=render_record)
+        render_record.save(file_path=render_record_file)
 
-    logger.debug("Rendering complete.")
-    logger.debug("Render record saved to %s", render_record_file)
+        logger.debug("Rendering complete.")
+        logger.debug("Render record saved to %s", render_record_file)
 
     # Sync
     logger.info("Starting synchronization...")

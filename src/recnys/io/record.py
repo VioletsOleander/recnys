@@ -107,9 +107,7 @@ class ExecutionRecord(MutableMapping[FileIOTask, TaskExecutionRecord]):
 
     def save(self, file_path: Path) -> None:
         """Save the current execution record to the JSON file."""
-        serializable_data = {
-            dataclasses.asdict(k): dataclasses.asdict(v) for k, v in self._mapping.items()
-        }
+        serializable_data = {str(k.src): dataclasses.asdict(v) for k, v in self._mapping.items()}
 
         with file_path.open("w", encoding="utf-8") as f:
             json.dump(serializable_data, f, indent=4)

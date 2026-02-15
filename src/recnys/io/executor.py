@@ -1,4 +1,4 @@
-"""Provide`FileIOTaskExecutor` and execution related data structures."""
+"""Provide `FileIOTaskExecutor` and execution related data structures."""
 
 from abc import abstractmethod
 from datetime import datetime

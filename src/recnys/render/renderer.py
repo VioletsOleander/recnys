@@ -38,7 +38,7 @@ class TemplateRenderer(FileIOTaskExecutor[TemplateRenderTask]):
             variables (LoadedVariables): The variables to be used for rendering templates.
         """
         self._variables = variables
-        self._environment = Environment(keep_trailing_newline=True, autoescape=True)
+        self._environment = Environment(keep_trailing_newline=True, autoescape=False)  # noqa: S701
 
     def render(
         self, tasks: list[TemplateRenderTask], last_record: ExecutionRecord
