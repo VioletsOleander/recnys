@@ -5,7 +5,7 @@ description = "A simple dotfile synchronization helper"
 authors = [{ name = "VioletsOleander", email = "1377232072@qq.com" }]
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = ["pyyaml>=6.0.3"]
+dependencies = ["jinja2>=3.1.6", "pyyaml>=6.0.3"]
 
 [project.scripts]
 recnys = "recnys.main:main"
@@ -16,7 +16,14 @@ requires = ["uv_build>=0.9.10,<0.10.0"]
 build-backend = "uv_build"
 
 [dependency-groups]
-dev = ["import-linter>=2.9", "pyfakefs>=6.0.0", "pytest-cov>=7.0.0", "pytest-mock>=3.15.1", "ty>=0.0.12"]
+dev = [
+    "import-linter>=2.9",
+    "pyfakefs>=6.0.0",
+    "pytest-cov>=7.0.0",
+    "pytest-mock>=3.15.1",
+    "ruff>=0.15.1",
+    "ty>=0.0.12",
+]
 
 [tool.ruff]
 line-length = 100
@@ -105,6 +112,7 @@ type = "acyclic_siblings"
 ancestors = ["recnys"]
 
 [tool.pytest]
+testpaths = ["tests"]
 addopts = ["--import-mode=importlib", "-s"]
 
 [tool.coverage.run]

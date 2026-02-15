@@ -1,4 +1,6 @@
 autouse
+Canonicalizer
+dsts
 inputrc
 nvim
 pipx
