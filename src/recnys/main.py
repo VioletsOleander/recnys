@@ -40,7 +40,7 @@ def parse_arguments() -> argparse.Namespace:
         help="Force execute all render tasks, ignoring execution decisions",
     )
     parser.add_argument(
-        "-s",
+        "-c",
         "--force-sync",
         action="store_true",
         help="Force execute all sync tasks, ignoring execution decisions",
