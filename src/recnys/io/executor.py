@@ -51,26 +51,30 @@ class FileIOTaskExecutor[T_contra: FileIOTask](Protocol):
         record = ExecutionRecord()
 
         for task in tasks:
-            decision = self._make_execution_decision(task=task, last_record=last_record.get(task))
+            key = str(task.src)
+
+            decision = self._make_execution_decision(
+                task=task, last_task_record=last_record.get(key)
+            )
             result = self._execute_task(task=task, decision=decision)
-            record[task] = self._make_execution_record(task=task, decision=decision, result=result)
+            record[key] = self._make_execution_record(task=task, decision=decision, result=result)
 
         return record
 
     def _make_execution_decision(
-        self, task: T_contra, last_record: TaskExecutionRecord | None
+        self, task: T_contra, last_task_record: TaskExecutionRecord | None
     ) -> TaskExecutionDecision:
         """Make execution decision for a file I/O task based on the last execution record.
 
         Args:
             task (T_contra): The file I/O task for which to make the execution decision.
-            last_record (TaskExecutionRecord | None): The record of the last execution of the task,
+            last_task_record (TaskExecutionRecord | None): The record of the last execution of the task,
                 used for making the decision, or None if the task has never been executed before.
 
         Returns:
             TaskExecutionDecision: The decision on whether and why to execute the task.
         """
-        if last_record is None:
+        if last_task_record is None:
             return TaskExecutionDecision(
                 ok=True,
                 reason=f"There is no previous execution record for task '{task.name}',"
@@ -86,7 +90,7 @@ class FileIOTaskExecutor[T_contra: FileIOTask](Protocol):
             )
 
         curr_hash = get_normalized_file_hash(file_path=task.src)
-        prev_hash = last_record.file_hash
+        prev_hash = last_task_record.file_hash
         if prev_hash != curr_hash:
             return TaskExecutionDecision(
                 ok=True,
