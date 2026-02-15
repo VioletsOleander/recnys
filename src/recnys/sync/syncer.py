@@ -26,15 +26,15 @@ class FileSyncer(FileIOTaskExecutor[FileSyncTask]):
     The main provided method is `sync`.
     """
 
-    _force: bool
+    _skip: bool
 
-    def __init__(self, *, force: bool = False) -> None:
+    def __init__(self, *, skip: bool = False) -> None:
         """Initialize the FileSyncer.
 
         Args:
-            force (bool): If True, skip user confirmation prompts during sync operations.
+            skip (bool): If True, skip user confirmation prompts during sync operations.
         """
-        self._force = force
+        self._skip = skip
 
     def sync(self, tasks: list[FileSyncTask], last_record: ExecutionRecord) -> ExecutionRecord:
         """Execute the file synchronization tasks sequentially, while maintaining an execution record.
@@ -103,7 +103,7 @@ class FileSyncer(FileIOTaskExecutor[FileSyncTask]):
             )
         prompt = prompt + "(Press Enter to confirm, and any other key to refuse): "
 
-        if not self._force and not prompt_for_confirmation(message=prompt, confirm_signal=""):
+        if not self._skip and not prompt_for_confirmation(message=prompt, confirm_signal=""):
             logger.info("Received denial from user, skipping sync for %s", task.src)
             return TaskExecutionResult.SKIPPED
 

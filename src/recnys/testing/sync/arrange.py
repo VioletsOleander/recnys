@@ -36,4 +36,4 @@ def make_syncer() -> FileSyncer:
 
     This function should be called after the fake filesystem is set up.
     """
-    return FileSyncer(force=True)
+    return FileSyncer(skip=True)
