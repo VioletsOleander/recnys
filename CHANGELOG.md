@@ -1,3 +1,31 @@
+## [0.4.0] - 2026-02-15
+
+### Features
+
+- [**breaking**] Support variables (#33)
+- Add more command line options (#36)
+
+### Bug Fixes
+
+- Issue about file under directory parsed wrong (#31)
+
+### Refactor
+
+- Simplify record file key to string (#34)
+
+### Documentation
+
+- Update README (#35)
+
+### Testing
+
+- Refactor by replacing most logic with hardcoded expected values (#32)
+
+### ️ Miscellaneous Tasks
+
+- Add pytest-cov as dev tool (#29)
+- Update message for newly created file (#30)
+
 ## [0.3.0] - 2026-01-31
 
 ### Features
@@ -11,6 +39,7 @@
 ### ️ Miscellaneous Tasks
 
 - Make workflows more clear (#24)
+- Release v0.3.0 (#28)
 
 ## [0.2.1] - 2026-01-25
 
