@@ -14,7 +14,7 @@ def test_sync(system: str, filesystem: FakeFilesystem) -> None:
     record = make_sync_record()
     syncer = make_syncer()
 
-    syncer.sync(tasks=sync_tasks, last_record=record)
+    record = syncer.sync(tasks=sync_tasks, last_record=record)
 
     assert_synced_correctly(tasks=sync_tasks)
     assert_sync_record_io(sync_record=record)
