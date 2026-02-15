@@ -63,7 +63,7 @@ class FileIOTaskExecutor[T_contra: FileIOTask](Protocol):
             result = self._execute_task(task=task, decision=decision)
             record[key] = self._make_execution_record(task=task, decision=decision, result=result)
 
-            logger.debug("Finished executing task: %s")
+            logger.debug("Finished executing task: %s", task)
 
         return record
 

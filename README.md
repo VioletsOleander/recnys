@@ -40,7 +40,7 @@ synchronization will start. For example:
 syncer
 ```
 
-Recnys will prompt for confirmation request for each file's synchronization, specify `-s` or `--skip` to
+Recnys will prompt for confirmation request for each file's synchronization, specify `-s` or `--skip-confirmation` to
 disable the behavior. For example:
 
 ```shell

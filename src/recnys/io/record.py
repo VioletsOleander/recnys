@@ -100,7 +100,7 @@ class ExecutionRecord(MutableMapping[str, TaskExecutionRecord]):
             with file_path.open("r", encoding="utf-8") as f:
                 data = json.load(f)
             execution_record.mapping = {
-                k: TaskExecutionRecord.from_dict(v) for k, v in data.items() if k != "metadata"
+                k: TaskExecutionRecord.from_dict(v) for k, v in data.items()
             }
             logger.debug("Loaded execution record from %s", file_path)
 
