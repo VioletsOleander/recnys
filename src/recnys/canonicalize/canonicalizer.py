@@ -87,7 +87,7 @@ class ConfigCanonicalizer:
 
             # Determine the key (relative path from cwd, preserving .template suffix)
             key = src_file.relative_to(Path.cwd()).as_posix()
-            
+
             # For template files, sync_spec.src should point to the rendered file
             if key.endswith(".template"):
                 sync_src = self._rendered_file_dir / key.removesuffix(".template")
