@@ -92,7 +92,7 @@ class ConfigCanonicalizer:
                 dst = None
             else:
                 dst = dst_dir / src_file.relative_to(src_dir)
-                if key.endswith(".template"):
+                if dst.suffix.endswith(".template"):
                     dst = dst.with_suffix("")
 
             file_sync_spec = SyncSpec(src=src, dst=dst, policy=sync_spec.policy)
