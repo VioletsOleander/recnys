@@ -79,7 +79,7 @@ def test_symlink_policy_replaces_existing_symlink(filesystem: FakeFilesystem) ->
     filesystem.create_file(src_path, contents=NORMAL_FILE_CONTENT)
     filesystem.create_file(old_src_path, contents="old content")
     dst_path.parent.mkdir(parents=True, exist_ok=True)
-    dst_path.symlink_to(old_src_path)
+    dst_path.symlink_to(old_src_path.resolve())
 
     task = FileSyncTask(
         src=src_path,

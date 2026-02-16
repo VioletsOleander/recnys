@@ -88,6 +88,7 @@ class FileSyncer(FileIOTaskExecutor[FileSyncTask]):
         finally:
             if tmp_dst is not None:
                 tmp_dst.unlink(missing_ok=True)
+            if task.policy != FileSyncPolicy.SYMLINK:
                 logger.debug("Cleaned up temporary file %s", tmp_dst)
 
     @override
