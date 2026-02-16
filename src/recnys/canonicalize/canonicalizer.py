@@ -85,14 +85,13 @@ class ConfigCanonicalizer:
             if not src_file.is_file():
                 continue
 
-            if dst_dir is None:
-                dst_file = None
-            else:
-                dst_file = dst_dir / src_file.relative_to(src_dir)
-                if dst_file.suffix.endswith(".template"):
-                    dst_file = dst_file.with_suffix("")
-            file_sync_spec = SyncSpec(src=src_file, dst=dst_file, policy=sync_spec.policy)
-            result[src_file.relative_to(Path.cwd()).as_posix()] = file_sync_spec
+            key = src_file.relative_to(Path.cwd()).as_posix()
+
+            src = src_file.with_suffix("") if src_file.suffix.endswith(".template") else src_file
+            dst = None if dst_dir is None else dst_dir / src.relative_to(src_dir)
+            file_sync_spec = SyncSpec(src=src, dst=dst, policy=sync_spec.policy)
+
+            result[key] = file_sync_spec
 
         return result
 
