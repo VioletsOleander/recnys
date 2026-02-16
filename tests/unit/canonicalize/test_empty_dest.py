@@ -24,7 +24,7 @@ def setup_test_files(filesystem: FakeFilesystem) -> None:
 
 def test_empty_dest_excludes_directory_files(
     system: str,
-    filesystem: FakeFilesystem,
+    filesystem: FakeFilesystem,  # noqa: ARG001
     setup_test_files: None,  # noqa: ARG001
 ) -> None:
     """Test that files under a directory with empty dest are not synced."""
@@ -38,7 +38,17 @@ def test_empty_dest_excludes_directory_files(
     # Act
     result = canonicalizer.canonicalize(loaded_config=loaded_config)
 
-    # Assert - all expanded files should have dst=None
+    # Assert - verify expected files are present with dst=None
+    expected_files = {
+        "third_party/file1.txt",
+        "third_party/subdir/file2.txt",
+        "third_party/nu_scripts/custom-completions/git/git-completions.nu",
+    }
+    assert set(result.keys()) == expected_files, (
+        f"Expected {expected_files} but got {set(result.keys())}"
+    )
+
+    # All expanded files should have dst=None
     for key, value in result.items():
         assert value.sync_spec.dst is None, (
             f"File {key} should have dst=None but got {value.sync_spec.dst}"
@@ -47,7 +57,7 @@ def test_empty_dest_excludes_directory_files(
 
 def test_empty_dest_excludes_explicit_files_under_directory(
     system: str,
-    filesystem: FakeFilesystem,
+    filesystem: FakeFilesystem,  # noqa: ARG001
     setup_test_files: None,  # noqa: ARG001
 ) -> None:
     """Test that explicitly listed files under excluded directory are also excluded."""
@@ -69,7 +79,17 @@ def test_empty_dest_excludes_explicit_files_under_directory(
         "because it's under an excluded directory"
     )
 
-    # All files in result should have dst=None (from directory expansion)
+    # Verify only directory-expanded files are present
+    expected_files = {
+        "third_party/file1.txt",
+        "third_party/subdir/file2.txt",
+        "third_party/nu_scripts/custom-completions/git/git-completions.nu",
+    }
+    assert set(result.keys()) == expected_files, (
+        f"Expected {expected_files} but got {set(result.keys())}"
+    )
+
+    # All files should have dst=None
     for key, value in result.items():
         assert value.sync_spec.dst is None, (
             f"File {key} should have dst=None but got {value.sync_spec.dst}"
@@ -107,7 +127,7 @@ def test_empty_dest_allows_explicit_files_outside_excluded_directory(
 
 def test_explicit_file_with_custom_dest_under_excluded_dir(
     system: str,
-    filesystem: FakeFilesystem,
+    filesystem: FakeFilesystem,  # noqa: ARG001
     setup_test_files: None,  # noqa: ARG001
 ) -> None:
     """Test that explicit file with custom dest under excluded dir CAN override.
@@ -137,7 +157,7 @@ def test_explicit_file_with_custom_dest_under_excluded_dir(
 
 def test_explicit_file_with_empty_dest_under_excluded_dir(
     system: str,
-    filesystem: FakeFilesystem,
+    filesystem: FakeFilesystem,  # noqa: ARG001
     setup_test_files: None,  # noqa: ARG001
 ) -> None:
     """Test that explicit file with empty dest under excluded dir is handled.
