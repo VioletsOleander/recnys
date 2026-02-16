@@ -5,7 +5,7 @@ import json
 import logging
 from collections.abc import Iterator, MutableMapping
 from enum import StrEnum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -74,11 +74,11 @@ class ExecutionRecord(MutableMapping[str, TaskExecutionRecord]):
 
     Attributes:
         mapping (dict[str, TaskExecutionRecord]): The mapping from str(FileIOTask.src) to TaskExecutionRecord
-        metadata (dict[str, str]): Optional metadata for the record (e.g., variables_file_hash for render records)
+        metadata (dict[str, Any]): Optional metadata for the record (e.g., variables_file_hash for render records)
     """
 
     mapping: dict[str, TaskExecutionRecord]
-    metadata: dict[str, str]
+    metadata: dict[str, Any]
 
     def __init__(self) -> None:
         self.mapping = {}

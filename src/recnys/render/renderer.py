@@ -1,5 +1,6 @@
 """Provide `TemplateRenderer` to render template files into actual files with content."""
 
+import dataclasses
 import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, override
@@ -75,11 +76,7 @@ class TemplateRenderer(FileIOTaskExecutor[TemplateRenderTask]):
             # Mark all tasks to force execute if variables changed
             if variables_changed:
                 tasks = [
-                    TemplateRenderTask(
-                        src=task.src,
-                        dst=task.dst,
-                        force_execute=True,
-                    )
+                    dataclasses.replace(task, force_execute=True)
                     for task in tasks
                 ]
         
