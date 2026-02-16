@@ -30,10 +30,12 @@
 #   Notice that all paths (i.e. `src`, `dest_linux`, `dest_windows`) should be relative to
 #   the root directory of the dotfiles repository, i.e. the parent directory of this file.
 #
-#   `policy` can be "copy" (default) or "source".
+#   `policy` can be "copy" (default), "source", or "symlink".
 #   - "copy" means copy the file/directory from the source to the destination, and overwrite the destination if it already exists.
 #   - "source" means add a source statement on top of the existing file instead of overwriting it.
 #   for example, for .bashrc, it will add "source ~/path/to/dotfiles/.bashrc" on top of existing .bashrc.
+#   - "symlink" means create a symbolic link from the destination to the source file/directory in the dotfiles repository.
+#   This keeps files synchronized automatically since the destination points to the source.
 #
 # 3. In case of conflict, the latter entry takes precedence.
 #   For example, after we have specified a "dir/" entry, if we specify a "dir/file" entry later, with
@@ -47,7 +49,7 @@
     ".tmux.conf": { dest: { Windows: "" } },
     ".gitconfig",
     "nvim/": { dest: { Windows: "AppData/Local/nvim/" } },
-    "helix/",
+    "helix/": { policy: "symlink" },
     "yazi/",
     "nushell/",
     "nushell/config.nu.template",

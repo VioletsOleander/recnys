@@ -55,30 +55,39 @@ class FileSyncer(FileIOTaskExecutor[FileSyncTask]):
             logger.info(
                 "Syncing file %s to %s with policy '%s'...", task.src, task.dst, task.policy
             )
-            match task.policy:
-                case FileSyncPolicy.COPY:
-                    content = task.src.read_text(encoding="utf-8")
-                case FileSyncPolicy.SOURCE:
-                    origin_content = (
-                        task.dst.read_text(encoding="utf-8") if task.dst.exists() else ""
-                    )
-                    source_statement = f'source "{task.src}"'
-                    content = source_statement + "\n\n" + origin_content
-
             task.dst.parent.mkdir(parents=True, exist_ok=True)
 
-            tmp_dst = task.dst.with_suffix(task.dst.suffix + ".tmp_sync")
-            tmp_dst.write_text(content, encoding="utf-8")
-            tmp_dst.replace(task.dst)
-            logger.info("Successfully synced file %s to %s", task.src, task.dst)
+            if task.policy == FileSyncPolicy.SYMLINK:
+                # Remove existing file or symlink if it exists
+                if task.dst.exists() or task.dst.is_symlink():
+                    task.dst.unlink()
+                # Create symbolic link pointing to source
+                task.dst.symlink_to(task.src)
+                logger.info("Successfully created symlink %s -> %s", task.dst, task.src)
+            else:
+                match task.policy:
+                    case FileSyncPolicy.COPY:
+                        content = task.src.read_text(encoding="utf-8")
+                    case FileSyncPolicy.SOURCE:
+                        origin_content = (
+                            task.dst.read_text(encoding="utf-8") if task.dst.exists() else ""
+                        )
+                        source_statement = f'source "{task.src}"'
+                        content = source_statement + "\n\n" + origin_content
+
+                tmp_dst = task.dst.with_suffix(task.dst.suffix + ".tmp_sync")
+                tmp_dst.write_text(content, encoding="utf-8")
+                tmp_dst.replace(task.dst)
+                logger.info("Successfully synced file %s to %s", task.src, task.dst)
         except Exception:
             logger.exception("Failed to sync file %s to %s", task.src, task.dst)
             return TaskExecutionResult.FAILURE
         else:
             return TaskExecutionResult.SUCCESS
         finally:
-            tmp_dst.unlink(missing_ok=True)
-            logger.debug("Cleaned up temporary file %s", tmp_dst)
+            if task.policy != FileSyncPolicy.SYMLINK:
+                tmp_dst.unlink(missing_ok=True)
+                logger.debug("Cleaned up temporary file %s", tmp_dst)
 
     @override
     def _execute_task(

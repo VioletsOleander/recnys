@@ -12,11 +12,13 @@ class FileSyncPolicy(StrEnum):
     Attributes:
         COPY: Copy source contents to destination, replacing existing content.
         SOURCE: Prepend a "source" statement to existing content.
+        SYMLINK: Create a symbolic link from destination to source.
         DEFAULT: Default policy (COPY).
     """
 
     COPY = "copy"
     SOURCE = "source"
+    SYMLINK = "symlink"
     DEFAULT = COPY
 
     @property
@@ -27,6 +29,8 @@ class FileSyncPolicy(StrEnum):
                 return "Copy contents"
             case FileSyncPolicy.SOURCE:
                 return 'Prepend a "source" statement'
+            case FileSyncPolicy.SYMLINK:
+                return "Create a symbolic link"
 
 
 @dataclass(frozen=True, kw_only=True)
