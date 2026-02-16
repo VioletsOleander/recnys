@@ -62,8 +62,8 @@ class FileSyncer(FileIOTaskExecutor[FileSyncTask]):
                 # Remove existing file or symlink if it exists
                 if task.dst.exists() or task.dst.is_symlink():
                     task.dst.unlink()
-                # Create symbolic link pointing to source
-                task.dst.symlink_to(task.src)
+                # Create symbolic link pointing to source (using absolute path)
+                task.dst.symlink_to(task.src.resolve())
                 logger.info("Successfully created symlink %s -> %s", task.dst, task.src)
             else:
                 match task.policy:
