@@ -57,7 +57,7 @@ def test_render_with_variables_file_change_detection(
     assert original_hash == get_normalized_file_hash(variables_file)
     
     # Modify the variables file
-    new_variables_content = '{ proxy_url: "http://newproxy.example.com:9090" }'
+    new_variables_content = 'proxy_url: "http://newproxy.example.com:9090"'
     variables_file.write_text(new_variables_content)
     new_hash = get_normalized_file_hash(variables_file)
     assert new_hash != original_hash, "Variables file hash should change after modification"
