@@ -85,14 +85,23 @@ class ConfigCanonicalizer:
             if not src_file.is_file():
                 continue
 
+            # Determine the key (relative path from cwd, preserving .template suffix)
+            key = src_file.relative_to(Path.cwd()).as_posix()
+            
+            # For template files, sync_spec.src should point to the rendered file
+            if key.endswith(".template"):
+                sync_src = self._rendered_file_dir / key.removesuffix(".template")
+            else:
+                sync_src = src_file
+
             if dst_dir is None:
                 dst_file = None
             else:
                 dst_file = dst_dir / src_file.relative_to(src_dir)
                 if dst_file.suffix.endswith(".template"):
                     dst_file = dst_file.with_suffix("")
-            file_sync_spec = SyncSpec(src=src_file, dst=dst_file, policy=sync_spec.policy)
-            result[src_file.relative_to(Path.cwd()).as_posix()] = file_sync_spec
+            file_sync_spec = SyncSpec(src=sync_src, dst=dst_file, policy=sync_spec.policy)
+            result[key] = file_sync_spec
 
         return result
 
