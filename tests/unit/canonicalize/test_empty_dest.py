@@ -100,13 +100,13 @@ def test_empty_dest_allows_explicit_files_outside_excluded_directory(
 def test_explicit_file_with_custom_dest_under_excluded_dir(
     system: str, filesystem: "FakeFilesystem", setup_test_files: None
 ) -> None:
-    """Test that explicit file with custom dest under excluded dir could override.
+    """Test that explicit file with custom dest under excluded dir CAN override.
     
-    Note: This test documents current behavior. An explicit file with a custom
-    destination under an excluded directory is still excluded. This could be
-    changed in the future if users need to override parent directory exclusions.
+    When a file has an explicit dest specification, it should override the
+    parent directory exclusion. This allows users to sync specific files
+    from an excluded directory.
     """
-    # Setup - even with a custom dest, if parent dir is excluded, file should be excluded
+    # Setup - explicit dest should override parent exclusion
     loaded_config = {
         "nushell/third_party/": {"dest": {system: ""}},
         "nushell/third_party/file1.txt": {"dest": {system: "custom/path"}},
@@ -117,8 +117,35 @@ def test_explicit_file_with_custom_dest_under_excluded_dir(
     # Act
     result = canonicalizer.canonicalize(loaded_config=loaded_config)
     
-    # Assert - the explicit file should NOT be in result because parent dir is excluded
-    assert "nushell/third_party/file1.txt" not in result, (
-        "Explicitly listed file with custom dest is not synced "
-        "because parent directory is excluded"
+    # Assert - the explicit file SHOULD be in result with custom dest
+    assert "nushell/third_party/file1.txt" in result, (
+        "Explicitly listed file with custom dest should override parent directory exclusion"
     )
+    expected_dest = Path.home() / "custom/path"
+    assert result["nushell/third_party/file1.txt"].sync_spec.dst == expected_dest
+
+
+def test_explicit_file_with_empty_dest_under_excluded_dir(
+    system: str, filesystem: "FakeFilesystem", setup_test_files: None
+) -> None:
+    """Test that explicit file with empty dest under excluded dir is handled.
+    
+    When a file has an explicit empty dest, it should be in the canonical config
+    with dst=None, but will be filtered out during task building.
+    """
+    # Setup - explicit empty dest overrides parent exclusion but also excludes the file
+    loaded_config = {
+        "nushell/third_party/": {"dest": {system: ""}},
+        "nushell/third_party/file1.txt": {"dest": {system: ""}},
+    }
+    
+    canonicalizer = ConfigCanonicalizer(rendered_file_dir=Path("/tmp/rendered"))
+    
+    # Act
+    result = canonicalizer.canonicalize(loaded_config=loaded_config)
+    
+    # Assert - the explicit file should be in result but with dst=None
+    assert "nushell/third_party/file1.txt" in result, (
+        "Explicitly listed file with empty dest should be in canonical config"
+    )
+    assert result["nushell/third_party/file1.txt"].sync_spec.dst is None

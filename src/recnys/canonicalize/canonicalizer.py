@@ -68,8 +68,13 @@ class ConfigCanonicalizer:
                 expanded_sync_specs = self._expand_directory(sync_spec=sync_spec)
                 sync_specs.update(expanded_sync_specs)
             else:
-                # Skip files that are under excluded directories
-                if not self._is_under_excluded_dir(key, excluded_dirs):
+                # Skip files under excluded directories unless they have explicit dest override
+                # Files with no dest spec under excluded dirs are skipped
+                # Files with explicit dest (even if empty) override parent dir exclusion
+                is_under_excluded = self._is_under_excluded_dir(key, excluded_dirs)
+                has_explicit_dest = value is not None and "dest" in value
+                
+                if not is_under_excluded or has_explicit_dest:
                     sync_specs[key] = sync_spec
 
         # Determine render specifications and construct the canonical configuration
