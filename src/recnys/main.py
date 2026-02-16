@@ -86,10 +86,10 @@ def main() -> int:
     canonical_config = canonicalizer.canonicalize(loaded_config=config)
 
     # Render
-    logger.info("Starting rendering...")
     render_tasks = build_render_tasks(config=canonical_config, force_execute=args.force_render)
 
     if render_tasks:
+        logger.info("Starting rendering...")
         variables_file = Path.cwd() / "variables.yaml"
         variables = load_variables(file_path=variables_file)
 
@@ -100,8 +100,8 @@ def main() -> int:
         render_record = renderer.render(tasks=render_tasks, last_record=render_record)
         render_record.save(file_path=render_record_file)
 
-    logger.info("Rendering complete.")
-    logger.info("Render record saved to %s", render_record_file)
+        logger.info("Rendering complete.")
+        logger.info("Render record saved to %s", render_record_file)
 
     if args.render_only:
         logger.info("Render-only mode enabled, skipping synchronization.")
