@@ -86,7 +86,7 @@ def main() -> int:
         render_record_file = project_data_dir / "render_record.json"
         render_record = ExecutionRecord.from_json(file_path=render_record_file)
 
-        renderer = TemplateRenderer(variables=variables)
+        renderer = TemplateRenderer(variables=variables, variables_file_path=variables_file)
         render_record = renderer.render(tasks=render_tasks, last_record=render_record)
         render_record.save(file_path=render_record_file)
 

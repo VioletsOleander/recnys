@@ -33,4 +33,4 @@ def make_renderer() -> TemplateRenderer:
 
     This function should be called after the fake filesystem is set up.
     """
-    return TemplateRenderer(variables=LOADED_VARIABLES)
+    return TemplateRenderer(variables=LOADED_VARIABLES, variables_file_path=None)

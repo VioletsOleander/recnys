@@ -74,12 +74,15 @@ class ExecutionRecord(MutableMapping[str, TaskExecutionRecord]):
 
     Attributes:
         mapping (dict[str, TaskExecutionRecord]): The mapping from str(FileIOTask.src) to TaskExecutionRecord
+        metadata (dict[str, str]): Optional metadata for the record (e.g., variables_file_hash for render records)
     """
 
     mapping: dict[str, TaskExecutionRecord]
+    metadata: dict[str, str]
 
     def __init__(self) -> None:
         self.mapping = {}
+        self.metadata = {}
 
     @classmethod
     def from_json(cls, file_path: Path) -> ExecutionRecord:
@@ -93,6 +96,7 @@ class ExecutionRecord(MutableMapping[str, TaskExecutionRecord]):
         execution_record = cls()
         if not file_path.exists():
             execution_record.mapping = {}
+            execution_record.metadata = {}
             logger.debug(
                 "Execution record file not found: %s, initialized an empty record.", file_path
             )
@@ -101,7 +105,9 @@ class ExecutionRecord(MutableMapping[str, TaskExecutionRecord]):
                 data = json.load(f)
             execution_record.mapping = {
                 k: TaskExecutionRecord.from_dict(v) for k, v in data.items()
+                if k != "__metadata__"
             }
+            execution_record.metadata = data.get("__metadata__", {})
             logger.debug("Loaded execution record from %s", file_path)
 
         return execution_record
@@ -109,6 +115,9 @@ class ExecutionRecord(MutableMapping[str, TaskExecutionRecord]):
     def save(self, file_path: Path) -> None:
         """Save the current execution record to the JSON file."""
         serializable_data = {k: dataclasses.asdict(v) for k, v in self.mapping.items()}
+        
+        if self.metadata:
+            serializable_data["__metadata__"] = self.metadata
 
         with file_path.open("w", encoding="utf-8") as f:
             json.dump(serializable_data, f, indent=4)

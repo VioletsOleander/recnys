@@ -1,12 +1,14 @@
 """Provide `TemplateRenderer` to render template files into actual files with content."""
 
 import logging
+from pathlib import Path
 from typing import TYPE_CHECKING, override
 
 from jinja2 import Environment
 
 from recnys.io.executor import FileIOTaskExecutor
 from recnys.io.record import TaskExecutionDecision, TaskExecutionResult
+from recnys.io.utils import get_normalized_file_hash
 
 from .task import TemplateRenderTask
 
@@ -30,14 +32,17 @@ class TemplateRenderer(FileIOTaskExecutor[TemplateRenderTask]):
 
     _environment: Environment
     _variables: LoadedVariables
+    _variables_file_path: Path | None
 
-    def __init__(self, variables: LoadedVariables) -> None:
+    def __init__(self, variables: LoadedVariables, variables_file_path: Path | None = None) -> None:
         """Initialize the template renderer with the given variables.
 
         Args:
             variables (LoadedVariables): The variables to be used for rendering templates.
+            variables_file_path (Path | None): The path to the variables file for change detection.
         """
         self._variables = variables
+        self._variables_file_path = variables_file_path
         self._environment = Environment(keep_trailing_newline=True, autoescape=False)  # noqa: S701
 
     def render(
@@ -53,7 +58,39 @@ class TemplateRenderer(FileIOTaskExecutor[TemplateRenderTask]):
             ExecutionRecord: The execution record of the current execution,
                 which will be used for future reference
         """
-        return self.execute(tasks, last_record)
+        # Check if variables file has changed
+        variables_changed = False
+        if self._variables_file_path and self._variables_file_path.exists():
+            current_variables_hash = get_normalized_file_hash(self._variables_file_path)
+            previous_variables_hash = last_record.metadata.get("variables_file_hash")
+            
+            if previous_variables_hash and previous_variables_hash != current_variables_hash:
+                logger.info(
+                    "Variables file has changed (hash: %s -> %s), forcing re-render of all templates",
+                    previous_variables_hash[:8],
+                    current_variables_hash[:8],
+                )
+                variables_changed = True
+            
+            # Mark all tasks to force execute if variables changed
+            if variables_changed:
+                tasks = [
+                    TemplateRenderTask(
+                        src=task.src,
+                        dst=task.dst,
+                        force_execute=True,
+                    )
+                    for task in tasks
+                ]
+        
+        # Execute the tasks
+        record = self.execute(tasks, last_record)
+        
+        # Store the current variables file hash in metadata
+        if self._variables_file_path and self._variables_file_path.exists():
+            record.metadata["variables_file_hash"] = get_normalized_file_hash(self._variables_file_path)
+        
+        return record
 
     @override
     def _execute_task(
