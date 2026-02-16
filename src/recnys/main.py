@@ -1,5 +1,6 @@
 import argparse
 import logging
+import shutil
 from pathlib import Path
 
 from .build import build_render_tasks, build_sync_tasks
@@ -51,6 +52,11 @@ def parse_arguments() -> argparse.Namespace:
         action="store_true",
         help="Only perform rendering without synchronization",
     )
+    parser.add_argument(
+        "--clean",
+        action="store_true",
+        help="Clean all cached data and execution records in project data directory",
+    )
     return parser.parse_args()
 
 
@@ -66,6 +72,10 @@ def main() -> int:
         logging.getLogger().setLevel(logging.DEBUG)
 
     project_data_dir = Path.cwd() / ".recnys"
+    if args.clean:
+        shutil.rmtree(project_data_dir)
+        logger.info("Cleaned all cached data and execution records in %s", project_data_dir)
+        return 0
 
     # Load config
     config_file = Path.cwd() / "recnys.yaml"
