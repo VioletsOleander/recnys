@@ -73,7 +73,7 @@ class ConfigCanonicalizer:
                 # Files with explicit dest (even if empty) override parent dir exclusion
                 is_under_excluded = self._is_under_excluded_dir(key, excluded_dirs)
                 has_explicit_dest = value is not None and "dest" in value
-                
+
                 if not is_under_excluded or has_explicit_dest:
                     sync_specs[key] = sync_spec
 
@@ -117,10 +117,7 @@ class ConfigCanonicalizer:
         Returns:
             bool: True if the file is under an excluded directory, False otherwise.
         """
-        for excluded_dir in excluded_dirs:
-            if file_path.startswith(excluded_dir + "/"):
-                return True
-        return False
+        return any(file_path.startswith(excluded_dir + "/") for excluded_dir in excluded_dirs)
 
     def _make_sync_spec(self, key: str, value: ConfigValue) -> SyncSpec:
         src = self._resolve_src(key)
