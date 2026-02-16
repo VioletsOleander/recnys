@@ -87,8 +87,8 @@ class ConfigCanonicalizer:
 
             key = src_file.relative_to(Path.cwd()).as_posix()
 
-            src = src_file.with_suffix("") if src_file.suffix.endswith(".template") else src_file
-            dst = None if dst_dir is None else dst_dir / src.relative_to(src_dir)
+            src = self._resolve_src(key)
+            dst = None if dst_dir is None else self._resolve_default_dst(key)
             file_sync_spec = SyncSpec(src=src, dst=dst, policy=sync_spec.policy)
 
             result[key] = file_sync_spec
