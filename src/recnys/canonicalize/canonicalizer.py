@@ -55,16 +55,22 @@ class ConfigCanonicalizer:
             CanonicalConfig: The canonicalized configuration.
         """
         sync_specs: dict[str, SyncSpec] = {}
+        excluded_dirs: set[str] = set()
 
         # Expand directory and determine sync specifications
         for key, value in loaded_config.items():
             sync_spec = self._make_sync_spec(key=key, value=value)
 
             if key.endswith("/"):
+                # Track directories with dst=None (excluded from syncing)
+                if sync_spec.dst is None:
+                    excluded_dirs.add(key.rstrip("/"))
                 expanded_sync_specs = self._expand_directory(sync_spec=sync_spec)
                 sync_specs.update(expanded_sync_specs)
             else:
-                sync_specs[key] = sync_spec
+                # Skip files that are under excluded directories
+                if not self._is_under_excluded_dir(key, excluded_dirs):
+                    sync_specs[key] = sync_spec
 
         # Determine render specifications and construct the canonical configuration
         canonical_config: CanonicalConfig = {}
@@ -95,6 +101,21 @@ class ConfigCanonicalizer:
             result[src_file.relative_to(src_dir.parent).as_posix()] = file_sync_spec
 
         return result
+
+    def _is_under_excluded_dir(self, file_path: str, excluded_dirs: set[str]) -> bool:
+        """Check if a file path is under any excluded directory.
+
+        Args:
+            file_path (str): The file path to check.
+            excluded_dirs (set[str]): Set of excluded directory paths.
+
+        Returns:
+            bool: True if the file is under an excluded directory, False otherwise.
+        """
+        for excluded_dir in excluded_dirs:
+            if file_path.startswith(excluded_dir + "/"):
+                return True
+        return False
 
     def _make_sync_spec(self, key: str, value: ConfigValue) -> SyncSpec:
         src = self._resolve_src(key)
