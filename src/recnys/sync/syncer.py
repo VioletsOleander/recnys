@@ -51,6 +51,7 @@ class FileSyncer(FileIOTaskExecutor[FileSyncTask]):
 
     def _execute_sync_task(self, task: FileSyncTask) -> TaskExecutionResult:
         """Execute the file synchronization task."""
+        tmp_dst = None
         try:
             logger.info(
                 "Syncing file %s to %s with policy '%s'...", task.src, task.dst, task.policy
@@ -85,7 +86,7 @@ class FileSyncer(FileIOTaskExecutor[FileSyncTask]):
         else:
             return TaskExecutionResult.SUCCESS
         finally:
-            if task.policy != FileSyncPolicy.SYMLINK:
+            if tmp_dst is not None:
                 tmp_dst.unlink(missing_ok=True)
                 logger.debug("Cleaned up temporary file %s", tmp_dst)
 
