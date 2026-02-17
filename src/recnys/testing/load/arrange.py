@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 from pathlib import Path
 
-    from pyfakefs.fake_filesystem import FakeFilesystem
+from pyfakefs.fake_filesystem import FakeFilesystem
+
+from .constants import CONFIG_FILE_CONTENT, VARIABLES_FILE_CONTENT, LazyConstants
 
 __all__ = ["create_config_file", "create_variables_file"]
 

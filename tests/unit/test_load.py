@@ -1,11 +1,9 @@
-from typing import TYPE_CHECKING
+from __future__ import annotations
 
+from pyfakefs.fake_filesystem import FakeFilesystem
 from recnys.load import load_config, load_variables
 from recnys.testing.load.arrange import create_config_file, create_variables_file
 from recnys.testing.load.constants import LOADED_CONFIG, LOADED_VARIABLES
-
-if TYPE_CHECKING:
-    from pyfakefs.fake_filesystem import FakeFilesystem
 
 
 def test_load_config(filesystem: FakeFilesystem) -> None:

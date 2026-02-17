@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 # code imports
+from pyfakefs.fake_filesystem import FakeFilesystem
 from recnys.build import build_render_tasks, build_sync_tasks
 from recnys.load import load_config, load_variables
 from recnys.render.renderer import TemplateRenderer
@@ -16,9 +18,6 @@ from recnys.testing.render.constants import TEMPLATE_FILE_CONTENT
 from recnys.testing.sync.arrange import make_sync_record
 from recnys.testing.sync.asserting import assert_synced_correctly
 from recnys.testing.sync.constants import NORMAL_FILE_CONTENT
-
-if TYPE_CHECKING:
-    from pyfakefs.fake_filesystem import FakeFilesystem
 
 
 def test_integration(system: str, filesystem: FakeFilesystem) -> None:

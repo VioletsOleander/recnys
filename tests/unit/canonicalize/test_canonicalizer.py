@@ -1,14 +1,12 @@
-from typing import TYPE_CHECKING
+from __future__ import annotations
 
+from pyfakefs.fake_filesystem import FakeFilesystem
 from recnys.testing.canonicalize.arrange import (
     create_source_files,
     make_canonical_config,
     make_canonicalizer,
 )
 from recnys.testing.load.constants import LOADED_CONFIG
-
-if TYPE_CHECKING:
-    from pyfakefs.fake_filesystem import FakeFilesystem
 
 
 def test_canonicalize(system: str, filesystem: FakeFilesystem) -> None:

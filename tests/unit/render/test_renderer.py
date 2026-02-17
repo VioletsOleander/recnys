@@ -1,11 +1,9 @@
-from typing import TYPE_CHECKING
+from __future__ import annotations
 
+from pyfakefs.fake_filesystem import FakeFilesystem
 from recnys.testing.build.arrange import make_render_tasks
 from recnys.testing.render.arrange import create_source_files, make_render_record, make_renderer
 from recnys.testing.render.asserting import assert_render_record_io, assert_rendered_correctly
-
-if TYPE_CHECKING:
-    from pyfakefs.fake_filesystem import FakeFilesystem
 
 
 def test_render(system: str, filesystem: FakeFilesystem) -> None:
