@@ -1,3 +1,14 @@
+## [0.5.0] - 2026-02-17
+
+### Features
+
+- Add --clean command line option (#45)
+
+### Bug Fixes
+
+- Canonical configuration key construction issue (#44)
+- Template file rendered but not correctly synced (#48)
+
 ## [0.4.0] - 2026-02-15
 
 ### Features
@@ -25,6 +36,7 @@
 
 - Add pytest-cov as dev tool (#29)
 - Update message for newly created file (#30)
+- Release v0.4.0 (#37)
 
 ## [0.3.0] - 2026-01-31
 
