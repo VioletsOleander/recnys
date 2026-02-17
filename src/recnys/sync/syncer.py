@@ -1,16 +1,15 @@
 """Provide `Syncer` to execute sync tasks and manage sync state."""
 
+from __future__ import annotations
+
 import logging
-from typing import TYPE_CHECKING, override
+from typing import override
 
 from recnys.io.executor import FileIOTaskExecutor
-from recnys.io.record import TaskExecutionDecision, TaskExecutionResult
+from recnys.io.record import ExecutionRecord, TaskExecutionDecision, TaskExecutionResult
 
 from .task import FileSyncPolicy, FileSyncTask
 from .utils import prompt_for_confirmation
-
-if TYPE_CHECKING:
-    from recnys.io.record import ExecutionRecord
 
 __all__ = ["FileSyncer"]
 

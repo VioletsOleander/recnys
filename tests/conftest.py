@@ -2,9 +2,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 from pyfakefs.fake_filesystem import FakeFilesystem, OSType
-
-if TYPE_CHECKING:
-    from pytest_mock import MockerFixture
+from pytest_mock import MockerFixture
 
 
 @pytest.fixture(params=["Linux", "Windows"])

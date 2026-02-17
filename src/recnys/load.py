@@ -1,12 +1,12 @@
 """Provide functions for loading YAML configuration and variables files."""
 
+from __future__ import annotations
+
 import logging
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import yaml
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -18,10 +18,10 @@ __all__ = [
     "load_variables",
 ]
 
-if TYPE_CHECKING:
-    type ConfigValue = dict[str, dict[str, str] | str] | None
-    type LoadedConfig = dict[str, ConfigValue]
-    type LoadedVariables = dict[str, str]
+# Type aliases for configuration and variables
+ConfigValue = dict[str, dict[str, str] | str] | None
+LoadedConfig = dict[str, ConfigValue]
+LoadedVariables = dict[str, str]
 
 
 def _load_yaml(file_path: Path) -> dict:

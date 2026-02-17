@@ -1,11 +1,9 @@
-from typing import TYPE_CHECKING
+from __future__ import annotations
 
 from recnys.io.record import ExecutionRecord
+from recnys.render.task import TemplateRenderTask
 
 from .constants import RENDERED_CONTENT, LazyConstants
-
-if TYPE_CHECKING:
-    from recnys.render.task import TemplateRenderTask
 
 __all__ = ["assert_rendered_correctly"]
 

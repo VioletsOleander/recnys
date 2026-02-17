@@ -1,9 +1,4 @@
-from typing import TYPE_CHECKING
-
-from .constants import CONFIG_FILE_CONTENT, VARIABLES_FILE_CONTENT, LazyConstants
-
-if TYPE_CHECKING:
-    from pathlib import Path
+from pathlib import Path
 
     from pyfakefs.fake_filesystem import FakeFilesystem
 

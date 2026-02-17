@@ -1,13 +1,11 @@
-from typing import TYPE_CHECKING
+from __future__ import annotations
 
+from pyfakefs.fake_filesystem import FakeFilesystem
 from recnys.io.record import ExecutionRecord
 from recnys.sync.syncer import FileSyncer, FileSyncTask
 from recnys.testing.render.constants import RENDERED_CONTENT
 
 from .constants import NORMAL_FILE_CONTENT, LazyConstants
-
-if TYPE_CHECKING:
-    from pyfakefs.fake_filesystem import FakeFilesystem
 
 __all__ = ["create_source_files", "make_sync_record", "make_syncer"]
 

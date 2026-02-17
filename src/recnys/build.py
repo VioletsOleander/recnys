@@ -1,10 +1,8 @@
-from typing import TYPE_CHECKING
+from __future__ import annotations
 
+from .canonicalize.config import CanonicalConfig
 from .render.task import TemplateRenderTask
 from .sync.task import FileSyncTask
-
-if TYPE_CHECKING:
-    from .canonicalize.config import CanonicalConfig
 
 __all__ = ["build_render_tasks", "build_sync_tasks"]
 

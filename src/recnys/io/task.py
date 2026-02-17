@@ -1,10 +1,9 @@
 """Provide `FileIOTask`."""
 
-from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from __future__ import annotations
 
-if TYPE_CHECKING:
-    from pathlib import Path
+from dataclasses import dataclass, field
+from pathlib import Path
 
 __all__ = ["FileIOTask"]
 

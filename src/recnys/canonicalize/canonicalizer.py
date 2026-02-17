@@ -1,16 +1,15 @@
 """Provide `ConfigCanonicalizer`."""
 
+from __future__ import annotations
+
 import platform
 from enum import StrEnum
 from pathlib import Path
-from typing import TYPE_CHECKING
 
+from recnys.load import ConfigValue, LoadedConfig
 from recnys.sync.task import FileSyncPolicy
 
 from .config import CanonicalConfig, CanonicalConfigValue, RenderSpec, SyncSpec
-
-if TYPE_CHECKING:
-    from recnys.load import ConfigValue, LoadedConfig
 
 __all__ = ["ConfigCanonicalizer", "SupportedSystem"]
 

@@ -1,15 +1,12 @@
-from typing import TYPE_CHECKING
+from __future__ import annotations
 
+from pyfakefs.fake_filesystem import FakeFilesystem
 from recnys.io.record import ExecutionRecord
 from recnys.render.renderer import TemplateRenderer
+from recnys.render.task import TemplateRenderTask
 from recnys.testing.load.constants import LOADED_VARIABLES
 
 from .constants import TEMPLATE_FILE_CONTENT, LazyConstants
-
-if TYPE_CHECKING:
-    from pyfakefs.fake_filesystem import FakeFilesystem
-
-    from recnys.render.task import TemplateRenderTask
 
 __all__ = ["create_source_files", "make_render_record", "make_renderer"]
 

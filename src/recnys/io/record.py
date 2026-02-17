@@ -1,14 +1,13 @@
 """Provide `TaskExecutionDecision`, `TaskExecutionResult`, `TaskExecutionRecord` and `ExecutionRecord`."""
 
+from __future__ import annotations
+
 import dataclasses
 import json
 import logging
 from collections.abc import Iterator, MutableMapping
 from enum import StrEnum
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from pathlib import Path
+from pathlib import Path
 
 
 __all__ = ["ExecutionRecord", "TaskExecutionRecord"]

@@ -1,8 +1,5 @@
 import hashlib
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from pathlib import Path
+from pathlib import Path
 
 __all__ = ["get_normalized_file_hash"]
 

@@ -4,12 +4,12 @@
 communicate with.
 """
 
-from typing import TYPE_CHECKING, NamedTuple
+from __future__ import annotations
 
-if TYPE_CHECKING:
-    from pathlib import Path
+from pathlib import Path
+from typing import NamedTuple
 
-    from recnys.sync.task import FileSyncPolicy
+from recnys.sync.task import FileSyncPolicy
 
 __all__ = ["CanonicalConfig", "CanonicalConfigValue", "RenderSpec", "SyncSpec"]
 

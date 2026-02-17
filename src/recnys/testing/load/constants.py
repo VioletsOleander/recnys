@@ -1,9 +1,9 @@
+from __future__ import annotations
+
 from functools import cached_property
 from pathlib import Path
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from recnys.load import LoadedConfig, LoadedVariables
+from recnys.load import LoadedConfig, LoadedVariables
 
 __all__ = [
     "CONFIG_FILE_CONTENT",

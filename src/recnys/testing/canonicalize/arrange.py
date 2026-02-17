@@ -1,16 +1,13 @@
-from pathlib import Path
-from typing import TYPE_CHECKING
+from __future__ import annotations
 
+from pathlib import Path
+
+from pyfakefs.fake_filesystem import FakeFilesystem
 from recnys.canonicalize.canonicalizer import ConfigCanonicalizer
-from recnys.canonicalize.config import CanonicalConfigValue, RenderSpec, SyncSpec
+from recnys.canonicalize.config import CanonicalConfig, CanonicalConfigValue, RenderSpec, SyncSpec
 from recnys.sync.task import FileSyncPolicy
 
 from .constants import LazyConstants
-
-if TYPE_CHECKING:
-    from pyfakefs.fake_filesystem import FakeFilesystem
-
-    from recnys.canonicalize.config import CanonicalConfig
 
 __all__ = ["create_source_files", "make_canonical_config", "make_canonicalizer"]
 

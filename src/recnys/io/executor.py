@@ -1,17 +1,16 @@
 """Provide `FileIOTaskExecutor` and execution related data structures."""
 
+from __future__ import annotations
+
 import logging
 from abc import abstractmethod
+from collections.abc import Sequence
 from datetime import datetime
-from typing import TYPE_CHECKING, Protocol
+from typing import Protocol
 
 from .record import ExecutionRecord, TaskExecutionDecision, TaskExecutionRecord, TaskExecutionResult
+from .task import FileIOTask
 from .utils import get_normalized_file_hash
-
-if TYPE_CHECKING:
-    from collections.abc import Sequence
-
-    from .task import FileIOTask
 
 logger = logging.getLogger(__name__)
 

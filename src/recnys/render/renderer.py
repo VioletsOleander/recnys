@@ -1,22 +1,21 @@
 """Provide `TemplateRenderer` to render template files into actual files with content."""
 
+from __future__ import annotations
+
 import logging
-from typing import TYPE_CHECKING, override
+from typing import override
 
 from jinja2 import Environment
 
 from recnys.io.executor import FileIOTaskExecutor
-from recnys.io.record import TaskExecutionDecision, TaskExecutionResult
+from recnys.io.record import ExecutionRecord, TaskExecutionDecision, TaskExecutionResult
+from recnys.load import LoadedVariables
 
 from .task import TemplateRenderTask
 
 logger = logging.getLogger(__name__)
 
 __all__ = ["TemplateRenderer"]
-
-if TYPE_CHECKING:
-    from recnys.io.record import ExecutionRecord
-    from recnys.load import LoadedVariables
 
 
 class TemplateRenderer(FileIOTaskExecutor[TemplateRenderTask]):
