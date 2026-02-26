@@ -1,6 +1,7 @@
 import argparse
 import logging
 import shutil
+from importlib.metadata import version
 from pathlib import Path
 
 from .build import build_render_tasks, build_sync_tasks
@@ -56,6 +57,12 @@ def parse_arguments() -> argparse.Namespace:
         "--clean",
         action="store_true",
         help="Clean all cached data and execution records in project data directory",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"v{version('recnys')}",
+        help="Show program version and exit",
     )
     return parser.parse_args()
 

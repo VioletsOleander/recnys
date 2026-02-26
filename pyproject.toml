@@ -5,7 +5,11 @@ description = "A simple dotfile synchronization helper"
 authors = [{ name = "VioletsOleander", email = "1377232072@qq.com" }]
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = ["jinja2>=3.1.6", "pyyaml>=6.0.3"]
+dependencies = [
+    "jinja2>=3.1.6",
+    "pyyaml>=6.0.3",
+    "ruff>=0.15.2",
+]
 
 [project.scripts]
 recnys = "recnys.main:main"
