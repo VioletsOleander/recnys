@@ -44,7 +44,7 @@ Recnys will prompt for confirmation request for each file's synchronization, spe
 disable the behavior. For example:
 
 ```shell
-syncer -f
+syncer -s
 ```
 
 For more options, run:
