@@ -16,7 +16,7 @@ Each requirement entry follows this template:
 **Description**: {What the system must do}
 
 **Acceptance Criteria**:
-- {Specific, testable condition}
+- {Specific, testable condition expressed as observable behavior}
 - ...
 ```
 
@@ -32,22 +32,23 @@ Each requirement entry follows this template:
 `recnys.yaml` file located in the current working directory.
 
 **Acceptance Criteria**:
-- Given a valid `recnys.yaml` in the current working directory, `load_config` returns
-  its contents as a dictionary.
-- Given no `recnys.yaml` in the current working directory, `load_config` raises
-  `FileNotFoundError`.
+- Given a valid `recnys.yaml` in the current working directory, the configuration is
+  successfully read and used to determine sync targets.
+- Given no `recnys.yaml` in the current working directory, the program exits with an
+  error indicating the file was not found.
 
 ### REQ-CFG-2: Load variables from `variables.yaml`
 
 **Status**: Implemented
 
-**Description**: When template files are present, the system must load Jinja2 template
+**Description**: When template files are present, the system must load template
 variables from a `variables.yaml` file in the current working directory.
 
 **Acceptance Criteria**:
-- Given a valid `variables.yaml`, `load_variables` returns its contents as a flat
-  string-to-string dictionary.
-- Given no `variables.yaml`, `load_variables` raises `FileNotFoundError`.
+- Given a valid `variables.yaml`, the variables it defines are available for template
+  rendering.
+- Given no `variables.yaml`, the program exits with an error indicating the file was
+  not found.
 
 ---
 
@@ -57,23 +58,23 @@ variables from a `variables.yaml` file in the current working directory.
 
 **Status**: Implemented
 
-**Description**: The canonicalizer must select the destination path for the current
+**Description**: The system must select the destination path appropriate for the current
 operating system. Only `Linux` and `Windows` are supported platforms.
 
 **Acceptance Criteria**:
-- When a `dest` block contains a key for the current platform, that path (relative to
-  `~`) is used as the destination.
-- When a `dest` block contains an empty string for the current platform, the
-  destination is `None` (no syncing on that platform).
+- When a `dest` block specifies a path for the current platform, that path is used as
+  the destination.
+- When a `dest` block specifies an empty string for the current platform, the file is
+  not synced on that platform.
 - When a `dest` block omits the current platform, the default destination path is used.
-- When running on an unsupported platform, the canonicalizer raises `RuntimeError`.
+- When running on an unsupported platform, the program exits with an error.
 
 ### REQ-CANON-2: Derive default destination paths
 
 **Status**: Implemented
 
-**Description**: When no explicit destination is provided for a file, the canonicalizer
-must derive a sensible default based on the source path and current platform.
+**Description**: When no explicit destination is provided for a file, the system must
+derive a sensible default destination based on the source path and current platform.
 
 **Acceptance Criteria**:
 - A top-level file (e.g. `.vimrc`) defaults to `~/.vimrc` on Linux and `~\.vimrc` on
@@ -87,16 +88,16 @@ must derive a sensible default based on the source path and current platform.
 
 **Description**: A configuration entry whose key ends with `/` must be expanded into
 one entry per file found recursively inside that directory. Each expanded entry inherits
-the policy of the parent directory entry, and the destination is derived relative to
+the policy of the parent directory entry, and its destination is derived relative to
 the parent directory destination.
 
 **Acceptance Criteria**:
 - Given a directory entry `nvim/` with destination `~/.config/nvim/`, each file
-  `nvim/foo/bar.txt` produces an entry with destination `~/.config/nvim/foo/bar.txt`.
-- When the directory entry has destination `None`, all expanded entries also have
-  destination `None`.
+  `nvim/foo/bar.txt` is synced to `~/.config/nvim/foo/bar.txt`.
+- When the directory entry specifies no syncing for the current platform, none of the
+  files inside that directory are synced.
 
-### REQ-CANON-4: Resolve later entries taking precedence over earlier ones
+### REQ-CANON-4: Later entries override earlier ones for the same file
 
 **Status**: Implemented
 
@@ -105,57 +106,52 @@ directory entry (e.g. `nvim/`), the specific entry's destination and policy over
 those derived from the directory expansion.
 
 **Acceptance Criteria**:
-- Given `nvim/` followed by `nvim/init.lua` with a different destination, the resulting
-  canonical entry for `nvim/init.lua` uses the destination from the explicit entry.
+- Given `nvim/` followed by `nvim/init.lua` with a different destination, `nvim/init.lua`
+  is synced to the destination from the explicit entry, not the one inherited from `nvim/`.
 
-### REQ-CANON-5: Handle `.template` suffix in source and destination paths
+### REQ-CANON-5: Template files are rendered before syncing
 
 **Status**: Implemented
 
-**Description**: Source files ending in `.template` are rendered before syncing. The
-canonicalizer must:
-1. Set the sync source to the rendered output path (stripping `.template`).
-2. Record a render specification pointing from the original template to the rendered
-   output path.
+**Description**: Source files ending in `.template` must be rendered into a concrete
+file first, and that rendered output must then be synced to the destination. The
+original `.template` file is never synced directly.
 
 **Acceptance Criteria**:
-- For a key `.bashrc.template`, the sync source is
-  `<rendered_file_dir>/.bashrc` (the rendered output).
-- For a key `.bashrc.template`, a render spec is created with `src` equal to the
-  original template file and `dst` equal to `<rendered_file_dir>/.bashrc`.
-- When the template entry has destination `None`, the render spec destination is also
-  `None` (no rendering needed).
+- A template file (e.g. `.bashrc.template`) is rendered and the rendered output
+  (`.bashrc`) is what is synced to the destination, not the raw `.template` file.
+- When a template entry specifies no syncing for the current platform, the template
+  file is not rendered either.
 
 ---
 
 ## RENDER – Template Rendering
 
-### REQ-RENDER-1: Render Jinja2 templates using loaded variables
+### REQ-RENDER-1: Render template files using loaded variables
 
 **Status**: Implemented
 
-**Description**: Each `TemplateRenderTask` must be executed by reading the template
-file, substituting the loaded variables using Jinja2, and writing the rendered output
-to the task's destination path.
+**Description**: Each template file must be rendered by substituting the loaded
+variables into the template, and the rendered output must be written to an intermediate
+location for subsequent syncing.
 
 **Acceptance Criteria**:
-- Given a template file containing `{{ variable }}` and a variables dictionary with
-  `variable: value`, the rendered output file contains `value`.
-- The destination's parent directories are created if they do not exist.
-- On a rendering error, the task result is `Failure` and no partial output file is left
-  behind.
+- Given a template file containing a variable placeholder and a matching variable
+  definition, the rendered output file has the placeholder replaced with the variable
+  value.
+- The output directory is created automatically if it does not exist.
+- On a rendering error, no partial output file is left behind.
 
 ### REQ-RENDER-2: Skip rendering when the template file is unchanged
 
 **Status**: Implemented
 
-**Description**: If the template source file has not been modified since the last
-successful render and the rendered output file still exists and is up-to-date, the
-render task must be skipped.
+**Description**: If a template source file has not been modified since the last
+successful render and the rendered output still exists, rendering must be skipped.
 
 **Acceptance Criteria**:
-- When the source hash matches the last recorded hash and the destination file exists
-  and is identical to the source, the render task result is `Skipped`.
+- When a template file is re-run without changes, the rendered output file is not
+  rewritten.
 
 ---
 
@@ -169,10 +165,10 @@ render task must be skipped.
 contents of the source file to the destination path, replacing any existing content.
 
 **Acceptance Criteria**:
-- After a `copy` sync, the destination file contains the same text as the source file.
+- After a `copy` sync, the destination file contains the same content as the source
+  file.
 - The destination's parent directories are created if they do not exist.
-- On a copy error, the task result is `Failure` and no partial output file is left
-  behind.
+- On a sync error, no partial output file is left behind.
 
 ### REQ-SYNC-2: Sync a file using the `source` policy
 
@@ -193,94 +189,97 @@ any existing content that follows it.
 **Status**: Implemented
 
 **Description**: Before overwriting or creating a destination file, the system must
-prompt the user for confirmation unless `--skip-confirmation` is given.
+display a prompt and wait for the user to confirm or decline, unless
+`--skip-confirmation` is given.
 
 **Acceptance Criteria**:
-- When `skip=False` and the user declines the prompt, the task result is `Skipped`.
-- When `skip=True`, no prompt is shown and the sync proceeds without user interaction.
+- When confirmation is required and the user declines, the file is not synced.
+- When `--skip-confirmation` is given, no prompt is displayed and the sync proceeds
+  without user interaction.
 
 ### REQ-SYNC-4: Skip syncing when the source and destination are unchanged
 
 **Status**: Implemented
 
 **Description**: If the source file has not changed since the last successful sync and
-the destination file still exists and matches the source, the sync task must be skipped
+the destination file still exists and matches the source, the sync must be skipped
 automatically.
 
 **Acceptance Criteria**:
-- When the source hash matches the last recorded hash and the destination file exists
-  and is identical to the source, the sync task result is `Skipped`.
+- When a file is re-run without changes to either source or destination, the
+  destination file is not rewritten.
 
 ---
 
 ## EXEC – Execution Decision Making
 
-### REQ-EXEC-1: Execute the task when there is no previous execution record
+### REQ-EXEC-1: Execute when there is no previous execution record
 
 **Status**: Implemented
 
-**Description**: A file I/O task must always be executed when there is no prior
-execution record for it, because the destination file may not exist yet.
+**Description**: A task must always be executed when it has never been run before,
+since no destination file will exist yet.
 
 **Acceptance Criteria**:
-- When `last_task_record` is `None`, the execution decision is `ok=True`.
+- When a task has no prior execution history, it is executed and a destination file is
+  produced.
 
-### REQ-EXEC-2: Execute the task when the destination file is missing
+### REQ-EXEC-2: Execute when the destination file is missing
 
 **Status**: Implemented
 
-**Description**: Even when a previous execution record exists, the task must be
-re-executed if the destination file is absent.
+**Description**: Even when a task has been run before, it must be re-executed if the
+destination file is absent.
 
 **Acceptance Criteria**:
-- When `last_task_record` is present but `task.dst` does not exist, the execution
-  decision is `ok=True`.
+- When a previously executed task's destination file is deleted, the next run
+  re-creates it.
 
-### REQ-EXEC-3: Execute the task when the source file has changed
+### REQ-EXEC-3: Execute when the source file has changed
 
 **Status**: Implemented
 
-**Description**: When the source file's content hash differs from the hash stored in
-the last execution record, the task must be re-executed.
+**Description**: When the source file's content has changed since the last execution,
+the task must be re-executed so the destination reflects the latest source.
 
 **Acceptance Criteria**:
-- When the current hash of `task.src` differs from `last_task_record.file_hash`,
-  the execution decision is `ok=True`.
+- When the source file is modified between runs, the destination file is updated in the
+  next run.
 
-### REQ-EXEC-4: Execute the task when the destination file has drifted from the source
+### REQ-EXEC-4: Execute when the destination file has drifted from the source
 
 **Status**: Implemented
 
-**Description**: When the destination file exists and its content has been changed
-externally (i.e. it no longer matches the source), the task must be re-executed.
+**Description**: When the destination file has been modified externally so that it no
+longer matches the source, the task must be re-executed to restore consistency.
 
 **Acceptance Criteria**:
-- When `hash(task.src) == last_task_record.file_hash` but `hash(task.dst) != hash(task.src)`,
-  the execution decision is `ok=True`.
+- When the destination file is modified externally between runs (while the source is
+  unchanged), the next run overwrites the destination with the current source content.
 
-### REQ-EXEC-5: Skip the task when source and destination are both unchanged
+### REQ-EXEC-5: Skip when source and destination are both unchanged
 
 **Status**: Implemented
 
-**Description**: When the source file hash matches the last recorded hash and the
-destination content matches the source, the task must be skipped.
+**Description**: When both the source file and the destination file are unchanged since
+the last execution, the task must be skipped to avoid unnecessary work.
 
 **Acceptance Criteria**:
-- When `hash(task.src) == last_task_record.file_hash` and `hash(task.dst) == hash(task.src)`,
-  the execution decision is `ok=False`.
+- When neither the source nor the destination file has changed between runs, the
+  destination file is not rewritten.
 
-### REQ-EXEC-6: Force execute the task when `force_execute` is set
+### REQ-EXEC-6: Force execution regardless of change detection
 
 **Status**: Implemented
 
-**Description**: When `task.force_execute` is `True`, all other conditions must be
-ignored and the task must always be executed.
+**Description**: The user must be able to force all tasks to execute, bypassing all
+change-detection logic.
 
 **Acceptance Criteria**:
-- When `task.force_execute` is `True`, the execution decision is `ok=True` regardless
-  of the last execution record or file states.
+- When force execution is requested (via `--force-render` or `--force-sync`), all
+  applicable tasks are executed even when neither source nor destination has changed.
 
-### REQ-EXEC-7: Execute the task when the configuration entry has changed
+### REQ-EXEC-7: Execute when the configuration entry has changed
 
 **Status**: Planned
 
@@ -289,44 +288,40 @@ modified since the last execution, the task must be re-executed to reflect the n
 configuration, even if the source file itself is unchanged.
 
 **Acceptance Criteria**:
-- When the sync policy in the current configuration differs from the policy recorded at
-  the time of the last execution, the execution decision is `ok=True`.
-- When the destination path in the current configuration differs from the destination
-  recorded at the time of the last execution, the execution decision is `ok=True`.
-
-**Notes**: Implementing this requirement likely requires extending `TaskExecutionRecord`
-to store the configuration snapshot (policy, destination) used at execution time, and
-comparing it against the current task configuration in `_make_execution_decision`. This
-may require changes to `FileIOTask`, `FileSyncTask`, `TaskExecutionRecord`, and
-`FileIOTaskExecutor`.
+- When the sync policy for a file is changed in `recnys.yaml` and the program is
+  re-run, that file is re-synced using the new policy.
+- When the destination path for a file is changed in `recnys.yaml` and the program is
+  re-run, the file is synced to the new destination.
 
 ---
 
 ## RECORD – Execution Record Management
 
-### REQ-RECORD-1: Persist execution records to a JSON file
+### REQ-RECORD-1: Persist execution history between runs
 
 **Status**: Implemented
 
-**Description**: After each execution run, the full execution record must be saved to a
-JSON file so it can be used to make decisions in subsequent runs.
+**Description**: After each run, the execution history must be saved to disk so that
+it is available to inform decisions in subsequent runs.
 
 **Acceptance Criteria**:
-- After calling `ExecutionRecord.save(file_path)`, a valid JSON file exists at
-  `file_path` that contains all task records from that execution.
+- After a successful run, an execution history file exists in the `.recnys` project
+  data directory.
+- The information saved is sufficient for the system to make correct skip/execute
+  decisions on the next run.
 
-### REQ-RECORD-2: Load execution records from a JSON file
+### REQ-RECORD-2: Load execution history from a previous run
 
 **Status**: Implemented
 
-**Description**: At the start of each run, the system must load the execution record
-from the previously saved JSON file.
+**Description**: At the start of each run, the system must read the execution history
+saved by the previous run.
 
 **Acceptance Criteria**:
-- `ExecutionRecord.from_json(file_path)` returns the records previously saved by
-  `ExecutionRecord.save`.
-- When the file does not exist, `ExecutionRecord.from_json` returns an empty record
-  (not an error).
+- When an execution history file exists, its contents are used to make
+  skip/execute decisions for the current run.
+- When no execution history file exists (e.g. first run, or after `--clean`), the
+  system starts with an empty history without error.
 
 ---
 
@@ -347,33 +342,34 @@ confirmation prompts during a sync run.
 
 **Status**: Implemented
 
-**Description**: The `--verbose` flag must set the logging level to `DEBUG`, revealing
-detailed internal execution steps.
+**Description**: The `--verbose` flag must enable detailed diagnostic logging, making
+it easier to trace what the program is doing internally.
 
 **Acceptance Criteria**:
-- When the flag is provided, the root logger level is `DEBUG`.
+- When the flag is provided, detailed diagnostic messages are shown in the output that
+  are not visible in the default mode.
 
 ### REQ-CLI-3: Force re-render all templates with `-r` / `--force-render`
 
 **Status**: Implemented
 
-**Description**: The `--force-render` flag must cause all render tasks to be executed
-regardless of any cached execution records.
+**Description**: The `--force-render` flag must cause all template files to be
+re-rendered regardless of whether they have changed since the last run.
 
 **Acceptance Criteria**:
-- When the flag is provided, `build_render_tasks` produces tasks with
-  `force_execute=True`.
+- When the flag is provided, all template files are rendered even if their content is
+  unchanged since the last run.
 
 ### REQ-CLI-4: Force re-sync all files with `-c` / `--force-sync`
 
 **Status**: Implemented
 
-**Description**: The `--force-sync` flag must cause all sync tasks to be executed
-regardless of any cached execution records.
+**Description**: The `--force-sync` flag must cause all files to be re-synced
+regardless of whether they have changed since the last run.
 
 **Acceptance Criteria**:
-- When the flag is provided, `build_sync_tasks` produces tasks with
-  `force_execute=True`.
+- When the flag is provided, all files are synced even if their content is unchanged
+  since the last run.
 
 ### REQ-CLI-5: Render only (no sync) with `-o` / `--render-only`
 
@@ -383,8 +379,8 @@ regardless of any cached execution records.
 completing the render phase, skipping file synchronization entirely.
 
 **Acceptance Criteria**:
-- When the flag is provided, no sync tasks are executed and the program exits with
-  status `0` after rendering.
+- When the flag is provided, template files are rendered but no files are synced to
+  their destinations.
 
 ### REQ-CLI-6: Clean cached data with `--clean`
 
@@ -395,6 +391,5 @@ completing the render phase, skipping file synchronization entirely.
 any render or sync operations.
 
 **Acceptance Criteria**:
-- When the flag is provided and `.recnys` exists, the directory is deleted and the
-  program exits with status `0`.
-- No render or sync tasks are executed when `--clean` is provided.
+- When the flag is provided, the `.recnys` directory is removed and the program exits
+  without syncing or rendering any files.
