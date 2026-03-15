@@ -1,9 +1,9 @@
 """Provide `FileIOTaskExecutor` and execution related data structures."""
 
 import logging
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 from .record import ExecutionRecord, TaskExecutionDecision, TaskExecutionRecord, TaskExecutionResult
 from .utils import get_normalized_file_hash
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 __all__ = ["FileIOTaskExecutor"]
 
 
-class FileIOTaskExecutor[T_contra: FileIOTask](Protocol):
+class FileIOTaskExecutor[T: FileIOTask](ABC):
     """The executor of file I/O tasks.
 
     The executor is able to make execution decisions and execute
@@ -29,22 +29,22 @@ class FileIOTaskExecutor[T_contra: FileIOTask](Protocol):
     """
 
     @abstractmethod
-    def _execute_task(self, task: T_contra, decision: TaskExecutionDecision) -> TaskExecutionResult:
+    def _execute_task(self, task: T, decision: TaskExecutionDecision) -> TaskExecutionResult:
         """Execute the file I/O task based on the execution decision.
 
         Args:
-            task (T_contra): The file I/O task to be executed.
+            task (T): The file I/O task to be executed.
             decision (TaskExecutionDecision): The decision on whether and why to execute the task.
 
         Returns:
             TaskExecutionResult: The result of the task execution.
         """
 
-    def execute(self, tasks: Sequence[T_contra], last_record: ExecutionRecord) -> ExecutionRecord:
+    def execute(self, tasks: Sequence[T], last_record: ExecutionRecord) -> ExecutionRecord:
         """Execute given file I/O tasks sequentially.
 
         Args:
-            tasks (Sequence[T_contra]): Sequence of file I/O tasks to be executed.
+            tasks (Sequence[T]): Sequence of file I/O tasks to be executed.
             last_record (ExecutionRecord): Record of last execution of the tasks,
                 used for making execution decisions.
 
@@ -68,12 +68,12 @@ class FileIOTaskExecutor[T_contra: FileIOTask](Protocol):
         return record
 
     def _make_execution_decision(
-        self, task: T_contra, last_task_record: TaskExecutionRecord | None
+        self, task: T, last_task_record: TaskExecutionRecord | None
     ) -> TaskExecutionDecision:
         """Make execution decision for a file I/O task based on the last execution record.
 
         Args:
-            task (T_contra): The file I/O task for which to make the execution decision.
+            task (T): The file I/O task for which to make the execution decision.
             last_task_record (TaskExecutionRecord | None): The record of the last execution of the task,
                 used for making the decision, or None if the task has never been executed before.
 
@@ -126,7 +126,7 @@ class FileIOTaskExecutor[T_contra: FileIOTask](Protocol):
         )
 
     def _make_execution_record(
-        self, task: T_contra, decision: TaskExecutionDecision, result: TaskExecutionResult
+        self, task: T, decision: TaskExecutionDecision, result: TaskExecutionResult
     ) -> TaskExecutionRecord:
         """Make execution record for a file I/O task based on the execution decision and result."""
         timestamp = datetime.now().isoformat()
