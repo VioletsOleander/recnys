@@ -1,4 +1,4 @@
-# Template File
+# Dynamic File
 
 ## Requirement
 

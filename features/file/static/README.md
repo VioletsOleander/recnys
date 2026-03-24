@@ -1,4 +1,4 @@
-# Normal File
+# Static File
 
 ## Requirement
 
