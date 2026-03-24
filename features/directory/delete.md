@@ -54,5 +54,5 @@ _Operation_: Run `recnys`
 
 _Expectation_:
 
-- Artifacts of sub-directories that contain dynamic files only do not exist.
-- Artifacts of sub-directories that contain static files and dynamic files partially exist, i.e. the artifacts of static files under the sub-directories still exist while the artifacts of dynamic files under the sub-directories do not exist.
+- Artifacts of subdirectories that contain dynamic files only do not exist.
+- Artifacts of subdirectories that contain static files and dynamic files partially exist, i.e. the artifacts of static files under the subdirectories still exist while the artifacts of dynamic files under the subdirectories do not exist.

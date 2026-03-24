@@ -10,6 +10,6 @@ Define `<default_directory>` as:
 
 ```python
 match platform.system():
-    "Windows": default_directory = "~/AppData/Roaming/foo/"
-    "Linux": default_directory = "~/.config/foo/"
+    case "Windows": default_directory = "~/AppData/Roaming/foo/"
+    case "Linux": default_directory = "~/.config/foo/"
 ```

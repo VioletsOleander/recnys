@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The documents under this directory describes the features of Recnys. Each feature is described in a separate markdown file. The markdown files are organized in subdirectories according to use cases.
+The documents under this directory describe the features of Recnys. Each feature is described in a separate markdown file. The markdown files are organized in subdirectories according to use cases.
 
 The following terms are reserved as keywords in the feature documents:
 
@@ -16,7 +16,7 @@ The following terms are reserved as keywords in the feature documents:
 - "Variable Definition": The definition of variables used in the feature documents. Variables are enclosed in angle brackets, e.g., `<variable>`.
 - "Glossary": The definition of terms used in the feature documents.
 
-The "Requirement", "Variable Definition", "Pattern Definition" and "Glossary" defined in the `README.md` file under each subdirectory applies to all documents under the subdirectory and its subdirectories.
+The "Requirement", "Variable Definition", "Pattern Definition" and "Glossary" defined in the `README.md` file under each subdirectory apply to all documents under the subdirectory and its subdirectories.
 
 ## Requirement
 
@@ -36,8 +36,8 @@ Define `<os>` as:
 
 ```python
 match platform.system():
-    "Windows": os = "Windows"
-    "Linux": os = "Linux"
+    case "Windows": os = "Windows"
+    case "Linux": os = "Linux"
 ```
 
 ## Glossary
@@ -56,7 +56,7 @@ _Counterpart path_:
 _Counterpart directory_: A directory in the counterpart path, containing:
 
 - counterpart files and/or symlinks for files under the directory
-- counterpart directories and/or symlinks for sub-directories under the directory
+- counterpart directories and/or symlinks for subdirectories under the directory
 
 _Counterpart file_:
 

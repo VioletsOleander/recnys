@@ -61,10 +61,10 @@ _Operation_: Run `recnys`
 _Expectation_:
 
 - `<default_directory>` exists as a regular directory.
-- Counterpart symlinks of sub-directories that contain static files only exist.
-- Regular directories in counterpart paths of sub-directories that contain dynamic files exist.
-- Counterpart symlinks of static files under sub-directories that contains dynamic files exist.
-- Counterpart files of dynamic files under sub-directories that contains dynamic files exist.
+- Counterpart symlinks of subdirectories that contain static files only exist.
+- Regular directories in counterpart paths of subdirectories that contain dynamic files exist.
+- Counterpart symlinks of static files under subdirectories that contain dynamic files exist.
+- Counterpart files of dynamic files under subdirectories that contain dynamic files exist.
 
 ### 2.2. Destination specified
 
@@ -81,6 +81,6 @@ _Operation_: Run `recnys`
 _Expectation_:
 
 - `~/bar/` exists as a regular directory.
-- Counterpart symlinks of sub-directories that contain static files only exist.
-- Regular directories in counterpart paths of sub-directories that contain dynamic files exist.
-- Counterpart symlinks of static files under sub-directories that contains dynamic files exist.
+- Counterpart symlinks of subdirectories that contain static files only exist.
+- Regular directories in counterpart paths of subdirectories that contain dynamic files exist.
+- Counterpart symlinks of static files under subdirectories that contain dynamic files exist.
