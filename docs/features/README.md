@@ -10,8 +10,10 @@ The following terms are reserved as keywords in the feature documents:
   are met.
 - "Scenario": A specific use case that demonstrates how the feature works.
 - "Condition": The state or situation corresponding to the scenario before the operation is performed.
+- "Or": An alternative condition, used when there are multiple conditions corresponding to a scenario, and the operation and expectation described in the scenario is applicable to any of the conditions, without ambiguity.
 - "Operation": The action performed by the user.
 - "Expectation": The expected state or result after the operation is performed.
+- "Scenario Background": One or more conditions shared by multiple scenarios under the same section.
 - "Pattern Definition": The definition of patterns used in the feature documents. Patterns are enclosed in double angle brackets, e.g., `<<pattern>>`, and are defined using regular expressions.
 - "Variable Definition": The definition of variables used in the feature documents. Variables are enclosed in angle brackets, e.g., `<variable>`.
 - "Glossary": The definition of terms used in the feature documents.
