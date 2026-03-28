@@ -48,7 +48,7 @@ match platform.system():
 _File_:
 
 - Static file: A file without `.template` suffix.
-- Dynamic file: A file with `.template` suffix, also called template file.
+- Dynamic file: A file with `.template` suffix, also called template file. Dynamic files may contain [Jinja2 variables syntax](https://jinja.palletsprojects.com/en/stable/templates/#variables), and will be rendered using the provided variables before syncing to the destination.
 
 _Counterpart path_:
 

@@ -1,48 +1,6 @@
-# recnys.yaml
-# 1. This file should be placed in the root of the dotfiles repository.
-#
-# 2. Each entry's format is "src: { dest: {Linux: dest_linux, Windows: dest_windows}, policy: policy }",
-#   `src` is required, `dest` and `policy` are optional.
-#   (Note: 'Linux' and 'Windows' are case sensitive, and should be capitalized as shown here)
-#
-#   'src' can be:
-#   - a file, e.g. ".vimrc"
-#   - a template file (ending with .template), e.g. ".bashrc.template"
-#   - a directory (ending with /), e.g. "nvim/"
-#   It describes the source path of the files/directories to sync in the dotfiles repository.
-#   The template files will firstly be instantiated using the provided variables,
-#   and then synced as regular files.
-#
-#   'dest' describes the destination path on different platforms.
-#   If not provided for a platform, the default destination will be derived as follows:
-#       If `src` is a single file, the `dest` in Linux/Windows default to "~/src".
-#       If `src` is a directory (ends with /), the `dest` in Linux default to "~/.config/src",
-#       and in Windows defaults to "~/AppData/Roaming/<src>".
-#       If `src` is a file under a directory, the `dest` in Linux defaults to "~/.config/<source_parent_dir>/<source_file>",
-#       and in Windows defaults to "~/AppData/Roaming/<source_parent_dir>/<source_file>".
-#   If provided as an empty string, it means no syncing on that platform.
-#
-#   For example: `".vimrc": { dest: { Windows: "_vimrc" } }` describes that:
-#   - the source file is ".vimrc" in the dotfiles repository.
-#   - the destination path in Windows is "_vimrc" in the user's home directory.
-#   - the destination path in Linux is not provided, so it defaults to "~/.vimrc"
-#
-#   Notice that all paths (i.e. `src`, `dest_linux`, `dest_windows`) should be relative to
-#   the root directory of the dotfiles repository, i.e. the parent directory of this file.
-#
-#   `policy` can be "copy" (default) or "source".
-#   - "copy" means copy the file/directory from the source to the destination, and overwrite the destination if it already exists.
-#   - "source" means add a source statement on top of the existing file instead of overwriting it.
-#   for example, for .bashrc, it will add "source ~/path/to/dotfiles/.bashrc" on top of existing .bashrc.
-#
-# 3. In case of conflict, the latter entry takes precedence.
-#   For example, after we have specified a "dir/" entry, if we specify a "dir/file" entry later, with
-#   a different destination or policy, the latter entry will take precedence for "dir/file".
-#   (this function currently is not tested, so may not work as expected)
-#
 {
     ".vimrc": { dest: { Windows: "_vimrc" } },
-    ".bashrc.template": { dest: { Windows: "" }, policy: "source" },
+    ".bashrc.template": { dest: { Linux: "my_bashrc", Windows: "" } },
     ".inputrc": { dest: { Windows: "" } },
     ".tmux.conf": { dest: { Windows: "" } },
     ".gitconfig",
@@ -50,5 +8,4 @@
     "helix/",
     "yazi/",
     "nushell/",
-    "nushell/config.nu.template",
 }
