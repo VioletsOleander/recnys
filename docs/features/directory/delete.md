@@ -1,6 +1,6 @@
 # Delete
 
-## 1. Directory contains static files only
+**Requirement**: `variables.yaml` is defined in repository root, if there is any dynamic file under the directory or its subdirectories.
 
 **Scenario**: Delete artifact on entry remove or change
 
@@ -16,43 +16,36 @@ _Operation_: Run `recnys`
 
 _Expectation_: Artifact of `foo/` from last execution does not exist.
 
-## 2. Directory contains dynamic files
-
-**Requirement**: `variables.yaml` is defined in repository root.
-
-### 2.1 `recnys.yaml` entry
-
-**Scenario**: Delete artifact on entry remove or change
+**Scenario**: Delete artifact on files/subdirectories deletion under `copy` policy
 
 _Condition_: In last execution, the content of `recnys.yaml` is:
 
 ```yaml
-{ "foo/": <<any>> }
-```
-
-In current execution, the `foo/` entry does not exist, or still exists but with different content.
-
-_Operation_: Run `recnys`
-
-_Expectation_: Artifact of `foo/` from last execution does not exist.
-
-### 2.2 `variables.yaml` file
-
-**Scenario**: Delete (sub)artifact on variables change
-
-_Condition_: In last execution, the content of `recnys.yaml` is:
-
-```yaml
-{ "foo/": <<any>> }
+{ "foo/": { <<any>>, policy: "copy" } }
 ```
 
 In current execution, the `foo/` entry still exists with the same content.
 
-Compared to last execution, the hash value of `variables.yaml` has changed.
+Compared to last execution, some files and/or subdirectories under `foo/` and/or its subdirectories have been deleted.
 
 _Operation_: Run `recnys`
 
-_Expectation_:
+_Expectation_: Artifact of every deleted file and/or subdirectory from last execution does not exist.
 
-- Artifacts of subdirectories that contain dynamic files only do not exist.
-- Artifacts of subdirectories that contain static files and dynamic files partially exist, i.e. the artifacts of static files under the subdirectories still exist while the artifacts of dynamic files under the subdirectories do not exist.
+**Scenario**: Delete artifact on dynamic files deletion under `symlink` policy
+
+_Condition_: In last execution, the content of `recnys.yaml` is:
+
+```yaml
+{ "foo/": <<any>> }
+```
+
+with policy resolved to `symlink`.
+
+In current execution, the `foo/` entry still exists with the same content.
+
+Compared to last execution, some dynamic files under `foo/` and/or its subdirectories have been deleted.
+
+_Operation_: Run `recnys`
+
+_Expectation_: Artifact of every deleted dynamic file from last execution does not exist.

@@ -23,7 +23,7 @@ _Operation_: Run `recnys`
 
 _Expectation_: Operation is performed for the last entry, the first entry is ignored.
 
-## 1. Static and dynamic file
+## 1. File and File
 
 **Scenario**: Deduplicate between static and dynamic file entries
 
@@ -59,7 +59,9 @@ _Operation_: Run `recnys`
 
 _Expectation_: Operation is performed for the last entry, the first entry is ignored.
 
-## 2. File and containing directory
+## 2. Directory and File
+
+### 2.1. File and containing directory
 
 **Scenario**: Containing directory entry wins
 
@@ -83,7 +85,7 @@ _Operation_: Run `recnys`
 
 _Expectation_: Operation is performed for `foo/`, the first entry is ignored.
 
-## 3. Directory and contained file
+### 2.2. Directory and contained file
 
 **Scenario**: Contained file wins
 
@@ -106,3 +108,37 @@ and directory `foo/` contains file `bar.template`.
 _Operation_: Run `recnys`
 
 _Expectation_: Operation is performed for both entries, the artifact of the contained file corresponds to the file entry instead of the directory entry.
+
+## 3. Directory and Directory
+
+### 3.1. Subdirectory and containing directory
+
+**Scenario**: Containing directory entry wins
+
+_Condition_: The content of `recnys.yaml` is:
+
+```yaml
+{ "foo/bar/": <<any>>, "foo/": <<any>> }
+```
+
+and directory `foo/` contains subdirectory `bar/`.
+
+_Operation_: Run `recnys`
+
+_Expectation_: Operation is performed for `foo/`, the first entry is ignored.
+
+### 3.2. Directory and contained subdirectory
+
+**Scenario**: Contained subdirectory wins
+
+_Condition_: The content of `recnys.yaml` is:
+
+```yaml
+{ "foo/": <<any>>, "foo/bar/": <<any>> }
+```
+
+and directory `foo/` contains subdirectory `bar/`.
+
+_Operation_: Run `recnys`
+
+_Expectation_: Operation is performed for both entries, the artifact of the contained subdirectory corresponds to the subdirectory entry instead of the directory entry.
