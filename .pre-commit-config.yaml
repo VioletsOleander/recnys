@@ -2,7 +2,7 @@ default_install_hook_types: [pre-commit, commit-msg]
 default_stages: [pre-commit]
 repos:
   - repo: https://github.com/streetsidesoftware/cspell-cli
-    rev: v9.6.0
+    rev: v9.7.0
     hooks:
       - id: cspell # Spell check changed files
         name: Cspell (Files)
@@ -18,7 +18,7 @@ repos:
         pass_filenames: false
         stages: [commit-msg]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.14
+    rev: v0.15.7
     hooks:
       - id: ruff-check # Ruff Linter
         name: Ruff Lint
@@ -38,3 +38,8 @@ repos:
         language: unsupported
         types: [python]
         pass_filenames: false
+      - id: prettier-check
+        name: Prettier Check
+        entry: prettier --check
+        language: unsupported
+        types: [markdown, json, yaml]
