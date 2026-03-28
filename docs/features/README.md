@@ -14,6 +14,7 @@ The following terms are reserved as keywords in the feature documents:
 - "Operation": The action performed by the user.
 - "Expectation": The expected state or result after the operation is performed.
 - "Scenario Background": One or more conditions shared by multiple scenarios under the same section.
+- "Comment": Arbitrary text that provides additional information about the scenario, only used for explanation or clarification, and does not affect the scenario.
 - "Pattern Definition": The definition of patterns used in the feature documents. Patterns are enclosed in double angle brackets, e.g., `<<pattern>>`, and are defined using regular expressions.
 - "Variable Definition": The definition of variables used in the feature documents. Variables are enclosed in angle brackets, e.g., `<variable>`.
 - "Glossary": The definition of terms used in the feature documents.

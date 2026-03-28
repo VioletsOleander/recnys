@@ -5,7 +5,7 @@
 Define `<<entry>>` as:
 
 ```regex
-entry = [foo | foo.template | foo/ | foo/bar | foo/bar.template]
+entry = foo | foo\.template | foo/ | foo/bar | foo/bar\.template
 ```
 
 **Scenario**: Deduplicate between same entries
