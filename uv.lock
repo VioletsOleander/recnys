@@ -412,6 +412,7 @@ version = "0.5.0"
 source = { editable = "." }
 dependencies = [
     { name = "jinja2" },
+    { name = "pydantic" },
     { name = "pyyaml" },
 ]
 
@@ -428,6 +429,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "jinja2", specifier = ">=3.1.6" },
+    { name = "pydantic", specifier = ">=2.12.5" },
     { name = "pyyaml", specifier = ">=6.0.3" },
 ]
 
