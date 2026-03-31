@@ -41,5 +41,9 @@ def handle_exceptions(func: Callable[[], int]) -> Callable[[], int]:
         except KeyboardInterrupt:
             logger.exception("Execution interrupted by user")
             return 1
+        except Exception:
+            logger.exception("An unexpected error occurred")
+            logger.info("Hint: Please check the log file '.recnys/recnys.log' for more details.")
+            return 1
 
     return wrapper
