@@ -1,6 +1,10 @@
 autouse
 Canonicalizer
+Deconflict
+Deconfliction
+dnames
 dsts
+fnames
 inputrc
 nvim
 pipx

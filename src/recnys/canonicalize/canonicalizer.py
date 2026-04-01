@@ -1,30 +1,20 @@
 """Provide `ConfigCanonicalizer`."""
 
-import platform
-from enum import StrEnum
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from recnys.sync.task import FileSyncPolicy
 
-from .config import CanonicalConfig, CanonicalConfigValue, RenderSpec, SyncSpec
+from .model import CanonicalConfig, EntryKey, EntryValue, KeyCategory
 
 if TYPE_CHECKING:
-    from recnys.load import ConfigValue, LoadedConfig
+    from collections.abc import Generator, Iterable
 
-__all__ = ["ConfigCanonicalizer", "SupportedSystem"]
+    from recnys.config.model import EntryValue as PrimitiveEntryValue
+    from recnys.config.model import LoadedConfig
+    from recnys.utils.platform import Platform
 
-
-class SupportedSystem(StrEnum):
-    WINDOWS = "Windows"
-    LINUX = "Linux"
-
-    @classmethod
-    def _missing_(cls, value: object) -> None:
-        supported = ", ".join([repr(e.value) for e in cls])
-        raise RuntimeError(
-            f"Unsupported operating system: {value}. Currently only {supported} are supported."
-        )
+__all__ = ["ConfigCanonicalizer"]
 
 
 class ConfigCanonicalizer:
@@ -33,17 +23,10 @@ class ConfigCanonicalizer:
     The main provided method is `canonicalize`.
     """
 
-    _system: SupportedSystem
-    _rendered_file_dir: Path
+    _platform: Platform
 
-    def __init__(self, rendered_file_dir: Path) -> None:
-        """Initialize the ConfigCanonicalizer.
-
-        Args:
-            rendered_file_dir (Path): The directory where rendered files will be stored.
-        """
-        self._rendered_file_dir = rendered_file_dir
-        self._system = SupportedSystem(platform.system())
+    def __init__(self, platform: Platform) -> None:
+        self._platform = platform
 
     def canonicalize(self, loaded_config: LoadedConfig) -> CanonicalConfig:
         """Transform the loaded configuration into a canonical form.
@@ -54,10 +37,11 @@ class ConfigCanonicalizer:
         Returns:
             CanonicalConfig: The canonicalized configuration.
         """
-        sync_specs: dict[str, SyncSpec] = {}
+        config = loaded_config.root
 
-        # Expand directory and determine sync specifications
-        for key, value in loaded_config.items():
+        entry_keys = self._canonicalize_keys(keys=config.keys())
+
+        for key, value in config.items():
             sync_spec = self._make_sync_spec(key=key, value=value)
 
             if key.endswith("/"):
@@ -66,15 +50,19 @@ class ConfigCanonicalizer:
             else:
                 sync_specs[key] = sync_spec
 
-        # Determine render specifications and construct the canonical configuration
-        canonical_config: CanonicalConfig = {}
-        for key, sync_spec in sync_specs.items():
-            render_spec = self._make_render_spec(key=key, sync_spec=sync_spec)
-            canonical_config[key] = CanonicalConfigValue(
-                sync_spec=sync_spec, render_spec=render_spec
-            )
-
         return canonical_config
+
+    def _canonicalize_keys(self, keys: Iterable[str]) -> Generator[EntryKey]:
+        """Generate EntryKey instances from the source paths specified in the configuration file."""
+        for src in keys:
+            if src.endswith("/"):
+                category = KeyCategory.DIRECTORY
+            elif src.endswith(".template"):
+                category = KeyCategory.DYNAMIC_FILE
+            else:
+                category = KeyCategory.STATIC_FILE
+
+            yield EntryKey(src=src, category=category)
 
     def _expand_directory(self, sync_spec: SyncSpec) -> dict[str, SyncSpec]:
         result: dict[str, SyncSpec] = {}
@@ -107,15 +95,6 @@ class ConfigCanonicalizer:
         policy = self._resolve_policy(value)
 
         return SyncSpec(src=src, dst=dst, policy=policy)
-
-    def _make_render_spec(self, key: str, sync_spec: SyncSpec) -> RenderSpec:
-        src = Path.cwd() / key
-        if not key.endswith(".template") or sync_spec.dst is None:
-            dst = None
-        else:
-            dst = self._rendered_file_dir / key.removesuffix(".template")
-
-        return RenderSpec(src=src, dst=dst)
 
     def _resolve_src(self, key: str) -> Path:
         if key.endswith(".template"):

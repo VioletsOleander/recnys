@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING
 
 from pydantic import ValidationError
 
+from .platform import UnsupportedPlatformError
+
 if TYPE_CHECKING:
     from collections.abc import Callable, Generator
 
@@ -38,12 +40,17 @@ def handle_exceptions(func: Callable[[], int]) -> Callable[[], int]:
             )
 
             return 1
-        except KeyboardInterrupt:
-            logger.exception("Execution interrupted by user")
+        except UnsupportedPlatformError as e:
+            logger.exception("Error: %s", e)
             return 1
-        except Exception:
-            logger.exception("An unexpected error occurred")
-            logger.info("Hint: Please check the log file '.recnys/recnys.log' for more details.")
+        except KeyboardInterrupt:
+            logger.exception("Execution interrupted by user, program exited.")
+            return 1
+        except Exception as e:
+            logger.exception("Error: %s", e)
+            logger.info(
+                "Hint: Please enable debug mode with`--debug` and check the log file '.recnys/recnys.log' for more details."
+            )
             return 1
 
     return wrapper

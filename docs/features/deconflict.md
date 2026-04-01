@@ -1,4 +1,4 @@
-# Deduplicate
+# Deconflict
 
 **Pattern Definition**:
 
@@ -8,13 +8,13 @@ Define `<<entry>>` as:
 entry = foo | foo\.template | foo/ | foo/bar | foo/bar\.template
 ```
 
-**Comment**: Deduplication between the same keys relies on the behavior of PyYAML. In practice, PyYAML is supposed to let the last entry win when there are duplicate keys. However, this behavior is not written in its documentation and may not be guaranteed.
+**Comment**: Deconfliction between the same keys relies on the behavior of PyYAML. In practice, PyYAML is supposed to let the last entry win when there are duplicate keys. However, this behavior is not written in its documentation and may not be guaranteed.
 
 According to the YAML specification, keys in a yaml file should be unique. Therefore, maintaining the uniqueness of keys in the configuration file should be the responsibility of users.
 
 ## 1. File and File
 
-**Scenario**: Deduplicate between static and dynamic file entries
+**Scenario**: Static and dynamic file entries
 
 _Condition_: The content of `recnys.yaml` is:
 
