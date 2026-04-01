@@ -8,20 +8,9 @@ Define `<<entry>>` as:
 entry = foo | foo\.template | foo/ | foo/bar | foo/bar\.template
 ```
 
-**Scenario**: Deduplicate between same entries
+**Comment**: Deduplication between the same keys relies on the behavior of PyYAML. In practice, PyYAML is supposed to let the last entry win when there are duplicate keys. However, this behavior is not written in its documentation and may not be guaranteed.
 
-_Condition_: The content of `recnys.yaml` is:
-
-```yaml
-{
-    "<<entry>>": <<any>>,
-    "<<entry>>": <<any>>,
-}
-```
-
-_Operation_: Run `recnys`
-
-_Expectation_: Operation is performed for the last entry, the first entry is ignored.
+According to the YAML specification, keys in a yaml file should be unique. Therefore, maintaining the uniqueness of keys in the configuration file should be the responsibility of users.
 
 ## 1. File and File
 
