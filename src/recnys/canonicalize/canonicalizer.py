@@ -32,6 +32,18 @@ class ConfigCanonicalizer:
     def canonicalize(self, loaded_config: LoadedConfig) -> CanonicalConfig:
         """Transform the loaded configuration into a canonical form.
 
+        Canonicalization does not involve any filesystem IO operations, and only relies on the loaded
+        configuration and the platform information.
+
+        Canonicalization includes:
+        - Transform primitive entry keys into EntryKey instances, with deconfliction for dropping
+            entries and populating information for later special handling.
+        - Transform primitive entry values into EntryValue instances, defaulting missing fields, dropping
+            entries with empty destination.
+
+        Entries included in the canonical configuration are the effective entries for instructing
+        actual execution.
+
         Args:
             loaded_config (LoadedConfig): The loaded configuration to be canonicalized.
 
@@ -39,84 +51,34 @@ class ConfigCanonicalizer:
             CanonicalConfig: The canonicalized configuration.
         """
         config = loaded_config.root
+        canonical_config: dict[EntryKey, EntryValue] = {}
 
         keys = self._canonicalize_keys(keys=config.keys())
-        keys = deconflict(keys=keys)
+        for key in keys:
+            value = self._canonicalize_value(key=key, value=config[key.src])
+            if value is not None:
+                canonical_config[key] = value
 
-        raise KeyboardInterrupt
+        return CanonicalConfig(canonical_config)
 
-        for key, value in config.items():
-            sync_spec = self._make_sync_spec(key=key, value=value)
+    def _canonicalize_keys(self, keys: Iterable[str]) -> list[EntryKey]:
+        """Return canonicalized entry keys."""
 
+        def build_entry_key(key: str) -> EntryKey:
             if key.endswith("/"):
-                expanded_sync_specs = self._expand_directory(sync_spec=sync_spec)
-                sync_specs.update(expanded_sync_specs)
-            else:
-                sync_specs[key] = sync_spec
-
-        return canonical_config
-
-    def _canonicalize_keys(self, keys: Iterable[str]) -> Generator[EntryKey]:
-        """Generate EntryKey instances from the source paths specified in the configuration file."""
-        for src in keys:
-            if src.endswith("/"):
                 category = KeyCategory.DIRECTORY
-            elif src.endswith(".template"):
+            elif key.endswith(".template"):
                 category = KeyCategory.DYNAMIC_FILE
             else:
                 category = KeyCategory.STATIC_FILE
+            return EntryKey(src=key, category=category)
 
-            yield EntryKey(src=src, category=category)
+        return deconflict(keys=map(build_entry_key, keys))
 
-    def _expand_directory(self, sync_spec: SyncSpec) -> dict[str, SyncSpec]:
-        result: dict[str, SyncSpec] = {}
-
-        src_dir = sync_spec.src
-        dst_dir = sync_spec.dst
-        for src_file in src_dir.rglob("*"):
-            if not src_file.is_file():
-                continue
-
-            key = src_file.relative_to(Path.cwd()).as_posix()
-            src = self._resolve_src(key)
-
-            if dst_dir is None:
-                dst = None
-            else:
-                dst = dst_dir / src_file.relative_to(src_dir)
-                if dst.suffix.endswith(".template"):
-                    dst = dst.with_suffix("")
-
-            file_sync_spec = SyncSpec(src=src, dst=dst, policy=sync_spec.policy)
-
-            result[key] = file_sync_spec
-
-        return result
-
-    def _make_sync_spec(self, key: str, value: ConfigValue) -> SyncSpec:
-        src = self._resolve_src(key)
-        dst = self._resolve_dst(key, value)
-        policy = self._resolve_policy(value)
-
-        return SyncSpec(src=src, dst=dst, policy=policy)
-
-    def _resolve_src(self, key: str) -> Path:
-        if key.endswith(".template"):
-            return self._rendered_file_dir / key.removesuffix(".template")
-        return Path.cwd() / key
-
-    def _resolve_default_dst(self, key: str) -> Path:
-        key = key.removesuffix(".template")
-
-        if "/" in key:
-            match self._system:
-                case SupportedSystem.WINDOWS:
-                    return Path.home() / "AppData/Roaming" / key
-                case SupportedSystem.LINUX:
-                    return Path.home() / ".config" / key
-
-        return Path.home() / key
-
+    def _canonicalize_value(
+        self, key: EntryKey, value: PrimitiveEntryValue | None
+    ) -> EntryValue | None:
+        """Return canonicalized entry value or None if the entry should be dropped."""
     def _resolve_dst(self, key: str, value: ConfigValue) -> Path | None:
         """Return None if the destination is specified as an empty string, which means no syncing."""
         default_dst = self._resolve_default_dst(key)

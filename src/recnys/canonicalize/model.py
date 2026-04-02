@@ -5,9 +5,12 @@ communicate with.
 """
 
 from enum import StrEnum
-from typing import Literal
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, RootModel
+
+if TYPE_CHECKING:
+    from recnys.config.model import Policy
 
 __all__ = ["CanonicalConfig", "EntryKey", "EntryValue", "KeyCategory"]
 
@@ -32,7 +35,7 @@ class EntryKey(BaseModel):
     """Source path and category of an entry key specified in the configuration file.
 
     Attributes:
-        src (str): The source path specified in the configuration file.
+        src (str): The source path specified in the configuration file, relative to current working directory.
         category (KeyCategory): The category of the entry key.
         children (list[EntryKey]):
             For file entry: empty list
@@ -52,12 +55,12 @@ class EntryValue(BaseModel):
     """Destination path and synchronization policy for a source path specified in the configuration file.
 
     Attributes:
-        dest (str): The destination path for the source path.
-        policy (Literal["Copy", "Symlink"]): The file synchronization policy for the source path.
+        dest (str): The destination path for the source path, relative to the home directory.
+        policy (Policy): The file synchronization policy for the source path.
     """
 
     dest: str
-    policy: Literal["Copy", "Symlink"]
+    policy: Policy
 
 
 class CanonicalConfig(RootModel):

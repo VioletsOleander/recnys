@@ -1,10 +1,22 @@
 """Provide data models for loaded configuration and variables."""
 
-from typing import Literal
+from enum import StrEnum
 
 from pydantic import BaseModel, RootModel
 
-__all__ = ["Dest", "EntryValue", "LoadedConfig", "LoadedVariables"]
+__all__ = ["Dest", "EntryValue", "LoadedConfig", "LoadedVariables", "Policy"]
+
+
+class Policy(StrEnum):
+    """The file synchronization policy specified in the configuration file.
+
+    Attributes:
+        COPY: The source file will be copied to the destination path.
+        SYMLINK: A symbolic link will be created at the destination path pointing to the source file.
+    """
+
+    COPY = "copy"
+    SYMLINK = "symlink"
 
 
 class Dest(BaseModel):
@@ -24,11 +36,11 @@ class EntryValue(BaseModel):
 
     Attributes:
         dest (Dest | None): The destination paths for different platforms, or None if not specified
-        policy (Literal["copy", "symlink"] | None): The file synchronization policy, or None if not specified.
+        policy (Policy | None): The file synchronization policy, or None if not specified.
     """
 
     dest: Dest | None = None
-    policy: Literal["copy", "symlink"] | None = None
+    policy: Policy | None = None
 
 
 class LoadedConfig(RootModel):
