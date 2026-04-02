@@ -1,8 +1,11 @@
 autouse
 Canonicalizer
 Deconflict
+deconflicted
 Deconfliction
+dentries
 dnames
+dpaths
 dsts
 fnames
 inputrc

@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from recnys.sync.task import FileSyncPolicy
 
+from .deconflict import deconflict
 from .model import CanonicalConfig, EntryKey, EntryValue, KeyCategory
 
 if TYPE_CHECKING:
@@ -39,7 +40,10 @@ class ConfigCanonicalizer:
         """
         config = loaded_config.root
 
-        entry_keys = self._canonicalize_keys(keys=config.keys())
+        keys = self._canonicalize_keys(keys=config.keys())
+        keys = deconflict(keys=keys)
+
+        raise KeyboardInterrupt
 
         for key, value in config.items():
             sync_spec = self._make_sync_spec(key=key, value=value)

@@ -51,11 +51,11 @@ def main() -> int:
     setup_logging(log_file=paths.log_file, debug=args.debug)
 
     # Load config
-    config = load_config(file_path=paths.config_file)
+    loaded_config = load_config(file_path=paths.config_file)
 
     # Canonicalize config
     canonicalizer = ConfigCanonicalizer(platform=platform)
-    canonical_config = canonicalizer.canonicalize(loaded_config=config)
+    canonical_config = canonicalizer.canonicalize(loaded_config=loaded_config)
 
     # Render
     render_tasks = build_render_tasks(force_execute=args.force_render, config=canonical_config)
