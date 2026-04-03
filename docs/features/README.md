@@ -65,6 +65,22 @@ directory = ([^/]+/)+
 
 For example, `foo/`, `foo/bar/` and `foo/bar/baz/` are all valid `<<directory>>`, but `foo` and `/foo/` are not valid `<<directory>>`.
 
+Define `<<root_directory>>` as:
+
+```regex
+root_directory = [^/]+/
+```
+
+For example, `foo/` is a valid `<<root_directory>>`, but `foo/bar/` and `/foo/` are not valid `<<root_directory>>`.
+
+Define `<<leaf_directory>>` as:
+
+```regex
+leaf_directory = ([^/]+/)+
+```
+
+For example, `foo/bar/` and `foo/bar/baz/` are valid `<<leaf_directory>>`, but `foo/` and `/foo/` are not valid `<<leaf_directory>>`.
+
 ## Variable Definition
 
 Define `<os>` as:
@@ -95,11 +111,6 @@ _File_:
 
 - Static file: A file without `.template` suffix.
 - Dynamic file: A file with `.template` suffix, also called template file. Dynamic files may contain [Jinja2 variables syntax](https://jinja.palletsprojects.com/en/stable/templates/#variables), and will be rendered using the provided variables before syncing to the destination.
-
-_Directory_:
-
-- Static directory: A directory that does not contain any dynamic file in any level of its subdirectories.
-- Dynamic directory: A directory that contains at least one dynamic file in any level of its subdirectories.
 
 _Counterpart path_:
 
