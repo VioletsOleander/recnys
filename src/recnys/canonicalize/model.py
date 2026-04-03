@@ -4,30 +4,44 @@
 communicate with.
 """
 
-from enum import StrEnum
-from typing import TYPE_CHECKING
+from enum import Enum
+from typing import TYPE_CHECKING, NamedTuple
 
 from pydantic import BaseModel, RootModel
 
 if TYPE_CHECKING:
     from recnys.config.model import Policy
 
-__all__ = ["CanonicalConfig", "EntryKey", "EntryValue", "KeyCategory"]
+__all__ = ["CanonicalConfig", "EntryKey", "EntryValue", "KeyAttribute", "KeyCategory"]
 
 
-class KeyCategory(StrEnum):
-    """The category of an entry key specified in the configuration file.
+class KeyAttribute(NamedTuple):
+    """The attribute of an entry key.
 
-    The category is determined by the suffix of the source path specified in the configuration file:
+    Refers to features/README:pattern-definition for the meaning of
+    "static", "dynamic", "root" and "leaf".
+
+    Note that the concept of "static/dynamic", "root/leaf" currently only
+    affect the handling for file entries.
 
     Attributes:
-        STATIC_FILE: The entry key is a static file if it does not end with "/" or ".template".
-        DYNAMIC_FILE: The entry key is a dynamic file if it ends with ".template".
-        DIRECTORY: The entry key is a directory if it ends with "/".
+        static (bool): True for static, False for dynamic.
+        root (bool): True for root, False for leaf.
     """
 
-    STATIC_FILE = "StaticFile"
-    DYNAMIC_FILE = "DynamicFile"
+    static: bool
+    root: bool
+
+
+class KeyCategory(Enum):
+    """The category of an entry key.
+
+    Attributes:
+        FILE
+        DIRECTORY
+    """
+
+    FILE = "File"
     DIRECTORY = "Directory"
 
 
@@ -37,6 +51,7 @@ class EntryKey(BaseModel):
     Attributes:
         src (str): The source path specified in the configuration file, relative to current working directory.
         category (KeyCategory): The category of the entry key.
+        attribute (KeyAttribute): The attribute of the entry key.
         children (list[EntryKey]):
             For file entry: empty list
             For directory entry that does not contain other entries: empty list
@@ -48,6 +63,7 @@ class EntryKey(BaseModel):
 
     src: str
     category: KeyCategory
+    attribute: KeyAttribute
     children: list[EntryKey] = []
 
 
@@ -64,10 +80,6 @@ class EntryValue(BaseModel):
 
 
 class CanonicalConfig(RootModel):
-    """Key-value pairs representing the canonicalized configuration.
-
-    Key (EntryKey): The source path and category of the entry.
-    Value (EntryValue): The destination path and synchronization policy for the entry.
-    """
+    """Key-value pairs representing the canonicalized configuration."""
 
     root: dict[EntryKey, EntryValue]

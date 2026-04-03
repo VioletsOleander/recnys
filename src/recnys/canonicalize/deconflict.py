@@ -1,4 +1,4 @@
-"""Provide `deconflict` function."""
+"""Provide `deconflict` function for deconflicting entry keys."""
 
 from pathlib import Path
 from typing import TYPE_CHECKING

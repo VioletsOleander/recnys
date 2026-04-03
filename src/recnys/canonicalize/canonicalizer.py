@@ -1,19 +1,18 @@
 """Provide `ConfigCanonicalizer`."""
 
-from pathlib import Path
 from typing import TYPE_CHECKING
 
-from recnys.sync.task import FileSyncPolicy
+from recnys.utils.platform import Platform
 
 from .deconflict import deconflict
-from .model import CanonicalConfig, EntryKey, EntryValue, KeyCategory
+from .defaulting import get_default_dest, get_default_policy
+from .model import CanonicalConfig, EntryKey, EntryValue, KeyAttribute, KeyCategory
 
 if TYPE_CHECKING:
-    from collections.abc import Generator, Iterable
+    from collections.abc import Iterable
 
     from recnys.config.model import EntryValue as PrimitiveEntryValue
     from recnys.config.model import LoadedConfig
-    from recnys.utils.platform import Platform
 
 __all__ = ["ConfigCanonicalizer"]
 
@@ -65,13 +64,14 @@ class ConfigCanonicalizer:
         """Return canonicalized entry keys."""
 
         def build_entry_key(key: str) -> EntryKey:
-            if key.endswith("/"):
-                category = KeyCategory.DIRECTORY
-            elif key.endswith(".template"):
-                category = KeyCategory.DYNAMIC_FILE
-            else:
-                category = KeyCategory.STATIC_FILE
-            return EntryKey(src=key, category=category)
+            category = KeyCategory.DIRECTORY if key.endswith("/") else KeyCategory.FILE
+
+            static = not key.endswith(".template")
+            root = "/" not in key.removesuffix("/")
+
+            return EntryKey(
+                src=key, category=category, attribute=KeyAttribute(static=static, root=root)
+            )
 
         return deconflict(keys=map(build_entry_key, keys))
 
@@ -79,46 +79,20 @@ class ConfigCanonicalizer:
         self, key: EntryKey, value: PrimitiveEntryValue | None
     ) -> EntryValue | None:
         """Return canonicalized entry value or None if the entry should be dropped."""
-    def _resolve_dst(self, key: str, value: ConfigValue) -> Path | None:
-        """Return None if the destination is specified as an empty string, which means no syncing."""
-        default_dst = self._resolve_default_dst(key)
         if value is None:
-            return default_dst
+            dest = get_default_dest(key=key, platform=self._platform)
+            policy = get_default_policy(key=key)
+            return EntryValue(dest=dest, policy=policy)
 
-        match value.get("dest"):
-            case None:
-                return default_dst
-            case dict() as sync_dsts:
-                match sync_dsts.get(self._system.value):
-                    case "":
-                        return None
-                    case str() as dst:
-                        return Path.home() / Path(dst)
-                    case None:
-                        return default_dst
-                    case _ as val:
-                        raise ValueError(
-                            f"Invalid destination value for {self._system.value}: {val}."
-                            " It should be either an empty string or a string path."
-                        )
-            case _ as val:
-                raise ValueError(
-                    f"Invalid destination value for {self._system.value}: {val}."
-                    " It should be either an empty string, a string path, or None."
-                )
+        if value.dest is None:
+            dest = get_default_dest(key=key, platform=self._platform)
+        else:
+            dest = value.dest.Linux if self._platform == Platform.LINUX else value.dest.Windows
+            dest = get_default_dest(key=key, platform=self._platform) if dest is None else dest
 
-    def _resolve_policy(self, value: ConfigValue) -> FileSyncPolicy:
-        if value is None:
-            return FileSyncPolicy.DEFAULT
+        if dest == "":
+            return None
 
-        match value.get("policy"):
-            case None:
-                return FileSyncPolicy.DEFAULT
-            case "copy":
-                return FileSyncPolicy.COPY
-            case "source":
-                return FileSyncPolicy.SOURCE
-            case _ as val:
-                raise ValueError(
-                    f"Invalid policy value: {val}. The valid options are 'copy' or 'source'."
-                )
+        policy = get_default_policy(key=key) if value.policy is None else value.policy
+
+        return EntryValue(dest=dest, policy=policy)

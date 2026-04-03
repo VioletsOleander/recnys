@@ -3,6 +3,7 @@ Canonicalizer
 deconflict
 Deconflict
 deconflicted
+deconflicting
 Deconfliction
 dentries
 dnames
