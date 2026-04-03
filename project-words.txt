@@ -10,6 +10,7 @@ dsts
 fnames
 inputrc
 nvim
+pathlib
 pipx
 prek
 pylint

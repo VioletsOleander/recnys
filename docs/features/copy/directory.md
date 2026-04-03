@@ -1,6 +1,9 @@
-# Copy
+# Directory
 
-**Requirement**: `variables.yaml` is defined in repository root, if there is any dynamic file under the directory or its subdirectories.
+**Requirement**:
+
+- `foo/` exists in the repository root.
+- `variables.yaml` is defined in repository root, if there is any dynamic file under the directory or its subdirectories.
 
 ## 1. Destination not specified
 
@@ -14,7 +17,7 @@ _Condition_: The content of `recnys.yaml` is:
 
 _Operation_: Run `recnys`
 
-_Expectation_: Every file under `foo/` and its subdirectories has its counterpart file under `<default_directory>`.
+_Expectation_: Every file under `foo/` and its subdirectories has its counterpart file under `<home>/<config_directory>/foo/`.
 
 ## 2. Destination specified
 
@@ -28,7 +31,7 @@ _Condition_: The content of `recnys.yaml` is:
 
 _Operation_: Run `recnys`
 
-_Expectation_: Every file under `foo/` and its subdirectories has its counterpart file under `~/bar/`.
+_Expectation_: Every file under `foo/` and its subdirectories has its counterpart file under `<home>/bar/`.
 
 **Scenario**: Skip sync
 

@@ -1,4 +1,6 @@
-# Symlink
+# Directory
+
+**Requirement**: `foo/` exists in the repository root.
 
 ## 1. Directory contains static files only
 
@@ -14,7 +16,7 @@ _Condition_: The content of `recnys.yaml` is:
 
 _Operation_: Run `recnys`
 
-_Expectation_: `<default_directory>` exists as a symlink to `foo/`
+_Expectation_: `<home>/<config_directory>/foo/` exists as a symlink to `foo/`
 
 ### 1.2. Destination specified
 
@@ -28,7 +30,7 @@ _Condition_: The content of `recnys.yaml` is:
 
 _Operation_: Run `recnys`
 
-_Expectation_: `~/bar/` exists as a symlink to `foo/`
+_Expectation_: `<home>/bar/` exists as a symlink to `foo/`
 
 **Scenario**: Skip symlink
 
@@ -66,7 +68,7 @@ _Operation_: Run `recnys`
 
 _Expectation_:
 
-- `<default_directory>` exists as a regular directory.
+- `<home>/<config_directory>/foo/` exists as a regular directory.
 - Counterpart symlinks of subdirectories that contain static files only exist.
 - Regular directories in counterpart paths of subdirectories that contain dynamic files exist.
 - Counterpart symlinks of static files under subdirectories that contain dynamic files exist.
@@ -86,7 +88,7 @@ _Operation_: Run `recnys`
 
 _Expectation_:
 
-- `~/bar/` exists as a regular directory.
+- `<home>/bar/` exists as a regular directory.
 - Counterpart symlinks of subdirectories that contain static files only exist.
 - Regular directories in counterpart paths of subdirectories that contain dynamic files exist.
 - Counterpart symlinks of static files under subdirectories that contain dynamic files exist.

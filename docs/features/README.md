@@ -33,6 +33,22 @@ Define `<<any>>` as:
 any = .*
 ```
 
+Define `<<file>>` as:
+
+```regex
+file = ([^/]+/)*[^/]+
+```
+
+For example, `foo`, `foo/bar` and `foo/bar/baz` are all valid `<<file>>`, but `foo/` and `/foo` are not valid `<<file>>`.
+
+Define `<<directory>>` as:
+
+```regex
+directory = ([^/]+/)+
+```
+
+For example, `foo/`, `foo/bar/` and `foo/bar/baz/` are all valid `<<directory>>`, but `foo` and `/foo/` are not valid `<<directory>>`.
+
 ## Variable Definition
 
 Define `<os>` as:
@@ -41,6 +57,20 @@ Define `<os>` as:
 match platform.system():
     case "Windows": os = "Windows"
     case "Linux": os = "Linux"
+```
+
+Define `<home>` as:
+
+```python
+home = pathlib.Path.home()
+```
+
+Define `<config_directory>` as:
+
+```python
+match platform.system():
+    case "Windows": config_directory = "AppData/Roaming/"
+    case "Linux": config_directory = ".config/"
 ```
 
 ## Glossary
