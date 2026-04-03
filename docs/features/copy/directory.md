@@ -2,8 +2,8 @@
 
 **Requirement**:
 
-- `foo/` exists in the repository root.
-- `variables.yaml` is defined in repository root, if there is any dynamic file under the directory or its subdirectories.
+- `<<directory>>` exists in the repository root.
+- `variables.yaml` is defined in repository root, if `<<directory>>` is a dynamic directory.
 
 ## 1. Destination not specified
 
@@ -12,12 +12,12 @@
 _Condition_: The content of `recnys.yaml` is:
 
 ```yaml
-{ "foo/": { policy: "copy" } }
+{ "<<directory>>": { policy: "copy" } }
 ```
 
 _Operation_: Run `recnys`
 
-_Expectation_: Every file under `foo/` and its subdirectories has its counterpart file under `<home>/<config_directory>/foo/`.
+_Expectation_: Every file under `<<directory>>` and its subdirectories has its counterpart file under `<home>/<config_directory>/<<directory>>`.
 
 ## 2. Destination specified
 
@@ -26,19 +26,19 @@ _Expectation_: Every file under `foo/` and its subdirectories has its counterpar
 _Condition_: The content of `recnys.yaml` is:
 
 ```yaml
-{ "foo/": { dest: { <os>: "bar/" }, policy: "copy" } }
+{ "<<directory>>": { dest: { <os>: "foo/" }, policy: "copy" } }
 ```
 
 _Operation_: Run `recnys`
 
-_Expectation_: Every file under `foo/` and its subdirectories has its counterpart file under `<home>/bar/`.
+_Expectation_: Every file under `<<directory>>` and its subdirectories has its counterpart file under `<home>/foo/`.
 
 **Scenario**: Skip sync
 
 _Condition_: The content of `recnys.yaml` is:
 
 ```yaml
-{ "foo/": { dest: { <os>: "" }, policy: "copy" } }
+{ "<<directory>>": { dest: { <os>: "" }, policy: "copy" } }
 ```
 
 _Operation_: Run `recnys`

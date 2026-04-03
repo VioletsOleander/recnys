@@ -2,8 +2,8 @@
 
 **Requirement**:
 
-- `<<directory>>/` exists in the repository root.
-- `variables.yaml` is defined in repository root, if there is any dynamic file under the directory or its subdirectories.
+- `<<directory>>` exists in the repository root.
+- `variables.yaml` is defined in repository root, if `<<directory>>` is a dynamic directory.
 
 **Scenario**: Delete artifact on entry remove or change
 
