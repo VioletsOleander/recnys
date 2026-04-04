@@ -96,7 +96,10 @@ and directory `foo/` contains file `bar.template`.
 
 _Operation_: Run `recnys`
 
-_Expectation_: Operation is performed for both entries, the artifact of the contained file corresponds to the file entry instead of the directory entry.
+_Expectation_: ~~Operation is performed for both entries, the artifact of the contained file corresponds to the file entry instead of the directory entry.~~
+(Unsupported scenario, the behavior is undefined. Users should avoid this kind of configuration.)
+
+_Comment_: Support those kind of scenario will greatly increase the complexity of the implementation. Also, the reasonableness of those kind of scenario is not clear, because when we specify the container's behavior, we should be clear that the container's behavior is applied to all of its content, including the contained file. Therefore, we choose not to support those kind of scenario.
 
 ## 3. Directory and Directory
 
@@ -130,4 +133,5 @@ and directory `foo/` contains subdirectory `bar/`.
 
 _Operation_: Run `recnys`
 
-_Expectation_: Operation is performed for both entries, the artifact of the contained subdirectory corresponds to the subdirectory entry instead of the directory entry.
+_Expectation_: ~~Operation is performed for both entries, the artifact of the contained subdirectory corresponds to the subdirectory entry instead of the directory entry.~~
+(Unsupported scenario, the behavior is undefined. Users should avoid this kind of configuration.)
