@@ -1,73 +1,75 @@
-"""Provide `ParsedConfig` and related data structures."""
+"""Provide node models."""
 
-from enum import Enum
-from typing import TYPE_CHECKING, NamedTuple
+from enum import Enum, auto
+from typing import TYPE_CHECKING
 
-from pydantic import BaseModel, RootModel
+from pydantic import BaseModel
 
 if TYPE_CHECKING:
-    from recnys.scanning.model import Policy
+    from pathlib import Path
 
-__all__ = ["EntryKey", "EntryValue", "KeyAttribute", "KeyCategory", "ParsedConfig"]
+__all__ = ["BranchNode", "LeafNode", "Operation", "RootNode"]
 
 
-class KeyAttribute(NamedTuple):
-    """The attribute of an entry key.
-
-    Refers to features/README:pattern-definition for the meaning of
-    "static", "dynamic", "root" and "leaf".
-
-    Note that the concept of "static/dynamic", "root/leaf" currently only
-    affect the handling for file entries.
+class Operation(Enum):
+    """Category of an operation.
 
     Attributes:
-        static (bool): True for static, False for dynamic.
-        root (bool): True for root, False for leaf.
+        CREATE: Create a node at the destination path.
+        RENDER: Render a node from the source path to the destination path.
+        COPY: Copy a node from the source path to the destination path.
+        LINK: Create a symbolic link from the source path to the destination path.
+        REMOVE: Remove a node at the destination path.
+        UNLINK: Remove a symbolic link at the destination path.
     """
 
-    static: bool
-    root: bool
+    CREATE = auto()
+    RENDER = auto()
+    COPY = auto()
+    LINK = auto()
+    REMOVE = auto()
+    UNLINK = auto()
 
 
-class KeyCategory(Enum):
-    """The category of an entry key.
+class RootNode(BaseModel):
+    """The root node of the node tree.
 
     Attributes:
-        FILE
-        DIRECTORY
+        dst (Path): The destination path of the root node, which should be the home directory.
+        op (Operation): The operation to be performed on the root node. Always CREATE.
+        children (dict[Path, BranchNode | LeafNode]): The child nodes of the root node,
+            keyed by their destination paths.
     """
 
-    FILE = "File"
-    DIRECTORY = "Directory"
+    dst: Path
+    op: Operation = Operation.CREATE
+    children: dict[Path, BranchNode | LeafNode] = {}
 
 
-class EntryKey(BaseModel):
-    """Parsed entry key.
+class BranchNode(BaseModel):
+    """A branch node in the node tree.
 
     Attributes:
-        src (str): The source path, relative to the repository root directory.
-        category (KeyCategory): The category of the entry key.
-        attribute (KeyAttribute): The attribute of the entry key.
+        dst (Path): The destination path of the branch node.
+        op (Operation): The operation to be performed on the branch node. Always CREATE.
+        children (dict[Path, BranchNode | LeafNode]): The child nodes of the branch node,
+            keyed by their destination paths.
     """
 
-    src: str
-    category: KeyCategory
-    attribute: KeyAttribute
+    dst: Path
+    op: Operation = Operation.CREATE
+    children: dict[Path, BranchNode | LeafNode] = {}
 
 
-class EntryValue(BaseModel):
-    """Parsed entry value.
+class LeafNode(BaseModel):
+    """A leaf node in the node tree.
 
     Attributes:
-        dest (str): The destination path, relative to the home directory.
-        policy (Policy): The synchronization policy.
+        src (Path): The source path of the leaf node.
+        dst (Path): The destination path of the leaf node.
+        op (Operation): The operation to be performed on the leaf node.
     """
 
-    dest: str
-    policy: Policy
-
-
-class ParsedConfig(RootModel):
-    """Key-value pairs representing the parsed configuration."""
-
-    root: dict[EntryKey, EntryValue]
+    src: Path
+    dst: Path
+    op: Operation

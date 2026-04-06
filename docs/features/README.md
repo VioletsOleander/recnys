@@ -101,8 +101,8 @@ Define `<config_directory>` as:
 
 ```python
 match platform.system():
-    case "Windows": config_directory = "AppData/Roaming/"
-    case "Linux": config_directory = ".config/"
+    case "Windows": config_directory = "~/AppData/Roaming/"
+    case "Linux": config_directory = "~/.config/"
 ```
 
 ## Glossary

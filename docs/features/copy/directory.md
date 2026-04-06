@@ -17,7 +17,7 @@ _Condition_: The content of `recnys.yaml` is:
 
 _Operation_: Run `recnys`
 
-_Expectation_: Every file under `<<directory>>` and its subdirectories has its counterpart file under `<home>/<config_directory>/<<directory>>`.
+_Expectation_: Every file under `<<directory>>` and its subdirectories has its counterpart file under `<config_directory>/<<directory>>`.
 
 ## 2. Destination specified
 

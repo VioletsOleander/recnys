@@ -16,7 +16,7 @@ _Condition_: The content of `recnys.yaml` is:
 
 _Operation_: Run `recnys`
 
-_Expectation_: `<home>/<<root_file>>` exists as a symlink to `<<root_file>>`
+_Expectation_: `<config_directory>/<<root_file>>` exists as a symlink to `<<root_file>>`
 
 ### 1.2. Destination specified
 
@@ -60,7 +60,7 @@ _Condition_: The content of `recnys.yaml` is:
 
 _Operation_: Run `recnys`
 
-_Expectation_: `<home>/<config_directory>/<<leaf_file>>` exists as a symlink to `<<leaf_file>>`
+_Expectation_: `<config_directory>/<<leaf_file>>` exists as a symlink to `<<leaf_file>>`
 
 ### 2.2. Destination specified
 

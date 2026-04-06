@@ -14,7 +14,7 @@ _Condition_: The content of `recnys.yaml` is:
 
 _Operation_: Run `recnys`
 
-_Expectation_: `<home>/<config_directory>/<<directory>>` exists as a symlink to `<<directory>>`
+_Expectation_: `<config_directory>/<<directory>>` exists as a symlink to `<<directory>>`
 
 ## 2. Destination specified
 

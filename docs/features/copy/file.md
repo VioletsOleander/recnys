@@ -18,7 +18,7 @@ _Condition_: The content of `recnys.yaml` is:
 
 _Operation_: Run `recnys`
 
-_Expectation_: `<home>/<<root_file>>` exists, containing the counterpart content of `<<root_file>>`
+_Expectation_: `<config_directory>/<<root_file>>` exists, containing the counterpart content of `<<root_file>>`
 
 ### 1.2. Destination specified
 
@@ -62,7 +62,7 @@ _Condition_: The content of `recnys.yaml` is:
 
 _Operation_: Run `recnys`
 
-_Expectation_: `<home>/<config_directory>/<<leaf_file>>` exists, containing the counterpart content of `<<leaf_file>>`
+_Expectation_: `<config_directory>/<<leaf_file>>` exists, containing the counterpart content of `<<leaf_file>>`
 
 ### 2.2. Destination specified
 
@@ -76,7 +76,7 @@ _Condition_: The content of `recnys.yaml` is:
 
 _Operation_: Run `recnys`
 
-_Expectation_: `<home>/<config_directory>/foo/bar` exists, containing the counterpart content of `<<leaf_file>>`
+_Expectation_: `<home>/foo/bar` exists, containing the counterpart content of `<<leaf_file>>`
 
 **Scenario**: Skip sync
 

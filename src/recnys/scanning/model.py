@@ -2,7 +2,7 @@
 
 from enum import StrEnum
 
-from pydantic import BaseModel, RootModel
+from pydantic import BaseModel, RootModel, model_validator
 
 __all__ = ["Dest", "EntryValue", "Policy", "ScannedConfig", "ScannedVariables"]
 
@@ -12,10 +12,12 @@ class Policy(StrEnum):
 
     Attributes:
         COPY: The source file will be copied to the destination path.
+        RENDER: The source template file will be rendered to the destination path.
         SYMLINK: A symbolic link will be created at the destination path pointing to the source file.
     """
 
     COPY = "copy"
+    RENDER = "render"
     SYMLINK = "symlink"
 
 
@@ -52,8 +54,17 @@ class ScannedConfig(RootModel):
 
     root: dict[str, EntryValue | None]
 
-    def __getitem__(self, key: str) -> EntryValue | None:
-        return self.root[key]
+    @model_validator(mode="after")
+    def check_policy(self) -> ScannedConfig:
+        for key, val in self.root.items():
+            if not key.endswith(".template"):
+                continue
+            if val is None or val.policy is None:
+                continue
+            if val.policy != Policy.RENDER:
+                raise ValueError("Policy of template files must be 'render'")
+
+        return self
 
 
 class ScannedVariables(RootModel):
@@ -64,6 +75,3 @@ class ScannedVariables(RootModel):
     """
 
     root: dict[str, str]
-
-    def __getitem__(self, key: str) -> str:
-        return self.root[key]

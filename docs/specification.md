@@ -42,29 +42,16 @@ See [glossaries](features/README.md#glossary) for the definition of static and d
 
 `dest` describes the destination path on different platforms.
 
-`dest` is optional. For a certain platform, if the destination path is not provided, it will be derived from the source path with a default rule:
+`dest` is optional. For a certain platform, if the destination path is not provided, it will be derived from the source path:
 
-- If `<src>` is a file under repository root (e.g. `.vimrc`), the `dest` in Linux/Windows defaults to `~/src` (without `.template` suffix if `<src>` is a dynamic file).
-- If `<src>` is a directory (e.g. `nvim/`), the `dest` in Linux default to `~/.config/src`, and in Windows defaults to `~/AppData/Roaming/src`.
-- If `<src>` is a file under a specified directory (e.g. `nushell/config.nu`), the `dest` in Linux defaults to `~/.config/src`, and in Windows defaults to `~/AppData/Roaming/src` (without `.template` suffix if `<src>` is a dynamic file).
+- In Linux, it defaults to `~/.config/src` (without `.template` suffix if `<src>` is a dynamic file).
+- In Windows it defaults to `~/AppData/Roaming/src` (without `.template` suffix if `<src>` is a dynamic file).
 
 > Tip: `~/` means the user's home directory
 
-Destination path should be surrounded by double quotes (`"`), and should be a path relative to the user's home directory.
+Destination path should be surrounded by double quotes (`"`), and should be a relative path to the user's home directory.
 
 For a certain platform, if the destination path is an empty string (`""`), it means the entry is disabled on the platform, and no operation will be performed for the entry on the platform.
-
-For example, the following entry:
-
-```yaml
-{ ".vimrc": { dest: { Windows: "_vimrc" } } }
-```
-
-describes that:
-
-- the source file is `.vimrc` in the dotfiles repository.
-- the destination path in Windows is `~/_vimrc`.
-- the destination path in Linux is not provided, so defaults to `~/.vimrc`.
 
 #### `policy`
 
@@ -72,13 +59,11 @@ describes that:
 
 - `copy` means copy the file/directory from the source to the destination, and overwrite the destination if it already exists.
 - `symlink` means create a symlink at the destination pointing to the source, and overwrite the destination if it already exists.
+- `render` means render the source file (only applicable for dynamic files) and copy the rendered result to the destination, and overwrite the destination if it already exists.
 
-`policy` is optional. It defaults to `symlink` for static file and directory, and defaults to `copy` for dynamic file.
+`policy` is optional. It defaults to `symlink` for static file and directory, and defaults to `render` for dynamic file.
 
-**Notice**: In order to maintain a single source of truth, dynamic files do not support `symlink` policy:
-
-- A file entry with dynamic file as source and `symlink` as policy is considered invalid.
-- A directory entry containing dynamic files and with `symlink` as policy is considered as a special case. This directory will not be symlinked, but created as a regular directory in the destination path, and the subdirectories under it will be symlinked if they do not contain dynamic files, otherwise they will be created as regular directories, and the static files under it will be symlinked, but the dynamic files under it will be rendered and **copied** to the destination path. Refer to [the corresponding feature](features/directory/symlink.md#2-directory-contains-dynamic-files) for details.
+Dynamic files do not support `copy` policy (`render` policy already does copy) and `symlink` policy (to maintain a single source of truth).
 
 ### 1.2. Conflict Resolution
 

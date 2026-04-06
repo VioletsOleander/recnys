@@ -52,7 +52,7 @@ def main() -> int:
 
     # Load and parse config
     config_data = load_yaml(
-        file_path=paths.config_file,
+        file_path=paths.recnys_file,
         note="Hint: Please run this command in the root of your dotfiles repository, "
         "where the recnys.yaml file is located.",
     )
@@ -97,4 +97,5 @@ def main() -> int:
 
     return 0
 
-# parsing -> 
+
+# parsing ->
