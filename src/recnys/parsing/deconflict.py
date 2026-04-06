@@ -36,7 +36,7 @@ def _deconflict_overlap(keys: Iterable[EntryKey]) -> Iterable[EntryKey]:
     Corresponds to features/deconflict:1
 
     Args:
-        keys (list[EntryKey]): The list of EntryKey to be deconflicted.
+        keys (Iterable[EntryKey]): The EntryKeys to be deconflicted.
 
     Returns:
         Iterable[EntryKey]: The remaining EntryKeys after deconfliction.
@@ -66,7 +66,7 @@ def _deconflict_contained(keys: Iterable[EntryKey]) -> Iterable[EntryKey]:
     Corresponds to features/deconflict:2.2, features/deconflict:3.2
 
     Args:
-        keys (list[EntryKey]): The list of EntryKey to be deconflicted.
+        keys (Iterable[EntryKey]): The EntryKeys to be deconflicted.
 
     Returns:
         Iterable[EntryKey]: The remaining EntryKeys after deconfliction.
@@ -90,16 +90,19 @@ def _deconflict_contained(keys: Iterable[EntryKey]) -> Iterable[EntryKey]:
 def _deconflict_container(keys: Iterable[EntryKey]) -> list[EntryKey]:
     """Deconflict between directories and their contained files/subdirectories.
 
-    Latter one wins, the lost entry will be added to the winner's `children` for later special handling.
-    No entry will be dropped in this step.
+    Raise exception if there is such kind of conflict,
+    because the behavior is undefined and we choose not to support it.
 
-    Corresponds to features/deconflict:2.2, features/deconflict:3.2
+    If no conflict is found, return the input keys as a list without modification.
 
     Args:
-        keys (list[EntryKey]): The list of EntryKey to be deconflicted.
+        keys (Iterable[EntryKey]): The EntryKeys to be deconflicted.
 
     Returns:
-        list[EntryKey]: The list of EntryKey after deconfliction.
+        list[EntryKey]: Containing exactly the same keys as the input, in the same order.
+
+    Raises:
+        ValueError: If there is a conflict between a directory and its contained file/subdirectory.
     """
     keys = list(keys)
     seen_dpaths: set[Path] = set()
@@ -108,8 +111,9 @@ def _deconflict_container(keys: Iterable[EntryKey]) -> list[EntryKey]:
     for path, key in path_to_key.items():
         for parent in path.parents[:-1]:  # Exclude cwd "."
             if parent in seen_dpaths:
-                path_to_key[parent].children.append(key)
-                break
+                raise ValueError(
+                    f"Conflict found between directory '{parent}' and its contained file/subdirectory '{key.src}'"
+                )
 
         if key.category == KeyCategory.DIRECTORY:
             seen_dpaths.add(path)

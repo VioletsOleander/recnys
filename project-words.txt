@@ -11,6 +11,8 @@ dpaths
 dsts
 fnames
 inputrc
+Lowerer
+Materializer
 nvim
 pathlib
 pipx
@@ -19,6 +21,7 @@ pylint
 pypi
 pytest
 recnys
+RMFILE
 Syncer
 usefixtures
 vimrc

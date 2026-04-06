@@ -3,10 +3,10 @@ import logging
 from importlib.metadata import version
 from pathlib import Path
 
-from .build import build_render_tasks, build_sync_tasks
-from .canonicalize.canonicalizer import ConfigCanonicalizer
-from .config.loader import load_config, load_variables
+from .canonicalization.canonicalizer import ConfigCanonicalizer
 from .io.record import ExecutionRecord
+from .loader import load_yaml
+from .parsing.parser import parse_config, parse_variables
 from .render.renderer import TemplateRenderer
 from .sync.syncer import FileSyncer
 from .utils.exception import handle_exceptions
@@ -50,20 +50,22 @@ def main() -> int:
     platform = get_platform()
     setup_logging(log_file=paths.log_file, debug=args.debug)
 
-    # Load config
-    loaded_config = load_config(file_path=paths.config_file)
+    # Load and parse config
+    config_data = load_yaml(
+        file_path=paths.config_file,
+        note="Hint: Please run this command in the root of your dotfiles repository, "
+        "where the recnys.yaml file is located.",
+    )
+    parsed_config = parse_config(config_data=config_data)
 
     # Canonicalize config
     canonicalizer = ConfigCanonicalizer(platform=platform)
-    canonical_config = canonicalizer.canonicalize(loaded_config=loaded_config)
-
-    # Render
-    render_tasks = build_render_tasks(force_execute=args.force_render, config=canonical_config)
+    canonicalized_config = canonicalizer.canonicalize(parsed_config=parsed_config)
 
     if render_tasks:
         logger.info("Starting rendering...")
         variables_file = Path.cwd() / "variables.yaml"
-        variables = load_variables(file_path=variables_file)
+        variables = parse_variables(file_path=variables_file)
 
         render_record_file = data_dir / "render_record.json"
         render_record = ExecutionRecord.from_json(file_path=render_record_file)
@@ -81,7 +83,7 @@ def main() -> int:
 
     # Sync
     logger.info("Starting synchronization...")
-    sync_tasks = build_sync_tasks(config=canonical_config, force_execute=args.force_sync)
+    sync_tasks = build_sync_tasks(config=canonicalized_config, force_execute=args.force_sync)
 
     sync_record_file = data_dir / "sync_record.json"
     sync_record = ExecutionRecord.from_json(file_path=sync_record_file)
@@ -94,3 +96,5 @@ def main() -> int:
     logger.info("Sync record saved to %s", sync_record_file)
 
     return 0
+
+# parsing -> 

@@ -1,6 +1,6 @@
 """Provide `get_default_dest` and `get_default_policy` functions for defaulting entry values."""
 
-from recnys.config.model import Policy
+from recnys.parsing.model import Policy
 from recnys.utils.platform import Platform
 
 from .model import EntryKey, KeyCategory

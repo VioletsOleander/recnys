@@ -1,14 +1,14 @@
-"""Provide data models for loaded configuration and variables."""
+"""Provide data models for scanned configuration and variables."""
 
 from enum import StrEnum
 
 from pydantic import BaseModel, RootModel
 
-__all__ = ["Dest", "EntryValue", "LoadedConfig", "LoadedVariables", "Policy"]
+__all__ = ["Dest", "EntryValue", "Policy", "ScannedConfig", "ScannedVariables"]
 
 
 class Policy(StrEnum):
-    """The file synchronization policy specified in the configuration file.
+    """The file synchronization policy.
 
     Attributes:
         COPY: The source file will be copied to the destination path.
@@ -20,7 +20,7 @@ class Policy(StrEnum):
 
 
 class Dest(BaseModel):
-    """Destination paths for different platforms specified in the configuration file.
+    """Destination paths for different platforms.
 
     Attributes:
         Linux (str | None): The destination path for Linux, or None if not specified.
@@ -32,23 +32,22 @@ class Dest(BaseModel):
 
 
 class EntryValue(BaseModel):
-    """Destination and policy for a source path specified in the configuration file.
+    """Scanned entry value.
 
     Attributes:
-        dest (Dest | None): The destination paths for different platforms, or None if not specified
-        policy (Policy | None): The file synchronization policy, or None if not specified.
+        dest (Dest | None): The destination paths for different platforms, or None if not specified.
+        policy (Policy | None): The synchronization policy, or None if not specified.
     """
 
     dest: Dest | None = None
     policy: Policy | None = None
 
 
-class LoadedConfig(RootModel):
-    """Key-value pairs loaded from the YAML configuration file.
+class ScannedConfig(RootModel):
+    """Key-value pairs scanned from the YAML configuration data.
 
-    Key (str): The source path specified in the configuration file.
-    Value (EntryValue | None): The destination and policy for the source path,
-        or None if not specified.
+    Key (str): The source path.
+    Value (EntryValue | None): The destination and policy, or None if not specified.
     """
 
     root: dict[str, EntryValue | None]
@@ -57,10 +56,10 @@ class LoadedConfig(RootModel):
         return self.root[key]
 
 
-class LoadedVariables(RootModel):
-    """Key-value pairs loaded from the YAML variables file.
+class ScannedVariables(RootModel):
+    """Key-value pairs scanned from the YAML variables data.
 
-    Key (str): The variable name specified in the variables file.
+    Key (str): The name of the variable.
     Value (str): The value of the variable.
     """
 
