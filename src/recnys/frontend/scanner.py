@@ -1,4 +1,10 @@
-"""Provide functions for scanning YAML configuration and variables data."""
+"""Provide functions for scanning YAML configuration and variables data.
+
+The scanning stage transforms the raw YAML configuration/variables file into
+`ScannedConfig`/`ScannedVariables`, performing basic validation on the data.
+
+This stage can be analogized to the lexical analysis stage in a compilation pipeline.
+"""
 
 import logging
 from typing import overload

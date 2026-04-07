@@ -22,8 +22,8 @@ class TreeRefiner:
     def refine(self, root: RootNode) -> RootNode:
         """Refine the node tree rooted at `root`.
 
-        The refinement process will branchify any leaf node
-        that corresponds to a directory with COPY operation.
+        The refinement process will branchify any leaf node that corresponds to a directory with
+        COPY operation. For other nodes, no refinement is needed.
 
         Args:
             root (RootNode): The root node of the node tree to be refined.
@@ -31,19 +31,14 @@ class TreeRefiner:
         Returns:
             RootNode: The root node of the refined node tree.
         """
-        walk_tree(root, on_leaf=self._refine_leaf)
+
+        def refine_leaf(node: LeafNode) -> None:
+            if not node.src.is_dir() or node.op != Operation.COPY:
+                return
+            self._branchify_leaf(node, exclude_dirs=[".git"])
+
+        walk_tree(root, on_leaf=refine_leaf)
         return root
-
-    def _refine_leaf(self, node: LeafNode) -> None:
-        """Refine a leaf node in the node tree.
-
-        For a leaf node that corresponds to a directory with COPY operation, it will be branchified.
-        For other leaf nodes, no refinement is needed.
-        """
-        if not node.src.is_dir() or node.op != Operation.COPY:
-            return
-
-        self._branchify_leaf(node, exclude_dirs=[".git"])
 
     def _branchify_leaf(self, leaf: LeafNode, exclude_dirs: list[str]) -> None:
         """Transform a leaf node into branch node.
@@ -53,11 +48,6 @@ class TreeRefiner:
         All files under the directory and its subdirectories (excluding those specified in
         `exclude_dirs`) will be expanded into leaf nodes.
         """
-        if not leaf.src.is_dir():
-            raise ValueError("The leaf node to branchify must correspond to a directory.")
-        if leaf.op != Operation.COPY:
-            raise ValueError("The leaf node to branchify must have COPY operation.")
-
         src = leaf.src
         dst = leaf.dst
         branch = BranchNode(dst=dst, parent=leaf.parent)
