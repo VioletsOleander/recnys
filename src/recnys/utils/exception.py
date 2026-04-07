@@ -47,9 +47,9 @@ def handle_exceptions(func: Callable[[], int]) -> Callable[[], int]:
             logger.exception("Execution interrupted by user, program exited.")
             return 1
         except Exception as e:
-            logger.exception("Error: %s", e)
+            logger.exception("Unexpected error: %s", e)
             logger.info(
-                "Hint: Please enable debug mode with`--debug` and check the log file '.recnys/recnys.log' for more details."
+                "Check the log file '.recnys/recnys.log' for more details if debug mode is enabled."
             )
             return 1
 

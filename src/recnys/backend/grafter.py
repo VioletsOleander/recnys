@@ -1,9 +1,9 @@
 """Provide TreeGrafter."""
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, overload
 
 from .model import BranchNode, LeafNode, Node, Operation, RootNode
-from .utils import walk_tree
+from .utils.traversal import walk_tree
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -33,39 +33,46 @@ class TreeGrafter:
                 nodes grafted.
         """
         # Store nodes under root
-
         nodes: dict[Path, Node] = {}
 
-        def add_node(node: BranchNode | LeafNode) -> None:
-            nodes[node.dst] = node
+        @overload
+        def add_node(node: BranchNode) -> BranchNode: ...
 
-        walk_tree(root, on_branch=add_node, on_leaf=add_node)
+        @overload
+        def add_node(node: LeafNode) -> LeafNode: ...
+
+        def add_node(node: BranchNode | LeafNode) -> BranchNode | LeafNode:
+            nodes[node.dst] = node
+            return node
+
+        walk_tree(root, on_branch=add_node, on_leaf=add_node, update=False)
 
         # Graft nodes that exist under prev_root but not under root
-
-        def graft_branch(node: BranchNode) -> None:
+        def graft_branch(node: BranchNode) -> BranchNode:
             if node.dst in nodes:
-                return
+                return node
 
             parent = nodes[node.dst.parent]
             if isinstance(parent, LeafNode):
                 raise TypeError("Incorrect tree structure, leaf node can not be parent.")
 
-            graft_node = BranchNode(dst=node.dst, op=Operation.REMOVE, parent=parent)
+            graft_node = BranchNode(dst=node.dst, op=Operation.REMOVE, children=node.children)
             parent.children[node.dst] = graft_node
+            return graft_node
 
-        def graft_leaf(node: LeafNode) -> None:
+        def graft_leaf(node: LeafNode) -> LeafNode:
             if node.dst in nodes:
-                return
+                return node
 
             parent = nodes[node.dst.parent]
             if isinstance(parent, LeafNode):
                 raise TypeError("Incorrect tree structure, leaf node can not be parent.")
 
             op = Operation.UNLINK if node.op == Operation.LINK else Operation.REMOVE
-            graft_node = LeafNode(src=node.src, dst=node.dst, op=op, parent=parent)
+            graft_node = LeafNode(src=node.src, dst=node.dst, op=op)
             parent.children[node.dst] = graft_node
+            return node
 
-        walk_tree(prev_root, on_branch=graft_branch, on_leaf=graft_leaf)
+        walk_tree(prev_root, on_branch=graft_branch, on_leaf=graft_leaf, update=False)
 
         return root

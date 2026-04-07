@@ -42,7 +42,7 @@ def make_paths(platform: Platform) -> Paths:
         config_dir=config_dir,
         repo_dir=repo_dir,
         data_dir=data_dir,
-        log_file=data_dir / "log.txt",
+        log_file=data_dir / "recnys.log",
         record_file=data_dir / "record.json",
         recnys_file=repo_dir / "recnys.yaml",
         variables_file=repo_dir / "variables.yaml",

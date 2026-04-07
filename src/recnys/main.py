@@ -60,12 +60,19 @@ def main() -> int:
     # Scan
     scanned_config = scan_config(loaded_config)
 
-    raise KeyboardInterrupt
-
     # Backend
     # Parse
     parser = ConfigParser(paths, platform)
     root = parser.parse(scanned_config)
+
+    x = root.model_dump_json(indent=2)
+    import pydantic
+    from .backend.model import RootNode
+    y = RootNode.model_validate_json(x)
+    print(x)
+    print(y)
+
+    raise KeyboardInterrupt
 
     # Refine
     refiner = TreeRefiner()

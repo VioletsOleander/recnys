@@ -1,12 +1,9 @@
 """Provide node models."""
 
 from enum import Enum, auto
-from typing import TYPE_CHECKING
+from pathlib import Path  # noqa: TC003, Path is required by pydantic in runtime
 
 from pydantic import BaseModel
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 __all__ = ["BranchNode", "LeafNode", "Node", "Operation", "RootNode"]
 
@@ -54,14 +51,12 @@ class BranchNode(BaseModel):
     Attributes:
         dst (Path): The destination path of the branch node.
         op (Operation): The operation to be performed on the branch node. Always CREATE.
-        parent (RootNode | BranchNode): The parent node of the branch node.
         children (dict[Path, BranchNode | LeafNode]): The child nodes of the branch node,
             keyed by their destination paths.
     """
 
     dst: Path
     op: Operation = Operation.CREATE
-    parent: RootNode | BranchNode
     children: dict[Path, BranchNode | LeafNode] = {}
 
 
@@ -72,10 +67,8 @@ class LeafNode(BaseModel):
         src (Path): The source path of the leaf node.
         dst (Path): The destination path of the leaf node.
         op (Operation): The operation to be performed on the leaf node.
-        parent (RootNode | BranchNode): The parent node of the leaf node.
     """
 
     src: Path
     dst: Path
     op: Operation
-    parent: RootNode | BranchNode

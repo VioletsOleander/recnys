@@ -3,7 +3,7 @@
 from typing import TYPE_CHECKING
 
 from .model import BranchNode, LeafNode, Operation, RootNode
-from .utils import walk_tree
+from .utils.traversal import walk_tree
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -32,16 +32,15 @@ class TreeRefiner:
             RootNode: The root node of the refined node tree.
         """
 
-        def refine_leaf(node: LeafNode) -> None:
+        def refine_leaf(node: LeafNode) -> LeafNode | BranchNode:
             if not node.src.is_dir() or node.op != Operation.COPY:
-                return
-            self._branchify_leaf(node, exclude_dirs=[".git"])
+                return node
+            return self._branchify_leaf(node, exclude_dirs=[".git"])
 
-        walk_tree(root, on_leaf=refine_leaf)
-        return root
+        return walk_tree(root, on_leaf=refine_leaf, update=True)
 
-    def _branchify_leaf(self, leaf: LeafNode, exclude_dirs: list[str]) -> None:
-        """Transform a leaf node into branch node.
+    def _branchify_leaf(self, leaf: LeafNode, exclude_dirs: list[str]) -> BranchNode:
+        """Transform a leaf node into branch node and return it.
 
         The leaf node should be a directory with COPY operation.
 
@@ -50,14 +49,9 @@ class TreeRefiner:
         """
         src = leaf.src
         dst = leaf.dst
-        branch = BranchNode(dst=dst, parent=leaf.parent)
+        branch = BranchNode(dst=dst)
 
-        parent = branch.parent
-        parent.children[dst] = branch
-        parents: dict[Path, BranchNode | RootNode] = {
-            parent.dst: parent,
-            branch.dst: branch,
-        }
+        parents: dict[Path, BranchNode] = {branch.dst: branch}
 
         for dir_path, dir_names, file_names in src.walk(top_down=True):  # DFS
             for name in exclude_dirs:
@@ -68,12 +62,14 @@ class TreeRefiner:
             if branch_dst in parents:
                 parent = parents[branch_dst]
             else:
-                node = BranchNode(dst=branch_dst, parent=parent)
+                node = BranchNode(dst=branch_dst)
                 parents[branch_dst] = node
                 parent = node
 
             for file_name in file_names:
                 leaf_src = dir_path / file_name
                 leaf_dst = dst / leaf_src.relative_to(src)
-                node = LeafNode(src=leaf_src, dst=leaf_dst, op=Operation.COPY, parent=parent)
+                node = LeafNode(src=leaf_src, dst=leaf_dst, op=Operation.COPY)
                 parent.children[leaf_dst] = node
+
+        return branch

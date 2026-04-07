@@ -67,6 +67,8 @@ class ConfigParser:
         """Make leaf node and branch nodes on its way to the root node.
 
         If conflict leaf nodes are met during making branch nodes, they will be recursively branchified.
+        If conflict leaf/branch node is met during making leaf node, it will be replaced, and its subtree (if
+        exists) is thus dropped.
 
         All features specified in features/deconflict are satisfied by this implementation.
 
@@ -82,12 +84,12 @@ class ConfigParser:
                 node = parent.children[branch_dst]
                 branch = self._branchify_leaf(node) if isinstance(node, LeafNode) else node
             else:
-                branch = BranchNode(dst=branch_dst, parent=parent)
+                branch = BranchNode(dst=branch_dst)
 
             parent.children[branch_dst] = branch
             parent = branch
 
-        leaf = LeafNode(src=src, dst=dst, op=op, parent=parent)
+        leaf = LeafNode(src=src, dst=dst, op=op)
         parent.children[dst] = leaf
 
     def _branchify_leaf(self, leaf: LeafNode) -> BranchNode:
@@ -98,10 +100,10 @@ class ConfigParser:
         if not leaf.src.is_dir():
             raise ValueError("The leaf node to branchify must correspond to a directory.")
 
-        branch = BranchNode(dst=leaf.dst, parent=leaf.parent)
+        branch = BranchNode(dst=leaf.dst)
 
         for child_src, child_dst in zip(leaf.src.iterdir(), leaf.dst.iterdir(), strict=True):
-            node = LeafNode(src=child_src, dst=child_dst, op=leaf.op, parent=branch)
+            node = LeafNode(src=child_src, dst=child_dst, op=leaf.op)
             branch.children[child_dst] = node
 
         return branch
