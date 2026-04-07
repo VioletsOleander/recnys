@@ -1,51 +1,49 @@
+"""Provide `TreeRefiner`."""
+
 from typing import TYPE_CHECKING
 
-from recnys.parsing.model import BranchNode, LeafNode, Operation, RootNode
+from .model import BranchNode, LeafNode, Operation, RootNode
+from .utils import walk_tree
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-__all__ = ["TreeCanonicalizer"]
+__all__ = ["TreeRefiner"]
 
 
-class TreeCanonicalizer:
-    """TreeCanonicalizer canonicalizes the node tree.
+class TreeRefiner:
+    """TreeRefiner refines the parsed node tree.
 
-    The main provided method is `canonicalize`.
+    This stage can be analogized to the canonicalization stage in a compilation pipeline.
+
+    The main provided method is `refine`.
     """
 
-    def canonicalize(self, root: RootNode) -> RootNode:
-        """Canonicalize the node tree rooted at `root`.
+    def refine(self, root: RootNode) -> RootNode:
+        """Refine the node tree rooted at `root`.
 
-        The canonicalization process will branchify any leaf node
+        The refinement process will branchify any leaf node
         that corresponds to a directory with COPY operation.
 
         Args:
-            root (RootNode): The root node of the node tree to be canonicalized.
+            root (RootNode): The root node of the node tree to be refined.
 
         Returns:
-            RootNode: The root node of the canonicalized node tree.
+            RootNode: The root node of the refined node tree.
         """
-        for child in root.children.values():
-            self._canonicalize_node(child)
-
+        walk_tree(root, on_leaf=self._refine_leaf)
         return root
 
-    def _canonicalize_node(self, node: BranchNode | LeafNode) -> None:
-        """Canonicalize a node in the node tree.
+    def _refine_leaf(self, node: LeafNode) -> None:
+        """Refine a leaf node in the node tree.
 
-        The canonicalization process includes:
-
-        - For a branch node, recursively canonicalize its child nodes.
-        - For a leaf node that corresponds to a directory with COPY operation, branchify it.
+        For a leaf node that corresponds to a directory with COPY operation, it will be branchified.
+        For other leaf nodes, no refinement is needed.
         """
-        if isinstance(node, BranchNode):
-            for child in node.children.values():
-                self._canonicalize_node(child)
+        if not node.src.is_dir() or node.op != Operation.COPY:
             return
 
-        if node.src.is_dir() and node.op == Operation.COPY:
-            self._branchify_leaf(node, exclude_dirs=[".git"])
+        self._branchify_leaf(node, exclude_dirs=[".git"])
 
     def _branchify_leaf(self, leaf: LeafNode, exclude_dirs: list[str]) -> None:
         """Transform a leaf node into branch node.

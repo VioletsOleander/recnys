@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from recnys.scanning.model import EntryValue, Policy, ScannedConfig
+from recnys.frontend.model import EntryValue, Policy, ScannedConfig
 from recnys.utils.platform import Platform
 
 from .model import BranchNode, LeafNode, Operation, RootNode
@@ -16,6 +16,12 @@ __all__ = ["ConfigParser"]
 
 class ConfigParser:
     """ConfigParser parses the scanned configuration into a node tree structure.
+
+    This stage can be analogized to the syntax analysis and IR generation stage in a compilation pipeline.
+
+    Because what recnys manipulates is the filesystem, therefore tree structure is very natural for acting as
+    an intermediate representation, and further lowering tree into three-address code like representation is
+    just not necessary.
 
     The main provided method is `parse`.
     """
@@ -58,11 +64,17 @@ class ConfigParser:
         return root
 
     def _make_nodes(self, src: Path, dst: Path, op: Operation, root: RootNode) -> None:
-        """Make branch and leaf nodes.
+        """Make leaf node and branch nodes on its way to the root node.
 
-        Conflict leaf nodes will be recursively branchified.
+        If conflict leaf nodes are met during making branch nodes, they will be recursively branchified.
 
         All features specified in features/deconflict are satisfied by this implementation.
+
+        Args:
+            src (Path): The source path of the leaf node to be made.
+            dst (Path): The destination path of the leaf node to be made.
+            op (Operation): The operation of the leaf node to be made.
+            root (RootNode): The root node of the node tree.
         """
         parent = root
         for branch_dst in dst.parents[:-1]:  # exclude home

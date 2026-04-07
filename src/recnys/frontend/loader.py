@@ -1,3 +1,5 @@
+"""Provide functions for loading raw data from files."""
+
 import json
 from typing import TYPE_CHECKING
 

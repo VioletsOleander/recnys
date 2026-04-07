@@ -8,7 +8,9 @@ from pydantic import BaseModel
 if TYPE_CHECKING:
     from pathlib import Path
 
-__all__ = ["BranchNode", "LeafNode", "Operation", "RootNode"]
+__all__ = ["BranchNode", "LeafNode", "Node", "Operation", "RootNode"]
+
+type Node = RootNode | BranchNode | LeafNode
 
 
 class Operation(Enum):
