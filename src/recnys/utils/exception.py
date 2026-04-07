@@ -32,10 +32,10 @@ def handle_exceptions(func: Callable[[], int]) -> Callable[[], int]:
             def messages(e: ValidationError) -> Generator[str]:
                 for err in e.errors():
                     field = f"'{' -> '.join(map(str, err['loc']))}'"
-                    yield f"  {field}: {err['msg']}"
+                    yield f"  {field}: {err['msg']}."
 
             logger.exception(
-                "Error: Data validation failed\nDetails:\n%s",
+                "Error: Data validation failed.\nDetails:\n%s",
                 "\n".join(messages(e)),
             )
 

@@ -36,11 +36,11 @@ def _validate_data(
         raise
 
 
-def scan_config(config_data: dict) -> ScannedConfig:
+def scan_config(loaded_config: dict) -> ScannedConfig:
     """Transform YAML configuration data into a `ScannedConfig` object.
 
     Args:
-        config_data (dict): The YAML configuration data.
+        loaded_config (dict): The YAML configuration data.
 
     Returns:
         ScannedConfig: The scanned configuration.
@@ -50,16 +50,16 @@ def scan_config(config_data: dict) -> ScannedConfig:
     """
     return _validate_data(
         cls=ScannedConfig,
-        data=config_data,
+        data=loaded_config,
         note="Hint: Please check the contents of your recnys.yaml file.",
     )
 
 
-def scan_variables(variables_data: dict) -> ScannedVariables:
+def scan_variables(loaded_variables: dict) -> ScannedVariables:
     """Transform YAML variables data into a `ScannedVariables` object.
 
     Args:
-        variables_data (dict): The YAML variables data.
+        loaded_variables (dict): The YAML variables data.
 
     Returns:
         ScannedVariables: The scanned variables.
@@ -69,6 +69,6 @@ def scan_variables(variables_data: dict) -> ScannedVariables:
     """
     return _validate_data(
         cls=ScannedVariables,
-        data=variables_data,
+        data=loaded_variables,
         note="Hint: Please check the contents of your variables.yaml file.",
     )

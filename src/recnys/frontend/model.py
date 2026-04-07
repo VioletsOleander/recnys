@@ -3,6 +3,7 @@
 from enum import StrEnum
 
 from pydantic import BaseModel, RootModel, model_validator
+from pydantic_core import InitErrorDetails, PydanticCustomError, ValidationError
 
 __all__ = ["Dest", "EntryValue", "Policy", "ScannedConfig", "ScannedVariables"]
 
@@ -57,12 +58,31 @@ class ScannedConfig(RootModel):
     @model_validator(mode="after")
     def check_policy(self) -> ScannedConfig:
         for key, val in self.root.items():
-            if not key.endswith(".template"):
-                continue
             if val is None or val.policy is None:
                 continue
-            if val.policy != Policy.RENDER:
-                raise ValueError("Policy of template files must be 'render'")
+
+            is_template = key.endswith(".template")
+
+            if is_template and val.policy == Policy.RENDER:
+                continue
+            if not is_template and val.policy != Policy.RENDER:
+                continue
+
+            message = (
+                "Policy of template files must be 'render'"
+                if is_template
+                else "Only template files can have 'render' policy"
+            )
+
+            # Construct init error details in order to provide loc information
+            detail = InitErrorDetails(
+                type=PydanticCustomError("value_error", message),
+                input=val.policy,
+                loc=(key, "policy"),
+            )
+            raise ValidationError.from_exception_data(
+                title=self.__class__.__name__, line_errors=[detail]
+            )
 
         return self
 
