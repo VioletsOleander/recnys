@@ -17,8 +17,6 @@ __all__ = ["ConfigParser"]
 class ConfigParser:
     """ConfigParser parses the scanned configuration into a node tree structure.
 
-    During the parsing process, features from features/deconflict are satisfied.
-
     The main provided method is `parse`.
     """
 
@@ -37,6 +35,8 @@ class ConfigParser:
 
     def parse(self, scanned_config: ScannedConfig) -> RootNode:
         """Construct a node tree from the scanned configuration.
+
+        During the parsing process, features from features/deconflict are satisfied.
 
         Args:
             scanned_config (ScannedConfig): The scanned configuration to be parsed.
@@ -70,23 +70,26 @@ class ConfigParser:
                 node = parent.children[branch_dst]
                 branch = self._branchify_leaf(node) if isinstance(node, LeafNode) else node
             else:
-                branch = BranchNode(dst=branch_dst)
+                branch = BranchNode(dst=branch_dst, parent=parent)
 
             parent.children[branch_dst] = branch
             parent = branch
 
-        leaf = LeafNode(src=src, dst=dst, op=op)
+        leaf = LeafNode(src=src, dst=dst, op=op, parent=parent)
         parent.children[dst] = leaf
 
     def _branchify_leaf(self, leaf: LeafNode) -> BranchNode:
         """Transform a leaf node into a branch node.
 
-        The leaf node should be a directory.
+        The leaf node should be a directory. Only one level is expanded.
         """
-        branch = BranchNode(dst=leaf.dst)
+        if not leaf.src.is_dir():
+            raise ValueError("The leaf node to branchify must correspond to a directory.")
+
+        branch = BranchNode(dst=leaf.dst, parent=leaf.parent)
 
         for child_src, child_dst in zip(leaf.src.iterdir(), leaf.dst.iterdir(), strict=True):
-            node = LeafNode(src=child_src, dst=child_dst, op=leaf.op)
+            node = LeafNode(src=child_src, dst=child_dst, op=leaf.op, parent=branch)
             branch.children[child_dst] = node
 
         return branch

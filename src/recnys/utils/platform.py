@@ -1,5 +1,5 @@
-import platform
 from enum import StrEnum
+from platform import system
 
 __all__ = ["Platform", "UnsupportedPlatformError", "get_platform"]
 
@@ -33,4 +33,4 @@ def get_platform() -> Platform:
     Raises:
         UnsupportedPlatformError: If the current platform is not supported.
     """
-    return Platform(platform.system())
+    return Platform(system())

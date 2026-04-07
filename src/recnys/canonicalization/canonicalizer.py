@@ -1,92 +1,91 @@
-"""Provide `ConfigCanonicalizer`."""
-
-import logging
-from pathlib import Path
 from typing import TYPE_CHECKING
 
-from recnys.parsing.model import KeyCategory as ParsedKeyCategory
-from recnys.scanning.model import Policy
-
-from .model import CanonicalizedConfig, EntryKey, EntryValue
+from recnys.parsing.model import BranchNode, LeafNode, Operation, RootNode
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from pathlib import Path
 
-    from recnys.parsing.model import ParsedConfig
-
-
-__all__ = ["ConfigCanonicalizer"]
-
-logger = logging.getLogger(__name__)
+__all__ = ["TreeCanonicalizer"]
 
 
-class ConfigCanonicalizer:
-    """ConfigCanonicalizer transforms the parsed configuration into a canonical form."""
+class TreeCanonicalizer:
+    """TreeCanonicalizer canonicalizes the node tree.
 
-    _home: Path
-    _repo_dir: Path
+    The main provided method is `canonicalize`.
+    """
 
-    def __init__(self, home: Path, repo_dir: Path) -> None:
-        """Initialize the ConfigCanonicalizer.
+    def canonicalize(self, root: RootNode) -> RootNode:
+        """Canonicalize the node tree rooted at `root`.
+
+        The canonicalization process will branchify any leaf node
+        that corresponds to a directory with COPY operation.
 
         Args:
-            home (Path): The home directory path.
-            repo_dir (Path): The repository root directory path.
-        """
-        self._home = home
-        self._repo_dir = repo_dir
-
-    def canonicalize(self, parsed_config: ParsedConfig) -> CanonicalizedConfig:
-        """Transform the parsed configuration into a canonical form.
-
-        Canonicalization involves:
-
-        - Constructing absolute src and dest paths.
-        - Expanding directory entries with COPY policy into individual file entries.
-
-        Args:
-            parsed_config (ParsedConfig): The parsed configuration to be canonicalized.
+            root (RootNode): The root node of the node tree to be canonicalized.
 
         Returns:
-            CanonicalizedConfig: The canonicalized configuration.
+            RootNode: The root node of the canonicalized node tree.
         """
-        logger.debug("Canonicalizing configuration")
-        config = parsed_config.root
-        canonicalized_config: dict[EntryKey, EntryValue] = {}
+        for child in root.children.values():
+            self._canonicalize_node(child)
 
-        for key, value in config.items():
-            if key.category == ParsedKeyCategory.DIRECTORY and value.policy == Policy.COPY:
-                file_paths = self._expand_directory(base_dir=key.src, exclude_dirs=[".git"])
+        return root
 
-                for file_path in file_paths:
-                    canonical_key = EntryKey(
-                        src=self._repo_dir / file_path, static=file_path.suffix != ".template"
-                    )
-                    canonical_value = EntryValue(dest=self._home / file_path, policy=value.policy)
-                    canonicalized_config[canonical_key] = canonical_value
-            else:
-                canonical_key = EntryKey(src=self._repo_dir / key.src, static=key.attribute.static)
-                canonical_value = EntryValue(dest=self._home / value.dest, policy=value.policy)
-                canonicalized_config[canonical_key] = canonical_value
+    def _canonicalize_node(self, node: BranchNode | LeafNode) -> None:
+        """Canonicalize a node in the node tree.
 
-        logger.debug("Canonicalized configuration: %s", canonicalized_config)
-        return CanonicalizedConfig(canonicalized_config)
+        The canonicalization process includes:
 
-    def _expand_directory(self, base_dir: str, exclude_dirs: list[str]) -> Generator[Path]:
-        """Generate individual file paths by expanding the given directory path.
-
-        Args:
-            base_dir (str): The directory path to be expanded.
-            exclude_dirs (list[str]): The list of directory names to be excluded from expansion.
-
-        Yields:
-            Path: Individual file paths within the expanded directory, relative to the parent
-                directory of base_dir.
+        - For a branch node, recursively canonicalize its child nodes.
+        - For a leaf node that corresponds to a directory with COPY operation, branchify it.
         """
-        for dir_path, dir_names, file_names in Path(base_dir).walk():
+        if isinstance(node, BranchNode):
+            for child in node.children.values():
+                self._canonicalize_node(child)
+            return
+
+        if node.src.is_dir() and node.op == Operation.COPY:
+            self._branchify_leaf(node, exclude_dirs=[".git"])
+
+    def _branchify_leaf(self, leaf: LeafNode, exclude_dirs: list[str]) -> None:
+        """Transform a leaf node into branch node.
+
+        The leaf node should be a directory with COPY operation.
+
+        All files under the directory and its subdirectories (excluding those specified in
+        `exclude_dirs`) will be expanded into leaf nodes.
+        """
+        if not leaf.src.is_dir():
+            raise ValueError("The leaf node to branchify must correspond to a directory.")
+        if leaf.op != Operation.COPY:
+            raise ValueError("The leaf node to branchify must have COPY operation.")
+
+        src = leaf.src
+        dst = leaf.dst
+        branch = BranchNode(dst=dst, parent=leaf.parent)
+
+        parent = branch.parent
+        parent.children[dst] = branch
+        parents: dict[Path, BranchNode | RootNode] = {
+            parent.dst: parent,
+            branch.dst: branch,
+        }
+
+        for dir_path, dir_names, file_names in src.walk(top_down=True):  # DFS
             for name in exclude_dirs:
                 if name in dir_names:
                     dir_names.remove(name)
 
+            branch_dst = dst / dir_path.relative_to(src)
+            if branch_dst in parents:
+                parent = parents[branch_dst]
+            else:
+                node = BranchNode(dst=branch_dst, parent=parent)
+                parents[branch_dst] = node
+                parent = node
+
             for file_name in file_names:
-                yield Path(dir_path) / file_name
+                leaf_src = dir_path / file_name
+                leaf_dst = dst / leaf_src.relative_to(src)
+                node = LeafNode(src=leaf_src, dst=leaf_dst, op=Operation.COPY, parent=parent)
+                parent.children[leaf_dst] = node
