@@ -14,12 +14,17 @@ class Operation(Enum):
     """Category of an operation.
 
     Attributes:
-        CREATE: Create a node at the destination path.
-        RENDER: Render a node from the source path to the destination path.
-        COPY: Copy a node from the source path to the destination path.
-        LINK: Create a symbolic link from the source path to the destination path.
-        REMOVE: Remove a node at the destination path.
-        UNLINK: Remove a symbolic link at the destination path.
+        CREATE: Create a node at the destination path, corresponding to mkdir.
+        RENDER: Render a node from the source path to the destination path,
+            corresponding to render and copy file.
+        COPY: Copy a node from the source path to the destination path,
+            corresponding to copy dir or copy file.
+        LINK: Create a symbolic link from the source path to the destination path,
+            corresponding to symlink dir or symlink file.
+        REMOVE: Remove a node at the destination path,
+            corresponding to remove dir or remove file.
+        UNLINK: Remove a symbolic link at the destination path,
+            corresponding to unlink dir or unlink file.
     """
 
     CREATE = auto()

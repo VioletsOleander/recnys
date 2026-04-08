@@ -65,14 +65,11 @@ def main() -> int:
     parser = ConfigParser(paths, platform)
     root = parser.parse(scanned_config)
 
-    x = root.model_dump_json(indent=2)
-    import pydantic
-    from .backend.model import RootNode
-    y = RootNode.model_validate_json(x)
-    print(x)
-    print(y)
+    from .backend.utils.visualizer import print_tree
 
-    raise KeyboardInterrupt
+    print_tree(root)
+
+    raise NotImplementedError
 
     # Refine
     refiner = TreeRefiner()

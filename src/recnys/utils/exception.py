@@ -25,7 +25,7 @@ def handle_exceptions(func: Callable[[], int]) -> Callable[[], int]:
         try:
             return func()
         except FileNotFoundError as e:
-            logger.exception("Error: File not found: %s", e.filename)
+            logger.exception("Error: Path does not exist: %s", e.filename)
             return 1
         except ValidationError as e:
 

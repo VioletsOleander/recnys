@@ -7,6 +7,7 @@ from recnys.frontend.model import EntryValue, Policy, ScannedConfig
 from recnys.utils.platform import Platform
 
 from .model import BranchNode, LeafNode, Operation, RootNode
+from .utils.exception import handle_fnf
 
 if TYPE_CHECKING:
     from recnys.utils.paths import Paths
@@ -79,7 +80,8 @@ class ConfigParser:
             root (RootNode): The root node of the node tree.
         """
         parent = root
-        for branch_dst in dst.parents[:-1]:  # exclude home
+        num_exclude = len(root.dst.parents) + 1  # exclude home and its parents
+        for branch_dst in reversed(dst.parents[:-num_exclude]):
             if branch_dst in parent.children:
                 node = parent.children[branch_dst]
                 branch = self._branchify_leaf(node) if isinstance(node, LeafNode) else node
@@ -92,14 +94,12 @@ class ConfigParser:
         leaf = LeafNode(src=src, dst=dst, op=op)
         parent.children[dst] = leaf
 
+    @handle_fnf
     def _branchify_leaf(self, leaf: LeafNode) -> BranchNode:
         """Transform a leaf node into a branch node.
 
         The leaf node should be a directory. Only one level is expanded.
         """
-        if not leaf.src.is_dir():
-            raise ValueError("The leaf node to branchify must correspond to a directory.")
-
         branch = BranchNode(dst=leaf.dst)
 
         for child_src, child_dst in zip(leaf.src.iterdir(), leaf.dst.iterdir(), strict=True):
