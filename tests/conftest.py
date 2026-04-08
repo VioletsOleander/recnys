@@ -9,9 +9,7 @@ if TYPE_CHECKING:
 
 @pytest.fixture(params=["Linux", "Windows"])
 def system(mocker: MockerFixture, request: pytest.FixtureRequest) -> str:
-    mock = mocker.patch(
-        "recnys.canonicalize.canonicalizer.platform.system", return_value=request.param
-    )
+    mock = mocker.patch("recnys.utils.platform.system", return_value=request.param)
     return mock.return_value
 
 

@@ -37,16 +37,27 @@ def _get_file_handler(log_file: Path) -> logging.FileHandler:
     return handler
 
 
-def setup_logging(log_file: Path, *, debug: bool) -> None:
-    """Configure the top-level logger for recnys."""
+def setup_logging(log_file: Path, *, silent: bool, debug: bool) -> None:
+    """Configure the top-level logger for recnys.
+
+    Logging level:
+
+    - If debug is True, set to DEBUG (overrides silent)
+    - If silent is True, set to WARNING
+    - Otherwise, set to INFO
+    """
     logger = logging.getLogger("recnys")
 
-    logger.setLevel(logging.INFO)
     console_handler = _get_console_handler()
     logger.addHandler(console_handler)
 
+    file_handler = _get_file_handler(log_file)
+    logger.addHandler(file_handler)
+
+    if silent:
+        logger.setLevel(logging.WARNING)
+    else:
+        logger.setLevel(logging.INFO)
+
     if debug:
         logger.setLevel(logging.DEBUG)
-
-        file_handler = _get_file_handler(log_file)
-        logger.addHandler(file_handler)

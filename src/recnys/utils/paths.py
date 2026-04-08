@@ -15,6 +15,7 @@ class Paths(BaseModel):
     repo_dir: Path
     data_dir: Path
     log_file: Path
+    tree_file: Path
     record_file: Path
     recnys_file: Path
     variables_file: Path
@@ -34,8 +35,11 @@ def make_paths(platform: Platform) -> Paths:
     repo_dir = Path.cwd()
     data_dir = repo_dir / ".recnys"
 
-    config_dir.mkdir(exist_ok=True)
     data_dir.mkdir(exist_ok=True)
+
+    gitignore = data_dir / ".gitignore"
+    if not gitignore.exists():
+        gitignore.write_text("# Created by recnys\n*\n", encoding="utf-8")
 
     return Paths(
         home=home,
@@ -44,6 +48,7 @@ def make_paths(platform: Platform) -> Paths:
         data_dir=data_dir,
         log_file=data_dir / "recnys.log",
         record_file=data_dir / "record.json",
+        tree_file=data_dir / "prev_tree.json",
         recnys_file=repo_dir / "recnys.yaml",
         variables_file=repo_dir / "variables.yaml",
     )

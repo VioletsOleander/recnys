@@ -3,6 +3,7 @@
 from typing import TYPE_CHECKING
 
 from .model import BranchNode, LeafNode, Operation, RootNode
+from .utils.exception import handle_fnf
 from .utils.traversal import walk_tree
 
 if TYPE_CHECKING:
@@ -32,6 +33,7 @@ class TreeRefiner:
             RootNode: The root node of the refined node tree.
         """
 
+        @handle_fnf
         def refine_leaf(node: LeafNode) -> LeafNode | BranchNode:
             if not node.src.is_dir() or node.op != Operation.COPY:
                 return node
@@ -64,6 +66,7 @@ class TreeRefiner:
             else:
                 node = BranchNode(dst=branch_dst)
                 parents[branch_dst] = node
+                parent.children[branch_dst] = node
                 parent = node
 
             for file_name in file_names:

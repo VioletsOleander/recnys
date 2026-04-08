@@ -1,11 +1,11 @@
 import argparse
 import logging
 from importlib.metadata import version
-from pathlib import Path
 
 from .backend.grafter import TreeGrafter
 from .backend.parser import ConfigParser
 from .backend.refiner import TreeRefiner
+from .backend.utils.serializer import deserialize_tree, serialize_tree
 from .frontend.loader import load_yaml
 from .frontend.scanner import scan_config
 from .utils.exception import handle_exceptions
@@ -22,15 +22,14 @@ def parse_arguments() -> argparse.Namespace:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
-        "-s",
-        "--skip-confirmation",
+        "--silent",
         action="store_true",
-        help="Skip confirmation prompts during synchronization",
+        help="Suppress normal console output. This will not affect error messages.",
     )
     parser.add_argument(
         "--debug",
         action="store_true",
-        help="Enable debug logging",
+        help="Write debug information to log file. This will override the --silent option.",
     )
     parser.add_argument(
         "--version",
@@ -42,41 +41,39 @@ def parse_arguments() -> argparse.Namespace:
 
 
 @handle_exceptions
-def main() -> int:
-    args = parse_arguments()
+def main(argv: argparse.Namespace | None = None) -> int:
+    args = parse_arguments() if argv is None else argv
 
     platform = get_platform()
     paths = make_paths(platform)
-    setup_logging(paths.log_file, debug=args.debug)
+    setup_logging(paths.log_file, silent=args.silent, debug=args.debug)
 
     # Frontend
-    # Load
+    # Load: yaml -> dict
     loaded_config = load_yaml(
         paths.recnys_file,
         note="Hint: Please run this command in the root of your dotfiles repository, "
         "where the recnys.yaml file is located.",
     )
 
-    # Scan
+    # Scan: dict -> liner model
     scanned_config = scan_config(loaded_config)
 
     # Backend
-    # Parse
+    # Parse: liner model -> tree model
     parser = ConfigParser(paths, platform)
     root = parser.parse(scanned_config)
 
-    from .backend.utils.visualizer import print_tree
-
-    print_tree(root)
-
-    raise NotImplementedError
-
-    # Refine
+    # Refine: expand 'copy' dir nodes
     refiner = TreeRefiner()
     root = refiner.refine(root)
 
-    # Graft
-    grafter = TreeGrafter()
-    # grafter.graft(root)
+    # Graft: add deleted nodes
+    prev_root = deserialize_tree(paths.tree_file)
+    if prev_root is not None:
+        grafter = TreeGrafter()
+        grafter.graft(root, prev_root)
+
+    print_tree(root, verbose=True)
 
     return 0

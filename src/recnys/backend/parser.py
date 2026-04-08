@@ -80,11 +80,12 @@ class ConfigParser:
             root (RootNode): The root node of the node tree.
         """
         parent = root
+
         num_exclude = len(root.dst.parents) + 1  # exclude home and its parents
         for branch_dst in reversed(dst.parents[:-num_exclude]):
             if branch_dst in parent.children:
                 node = parent.children[branch_dst]
-                branch = self._branchify_leaf(node) if isinstance(node, LeafNode) else node
+                branch = self._branchify_leaf(node, src) if isinstance(node, LeafNode) else node
             else:
                 branch = BranchNode(dst=branch_dst)
 
@@ -95,14 +96,17 @@ class ConfigParser:
         parent.children[dst] = leaf
 
     @handle_fnf
-    def _branchify_leaf(self, leaf: LeafNode) -> BranchNode:
+    def _branchify_leaf(self, leaf: LeafNode, terminal_src: Path) -> BranchNode:
         """Transform a leaf node into a branch node.
 
         The leaf node should be a directory. Only one level is expanded.
         """
         branch = BranchNode(dst=leaf.dst)
 
-        for child_src, child_dst in zip(leaf.src.iterdir(), leaf.dst.iterdir(), strict=True):
+        for child_src in leaf.src.iterdir():
+            if child_src == terminal_src:  # terminal node will be made by the caller
+                continue
+            child_dst = branch.dst / child_src.name
             node = LeafNode(src=child_src, dst=child_dst, op=leaf.op)
             branch.children[child_dst] = node
 
@@ -118,16 +122,13 @@ class ConfigParser:
         match self.platform:
             case Platform.LINUX:
                 dst = val.dest.Linux
-                if dst is None:
-                    return default_dst
-
-                return None if dst == "" else Path(dst)
             case Platform.WINDOWS:
                 dst = val.dest.Windows
-                if dst is None:
-                    return default_dst
 
-                return None if dst == "" else Path(dst)
+        if dst is None:
+            return default_dst
+
+        return self.paths.home / Path(dst) if dst != "" else None
 
     def _get_op(self, key: str, val: EntryValue | None) -> Operation:
         """Return the resolved operation."""

@@ -1,5 +1,6 @@
 # ruff: noqa: TRY401
 
+import functools
 import logging
 from typing import TYPE_CHECKING
 
@@ -15,15 +16,16 @@ __all__ = ["handle_exceptions"]
 logger = logging.getLogger(__name__)
 
 
-def handle_exceptions(func: Callable[[], int]) -> Callable[[], int]:
+def handle_exceptions[**P](func: Callable[P, int]) -> Callable[P, int]:
     """Decorator to handle exceptions raised from the decorated function.
 
     Primarily used for decorating the main function.
     """
 
-    def wrapper() -> int:
+    @functools.wraps(func)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> int:
         try:
-            return func()
+            return func(*args, **kwargs)
         except FileNotFoundError as e:
             logger.exception("Error: Path does not exist: %s", e.filename)
             return 1

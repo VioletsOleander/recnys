@@ -11,7 +11,9 @@ dentries
 dnames
 dpaths
 dsts
+FCONTENT
 fnames
+ftplugin
 inputrc
 Lowerer
 Materializer
