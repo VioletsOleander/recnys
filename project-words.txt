@@ -11,12 +11,15 @@ dentries
 dnames
 dpaths
 dsts
+EAFP
 FCONTENT
 fnames
 ftplugin
 inputrc
+LBYL
 Lowerer
 Materializer
+nonleaf
 nvim
 pathlib
 pipx
@@ -27,6 +30,8 @@ pytest
 recnys
 RMFILE
 Syncer
+syscall
+syscalls
 usefixtures
 vimrc
 yazi

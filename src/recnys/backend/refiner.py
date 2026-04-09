@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from .model import BranchNode, LeafNode, Operation, RootNode
 from .utils.exception import handle_fnf
-from .utils.traversal import walk_tree
+from .utils.traversal import Callbacks, Order, walk_tree
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -39,7 +39,9 @@ class TreeRefiner:
                 return node
             return self._branchify_leaf(node, exclude_dirs=[".git"])
 
-        return walk_tree(root, on_leaf=refine_leaf, update=True)
+        callbacks = Callbacks(root=None, branch=None, leaf=refine_leaf)
+
+        return walk_tree(root, callbacks=callbacks, order=Order.PRE, update=True)
 
     def _branchify_leaf(self, leaf: LeafNode, exclude_dirs: list[str]) -> BranchNode:
         """Transform a leaf node into branch node and return it.

@@ -6,6 +6,7 @@ from .backend.grafter import TreeGrafter
 from .backend.parser import ConfigParser
 from .backend.refiner import TreeRefiner
 from .backend.utils.serializer import deserialize_tree, serialize_tree
+from .backend.utils.visualizer import print_tree
 from .frontend.loader import load_yaml
 from .frontend.scanner import scan_config
 from .utils.exception import handle_exceptions
@@ -72,7 +73,7 @@ def main(argv: argparse.Namespace | None = None) -> int:
     prev_root = deserialize_tree(paths.tree_file)
     if prev_root is not None:
         grafter = TreeGrafter()
-        grafter.graft(root, prev_root)
+        root = grafter.graft(root, prev_root)
 
     print_tree(root, verbose=True)
 

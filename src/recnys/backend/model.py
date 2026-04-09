@@ -15,6 +15,7 @@ class Operation(Enum):
 
     Attributes:
         CREATE: Create a node at the destination path, corresponding to mkdir.
+            No effect if the node already exists.
         RENDER: Render a node from the source path to the destination path,
             corresponding to render and copy file.
         COPY: Copy a node from the source path to the destination path,

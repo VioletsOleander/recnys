@@ -12,7 +12,6 @@ from recnys.testing.integration.arrange import (
 
 
 def test_integration(system: str, filesystem: FakeFilesystem) -> None:
-    print("\nSystem:", system)
     change_cwd(filesystem)
     create_recnys_file(filesystem)
     create_variables_file(filesystem)

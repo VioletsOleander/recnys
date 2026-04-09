@@ -3,7 +3,7 @@
 from typing import TYPE_CHECKING, overload
 
 from .model import BranchNode, LeafNode, Node, Operation, RootNode
-from .utils.traversal import walk_tree
+from .utils.traversal import Callbacks, Order, walk_tree
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -32,8 +32,51 @@ class TreeGrafter:
             RootNode: The root node of the grafted node tree, which is the same as `root` but with additional
                 nodes grafted.
         """
-        # Store nodes under root
-        nodes: dict[Path, Node] = {}
+        curr_nodes = self._collect_nodes(root)
+
+        # Graft nodes that exist under prev_root but not under root
+        # Two possible cases for such nodes:
+        # - creation related node, created in last execution
+        # - deletion related node, not finished by last execution
+        def graft_branch(node: BranchNode) -> BranchNode:
+            if node.dst in curr_nodes:
+                return node
+
+            parent = curr_nodes[node.dst.parent]
+            if isinstance(parent, LeafNode):
+                raise TypeError("Incorrect tree structure, leaf node can not be parent.")
+
+            graft_node = BranchNode(dst=node.dst, op=Operation.REMOVE, children=node.children)
+            parent.children[node.dst] = graft_node
+            return graft_node
+
+        def graft_leaf(node: LeafNode) -> LeafNode:
+            if node.dst in curr_nodes:
+                return node
+
+            parent = curr_nodes[node.dst.parent]
+            if isinstance(parent, LeafNode):
+                raise TypeError("Incorrect tree structure, leaf node can not be parent.")
+
+            op = node.op
+            if op not in (Operation.REMOVE, Operation.UNLINK):
+                op = Operation.UNLINK if op == Operation.LINK else Operation.REMOVE
+
+            graft_node = LeafNode(src=node.src, dst=node.dst, op=op)
+            parent.children[node.dst] = graft_node
+            return node
+
+        callbacks = Callbacks(root=None, branch=graft_branch, leaf=graft_leaf)
+        walk_tree(prev_root, callbacks=callbacks, order=Order.PRE, update=False)
+
+        return root
+
+    def _collect_nodes(self, root: RootNode) -> dict[Path, Node]:
+        """Collect all nodes under `root` into a dictionary and return it.
+
+        Dict keys are `node.dst`, values are the corresponding nodes.
+        """
+        nodes: dict[Path, Node] = {root.dst: root}
 
         @overload
         def add_node(node: BranchNode) -> BranchNode: ...
@@ -45,34 +88,7 @@ class TreeGrafter:
             nodes[node.dst] = node
             return node
 
-        walk_tree(root, on_branch=add_node, on_leaf=add_node, update=False)
+        callbacks = Callbacks(root=None, branch=add_node, leaf=add_node)
+        walk_tree(root, callbacks=callbacks, order=Order.PRE, update=False)
 
-        # Graft nodes that exist under prev_root but not under root
-        def graft_branch(node: BranchNode) -> BranchNode:
-            if node.dst in nodes:
-                return node
-
-            parent = nodes[node.dst.parent]
-            if isinstance(parent, LeafNode):
-                raise TypeError("Incorrect tree structure, leaf node can not be parent.")
-
-            graft_node = BranchNode(dst=node.dst, op=Operation.REMOVE, children=node.children)
-            parent.children[node.dst] = graft_node
-            return graft_node
-
-        def graft_leaf(node: LeafNode) -> LeafNode:
-            if node.dst in nodes:
-                return node
-
-            parent = nodes[node.dst.parent]
-            if isinstance(parent, LeafNode):
-                raise TypeError("Incorrect tree structure, leaf node can not be parent.")
-
-            op = Operation.UNLINK if node.op == Operation.LINK else Operation.REMOVE
-            graft_node = LeafNode(src=node.src, dst=node.dst, op=op)
-            parent.children[node.dst] = graft_node
-            return node
-
-        walk_tree(prev_root, on_branch=graft_branch, on_leaf=graft_leaf, update=False)
-
-        return root
+        return nodes
