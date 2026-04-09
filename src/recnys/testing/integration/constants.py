@@ -1,31 +1,10 @@
 from functools import cached_property
 from pathlib import Path
 
-__all__ = [
-    "RECNYS_FCONTENT",
-    "RECNYS_FNAME",
-    "VARIABLES_FCONTENT",
-    "VARIABLES_FNAME",
-    "LazyConstants",
-]
+__all__ = ["RECNYS_FNAME", "VARIABLES_FNAME", "LazyConstants"]
 
 RECNYS_FNAME = "recnys.yaml"
-
-RECNYS_FCONTENT = r"""
-{
-    ".vimrc": { dest: { Windows: "_vimrc", Linux: ".vimrc" } },
-    ".bashrc.template": { dest: { Windows: "", Linux: "my_bashrc" } },
-    ".gitconfig": { dest: { Windows: ".gitconfig", Linux: ".gitconfig" } },
-    "nvim/": { dest: { Windows: "AppData/Local/nvim" }, policy: "copy" },
-    "yazi/config/",
-    "nushell/",
-    "nushell/autoload/net.nu.template",
-}
-"""
-
 VARIABLES_FNAME = "variables.yaml"
-
-VARIABLES_FCONTENT = r"""{ proxy_url: "http://proxy.example.com:8080" }"""
 
 
 class _LazyConstants:
@@ -33,6 +12,11 @@ class _LazyConstants:
     def cwd(self) -> Path:
         """Current working directory."""
         return (Path.home() / "repo").absolute()
+
+    @cached_property
+    def data_dir(self) -> Path:
+        """Data directory path."""
+        return self.cwd / ".recnys"
 
     @cached_property
     def recnys_file(self) -> Path:

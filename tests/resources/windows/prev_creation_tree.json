@@ -1,0 +1,54 @@
+{
+  "dst": "C:\\Users\\Vios",
+  "children": {
+    "C:\\Users\\Vios\\_vimrc": {
+      "src": "C:\\Users\\Vios\\repo\\.vimrc",
+      "dst": "C:\\Users\\Vios\\_vimrc",
+      "op": "link"
+    },
+    "C:\\Users\\Vios\\.gitconfig": {
+      "src": "C:\\Users\\Vios\\repo\\.gitconfig",
+      "dst": "C:\\Users\\Vios\\.gitconfig",
+      "op": "link"
+    },
+    "C:\\Users\\Vios\\AppData": {
+      "dst": "C:\\Users\\Vios\\AppData",
+      "op": "create",
+      "children": {
+        "C:\\Users\\Vios\\AppData\\Local": {
+          "dst": "C:\\Users\\Vios\\AppData\\Local",
+          "op": "create",
+          "children": {
+            "C:\\Users\\Vios\\AppData\\Local\\nvim": {
+              "src": "C:\\Users\\Vios\\repo\\nvim",
+              "dst": "C:\\Users\\Vios\\AppData\\Local\\nvim",
+              "op": "copy"
+            }
+          }
+        },
+        "C:\\Users\\Vios\\AppData\\Roaming": {
+          "dst": "C:\\Users\\Vios\\AppData\\Roaming",
+          "op": "create",
+          "children": {
+            "C:\\Users\\Vios\\AppData\\Roaming\\yazi": {
+              "dst": "C:\\Users\\Vios\\AppData\\Roaming\\yazi",
+              "op": "create",
+              "children": {
+                "C:\\Users\\Vios\\AppData\\Roaming\\yazi\\config": {
+                  "src": "C:\\Users\\Vios\\repo\\yazi\\config",
+                  "dst": "C:\\Users\\Vios\\AppData\\Roaming\\yazi\\config",
+                  "op": "link"
+                }
+              }
+            },
+            "C:\\Users\\Vios\\AppData\\Roaming\\nushell": {
+              "src": "C:\\Users\\Vios\\repo\\nushell",
+              "dst": "C:\\Users\\Vios\\AppData\\Roaming\\nushell",
+              "op": "link"
+            }
+          }
+        }
+      }
+    }
+  }
+}

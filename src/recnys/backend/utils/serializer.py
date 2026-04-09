@@ -1,12 +1,10 @@
 import logging
-from typing import TYPE_CHECKING
+from pathlib import Path
+from typing import overload
 
 from pydantic import ValidationError
 
-from recnys.backend.model import RootNode
-
-if TYPE_CHECKING:
-    from pathlib import Path
+from recnys.backend.model import BranchNode, LeafNode, Node, RootNode
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +24,8 @@ def deserialize_tree(file_path: Path) -> RootNode | None:
     try:
         logger.debug("Deserializing data from %s", file_path)
         data = file_path.read_text(encoding="utf-8")
-        root = RootNode.model_validate_json(json_data=data)
+        root = RootNode.model_validate_json(data)
+        root = _concretize(root)
     except FileNotFoundError:
         logger.debug("File %s not found, return None", file_path)
         return None
@@ -36,3 +35,27 @@ def deserialize_tree(file_path: Path) -> RootNode | None:
     else:
         logger.debug("Successfully deserialized data from %s", file_path)
         return root
+
+
+@overload
+def _concretize(node: RootNode) -> RootNode: ...
+
+
+@overload
+def _concretize(node: BranchNode) -> BranchNode: ...
+
+
+@overload
+def _concretize(node: LeafNode) -> LeafNode: ...
+
+
+def _concretize(node: Node) -> Node:
+    """Convert Path object to concrete Path objects (WindowsPath or PosixPath)."""
+    if isinstance(node, LeafNode):
+        node.src = Path(node.src)
+        node.dst = Path(node.dst)
+    else:
+        node.dst = Path(node.dst)
+        node.children = {Path(dst): _concretize(child) for dst, child in node.children.items()}
+
+    return node

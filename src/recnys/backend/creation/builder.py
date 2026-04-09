@@ -1,37 +1,33 @@
-"""Provide `ConfigParser`."""
+"""Provide `CTreeBuilder`."""
 
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from recnys.backend.model import BranchNode, LeafNode, Operation, RootNode
+from recnys.backend.utils.exception import handle_fnf
 from recnys.frontend.model import EntryValue, Policy, ScannedConfig
 from recnys.utils.platform import Platform
-
-from .model import BranchNode, LeafNode, Operation, RootNode
-from .utils.exception import handle_fnf
 
 if TYPE_CHECKING:
     from recnys.utils.paths import Paths
 
-__all__ = ["ConfigParser"]
+__all__ = ["CTreeBuilder"]
 
 
-class ConfigParser:
-    """ConfigParser parses the scanned configuration into a node tree structure.
-
-    This stage can be analogized to the syntax analysis and IR generation stage in a compilation pipeline.
+class CTreeBuilder:
+    """CTreeBuilder transforms the scanned configuration into a creation tree.
 
     Because what recnys manipulates is the filesystem, therefore tree structure is very natural for acting as
-    an intermediate representation, and further lowering tree into three-address code like representation is
-    just not necessary.
+    an intermediate representation.
 
-    The main provided method is `parse`.
+    The main provided method is `build`.
     """
 
     paths: Paths
     platform: Platform
 
     def __init__(self, paths: Paths, platform: Platform) -> None:
-        """Initialize the ConfigParser.
+        """Initialize the CTreeBuilder.
 
         Args:
             paths (Paths): The Paths instance containing relevant paths.
@@ -40,8 +36,8 @@ class ConfigParser:
         self.paths = paths
         self.platform = platform
 
-    def parse(self, scanned_config: ScannedConfig) -> RootNode:
-        """Construct a node tree from the scanned configuration.
+    def build(self, scanned_config: ScannedConfig) -> RootNode:
+        """Construct a creation tree from the scanned configuration.
 
         During the parsing process, features from features/deconflict are satisfied.
 
@@ -49,7 +45,7 @@ class ConfigParser:
             scanned_config (ScannedConfig): The scanned configuration to be parsed.
 
         Returns:
-            RootNode: The root node of the constructed node tree.
+            RootNode: The root node of the constructed creation tree.
         """
         root = RootNode(dst=self.paths.home)
 
@@ -87,7 +83,7 @@ class ConfigParser:
                 node = parent.children[branch_dst]
                 branch = self._branchify_leaf(node, src) if isinstance(node, LeafNode) else node
             else:
-                branch = BranchNode(dst=branch_dst)
+                branch = BranchNode(dst=branch_dst, op=Operation.CREATE)
 
             parent.children[branch_dst] = branch
             parent = branch
@@ -101,7 +97,7 @@ class ConfigParser:
 
         The leaf node should be a directory. Only one level is expanded.
         """
-        branch = BranchNode(dst=leaf.dst)
+        branch = BranchNode(dst=leaf.dst, op=Operation.CREATE)
 
         for child_src in leaf.src.iterdir():
             if child_src == terminal_src:  # terminal node will be made by the caller

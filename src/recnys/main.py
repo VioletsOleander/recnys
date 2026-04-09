@@ -2,9 +2,9 @@ import argparse
 import logging
 from importlib.metadata import version
 
-from .backend.grafter import TreeGrafter
-from .backend.parser import ConfigParser
-from .backend.refiner import TreeRefiner
+from .backend.creation.builder import CTreeBuilder
+from .backend.creation.expander import CTreeExpander
+from .backend.deletion.deriver import DTreeDeriver
 from .backend.utils.serializer import deserialize_tree, serialize_tree
 from .backend.utils.visualizer import print_tree
 from .frontend.loader import load_yaml
@@ -61,20 +61,28 @@ def main(argv: argparse.Namespace | None = None) -> int:
     scanned_config = scan_config(loaded_config)
 
     # Backend
-    # Parse: liner model -> tree model
-    parser = ConfigParser(paths, platform)
-    root = parser.parse(scanned_config)
+    # Build: liner model -> creation tree
+    builder = CTreeBuilder(paths, platform)
+    ctree = builder.build(scanned_config)
 
-    # Refine: expand 'copy' dir nodes
-    refiner = TreeRefiner()
-    root = refiner.refine(root)
+    # Expand: expand 'copy' dir nodes
+    expander = CTreeExpander()
+    ctree = expander.expand(ctree)
 
-    # Graft: add deleted nodes
-    prev_root = deserialize_tree(paths.tree_file)
-    if prev_root is not None:
-        grafter = TreeGrafter()
-        root = grafter.graft(root, prev_root)
+    print_tree(ctree, verbose=True)
 
-    print_tree(root, verbose=True)
+    # Derive: construct deletion tree
+    prev_ctree = deserialize_tree(paths.ctree_file)
+    if prev_ctree is not None:
+        print_tree(prev_ctree, verbose=True)
+        deriver = DTreeDeriver()
+        dtree = deriver.derive(ctree, prev_ctree)
+
+    # Merge: graft unfinished deletion nodes
+    prev_dtree = deserialize_tree(paths.dtree_file)
+    if prev_dtree is not None:
+        print_tree(prev_dtree, verbose=True)
+
+    print_tree(dtree, verbose=True)
 
     return 0

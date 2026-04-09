@@ -1,6 +1,6 @@
 """Provide node models."""
 
-from enum import Enum, auto
+from enum import StrEnum, auto
 from pathlib import Path  # noqa: TC003, Path is required by pydantic in runtime
 
 from pydantic import BaseModel
@@ -10,10 +10,11 @@ __all__ = ["BranchNode", "LeafNode", "Node", "Operation", "RootNode"]
 type Node = RootNode | BranchNode | LeafNode
 
 
-class Operation(Enum):
+class Operation(StrEnum):
     """Category of an operation.
 
     Attributes:
+        NOP: No operation.
         CREATE: Create a node at the destination path, corresponding to mkdir.
             No effect if the node already exists.
         RENDER: Render a node from the source path to the destination path,
@@ -28,6 +29,7 @@ class Operation(Enum):
             corresponding to unlink dir or unlink file.
     """
 
+    NOP = auto()
     CREATE = auto()
     RENDER = auto()
     COPY = auto()
@@ -39,15 +41,15 @@ class Operation(Enum):
 class RootNode(BaseModel):
     """The root node of the node tree.
 
+    Corresponds to the home directory, which should always exist.
+
     Attributes:
         dst (Path): The destination path of the root node, which should be the home directory.
-        op (Operation): The operation to be performed on the root node. Always CREATE.
         children (dict[Path, BranchNode | LeafNode]): The child nodes of the root node,
             keyed by their destination paths.
     """
 
     dst: Path
-    op: Operation = Operation.CREATE
     children: dict[Path, BranchNode | LeafNode] = {}
 
 
@@ -56,13 +58,14 @@ class BranchNode(BaseModel):
 
     Attributes:
         dst (Path): The destination path of the branch node.
-        op (Operation): The operation to be performed on the branch node. Always CREATE.
+        op (Operation): The operation to be performed on the branch node.
+            Should be NOP, CREATE, or REMOVE.
         children (dict[Path, BranchNode | LeafNode]): The child nodes of the branch node,
             keyed by their destination paths.
     """
 
     dst: Path
-    op: Operation = Operation.CREATE
+    op: Operation
     children: dict[Path, BranchNode | LeafNode] = {}
 
 

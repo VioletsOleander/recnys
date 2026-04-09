@@ -1,14 +1,12 @@
 import os
 from typing import TYPE_CHECKING
 
-from .constants import RECNYS_FCONTENT, VARIABLES_FCONTENT, LazyConstants
+from .constants import LazyConstants
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from pyfakefs.fake_filesystem import FakeFilesystem
-
-__all__ = ["create_recnys_file", "create_source_files", "create_variables_file"]
 
 
 def change_cwd(filesystem: FakeFilesystem) -> Path:
@@ -21,26 +19,29 @@ def change_cwd(filesystem: FakeFilesystem) -> Path:
     return LazyConstants.cwd
 
 
-def create_recnys_file(filesystem: FakeFilesystem) -> Path:
-    """Create the recnys file in the fake filesystem.
+def create_config_files(filesystem: FakeFilesystem, resources_dir: Path) -> None:
+    """Create the recnys.yaml and variables.yaml files in the fake filesystem."""
+    filesystem.add_real_file(
+        resources_dir / LazyConstants.recnys_file.name, target_path=LazyConstants.recnys_file
+    )
+    filesystem.add_real_file(
+        resources_dir / LazyConstants.variables_file.name, target_path=LazyConstants.variables_file
+    )
 
-    Return the path to the created recnys file.
-    """
-    f = LazyConstants.recnys_file
-    filesystem.create_file(f, contents=RECNYS_FCONTENT)
 
-    return f
+def create_data_files(filesystem: FakeFilesystem, resources_dir: Path, system: str) -> None:
+    """Create the necessary data files in the fake filesystem based on the system."""
+    match system:
+        case "Linux":
+            real_file = resources_dir / "linux" / "prev_creation_tree.json"
+        case "Windows":
+            real_file = resources_dir / "windows" / "prev_creation_tree.json"
+        case _:
+            raise ValueError(f"Unsupported system: {system}")
 
-
-def create_variables_file(filesystem: FakeFilesystem) -> Path:
-    """Create the variables file in the fake filesystem.
-
-    Return the path to the created variables file.
-    """
-    f = LazyConstants.variables_file
-    filesystem.create_file(f, contents=VARIABLES_FCONTENT)
-
-    return f
+    filesystem.add_real_file(
+        real_file, target_path=LazyConstants.data_dir / "prev_creation_tree.json"
+    )
 
 
 def create_source_files(filesystem: FakeFilesystem) -> None:

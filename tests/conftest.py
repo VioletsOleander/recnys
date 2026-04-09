@@ -4,7 +4,14 @@ import pytest
 from pyfakefs.fake_filesystem import FakeFilesystem, OSType
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from pytest_mock import MockerFixture
+
+
+@pytest.fixture
+def resources_dir(pytestconfig: pytest.Config) -> Path:
+    return pytestconfig.rootpath / "tests" / "resources"
 
 
 @pytest.fixture(params=["Linux", "Windows"])

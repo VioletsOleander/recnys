@@ -61,12 +61,12 @@ def walk_tree(root: RootNode, callbacks: Callbacks, order: Order, *, update: boo
     if order == Order.PRE:
         root = on_root(root) if on_root is not None else root
 
-    for child in root.children.values():
+    for dst, child in root.children.items():
         child_node = walk_subtree(child, callbacks, order=order, update=update)
 
         if not update:
             continue
-        root.children[child.dst] = child_node
+        root.children[dst] = child_node
 
     if order == Order.POST:
         root = on_root(root) if on_root is not None else root
@@ -103,12 +103,12 @@ def walk_subtree(
     if order == Order.PRE:
         node = on_branch(node) if on_branch is not None else node
 
-    for child in node.children.values():
+    for dst, child in node.children.items():
         child_node = walk_subtree(child, callbacks, order=order, update=update)
 
         if not update:
             continue
-        node.children[child.dst] = child_node
+        node.children[dst] = child_node
 
     if order == Order.POST:
         node = on_branch(node) if on_branch is not None else node

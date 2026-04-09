@@ -6,7 +6,7 @@ __all__ = ["print_subtree", "print_tree"]
 def print_tree(root: RootNode, *, verbose: bool = False) -> None:
     message = str(root.dst)
     if verbose:
-        message += f" (root, op: {root.op})"
+        message += " (root)"
 
     print(message)
 
@@ -23,7 +23,7 @@ def print_subtree(
     message = f"{prefix}{marker}{node.dst}"
     if verbose:
         suffix = (
-            f" (src: {node.src}, op: {node.op})"
+            f" (leaf, src: {node.src}, op: {node.op})"
             if isinstance(node, LeafNode)
             else f" (branch, op: {node.op})"
         )

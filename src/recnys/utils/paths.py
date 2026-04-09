@@ -15,7 +15,8 @@ class Paths(BaseModel):
     repo_dir: Path
     data_dir: Path
     log_file: Path
-    tree_file: Path
+    ctree_file: Path
+    dtree_file: Path
     record_file: Path
     recnys_file: Path
     variables_file: Path
@@ -35,20 +36,27 @@ def make_paths(platform: Platform) -> Paths:
     repo_dir = Path.cwd()
     data_dir = repo_dir / ".recnys"
 
-    data_dir.mkdir(exist_ok=True)
-
-    gitignore = data_dir / ".gitignore"
-    if not gitignore.exists():
-        gitignore.write_text("# Created by recnys\n*\n", encoding="utf-8")
-
-    return Paths(
+    paths = Paths(
         home=home,
         config_dir=config_dir,
         repo_dir=repo_dir,
         data_dir=data_dir,
         log_file=data_dir / "recnys.log",
         record_file=data_dir / "record.json",
-        tree_file=data_dir / "prev_tree.json",
+        ctree_file=data_dir / "prev_creation_tree.json",
+        dtree_file=data_dir / "prev_deletion_tree.json",
         recnys_file=repo_dir / "recnys.yaml",
         variables_file=repo_dir / "variables.yaml",
     )
+    _ensure_exist(paths)
+
+    return paths
+
+
+def _ensure_exist(paths: Paths) -> None:
+    """Ensure that the necessary directories and files exist."""
+    paths.data_dir.mkdir(exist_ok=True)
+
+    gitignore = paths.data_dir / ".gitignore"
+    if not gitignore.exists():
+        gitignore.write_text("# Created by recnys\n*\n", encoding="utf-8")

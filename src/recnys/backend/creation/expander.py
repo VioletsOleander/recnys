@@ -1,45 +1,43 @@
-"""Provide `TreeRefiner`."""
+"""Provide `CTreeExpander`."""
 
 from typing import TYPE_CHECKING
 
-from .model import BranchNode, LeafNode, Operation, RootNode
-from .utils.exception import handle_fnf
-from .utils.traversal import Callbacks, Order, walk_tree
+from recnys.backend.model import BranchNode, LeafNode, Operation, RootNode
+from recnys.backend.utils.exception import handle_fnf
+from recnys.backend.utils.traversal import Callbacks, Order, walk_tree
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-__all__ = ["TreeRefiner"]
+__all__ = ["CTreeExpander"]
 
 
-class TreeRefiner:
-    """TreeRefiner refines the parsed node tree.
+class CTreeExpander:
+    """CTreeExpander expands the parsed creation tree.
 
-    This stage can be analogized to the canonicalization stage in a compilation pipeline.
-
-    The main provided method is `refine`.
+    The main provided method is `expand`.
     """
 
-    def refine(self, root: RootNode) -> RootNode:
-        """Refine the node tree rooted at `root`.
+    def expand(self, root: RootNode) -> RootNode:
+        """Expand the creation tree rooted at `root`.
 
-        The refinement process will branchify any leaf node that corresponds to a directory with
-        COPY operation. For other nodes, no refinement is needed.
+        The expansion process will branchify any leaf node that corresponds to a directory with
+        COPY operation. For other nodes, no expansion is needed.
 
         Args:
-            root (RootNode): The root node of the node tree to be refined.
+            root (RootNode): The root node of the creation tree to be expanded.
 
         Returns:
-            RootNode: The root node of the refined node tree.
+            RootNode: The root node of the expanded creation tree.
         """
 
         @handle_fnf
-        def refine_leaf(node: LeafNode) -> LeafNode | BranchNode:
+        def expand_leaf(node: LeafNode) -> LeafNode | BranchNode:
             if not node.src.is_dir() or node.op != Operation.COPY:
                 return node
             return self._branchify_leaf(node, exclude_dirs=[".git"])
 
-        callbacks = Callbacks(root=None, branch=None, leaf=refine_leaf)
+        callbacks = Callbacks(root=None, branch=None, leaf=expand_leaf)
 
         return walk_tree(root, callbacks=callbacks, order=Order.PRE, update=True)
 
@@ -53,7 +51,7 @@ class TreeRefiner:
         """
         src = leaf.src
         dst = leaf.dst
-        branch = BranchNode(dst=dst)
+        branch = BranchNode(dst=dst, op=Operation.CREATE)
 
         parents: dict[Path, BranchNode] = {branch.dst: branch}
 
@@ -66,7 +64,7 @@ class TreeRefiner:
             if branch_dst in parents:
                 parent = parents[branch_dst]
             else:
-                node = BranchNode(dst=branch_dst)
+                node = BranchNode(dst=branch_dst, op=Operation.CREATE)
                 parents[branch_dst] = node
                 parent.children[branch_dst] = node
                 parent = node

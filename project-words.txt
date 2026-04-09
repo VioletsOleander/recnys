@@ -2,6 +2,7 @@ autouse
 branchified
 branchify
 Canonicalizer
+ctree
 deconflict
 Deconflict
 deconflicted
@@ -11,6 +12,7 @@ dentries
 dnames
 dpaths
 dsts
+dtree
 EAFP
 FCONTENT
 fnames
@@ -24,9 +26,11 @@ nvim
 pathlib
 pipx
 prek
+prevtree
 pylint
 pypi
 pytest
+pytestconfig
 recnys
 RMFILE
 Syncer
