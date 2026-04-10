@@ -2,9 +2,10 @@
 
 from typing import TYPE_CHECKING
 
-from recnys.backend.model import BranchNode, LeafNode, Operation, RootNode
 from recnys.backend.utils.exception import handle_fnf
 from recnys.backend.utils.traversal import Callbacks, Order, walk_tree
+
+from .model import CBranchNode, CBranchOp, CLeafNode, CLeafOp, CRootNode
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -18,30 +19,30 @@ class CTreeExpander:
     The main provided method is `expand`.
     """
 
-    def expand(self, root: RootNode) -> RootNode:
-        """Expand the creation tree rooted at `root`.
+    def expand(self, ctree: CRootNode) -> CRootNode:
+        """Expand the creation tree.
 
         The expansion process will branchify any leaf node that corresponds to a directory with
         COPY operation. For other nodes, no expansion is needed.
 
         Args:
-            root (RootNode): The root node of the creation tree to be expanded.
+            ctree (CRootNode): The root node of the creation tree to be expanded.
 
         Returns:
-            RootNode: The root node of the expanded creation tree.
+            CRootNode: The root node of the expanded creation tree.
         """
 
         @handle_fnf
-        def expand_leaf(node: LeafNode) -> LeafNode | BranchNode:
-            if not node.src.is_dir() or node.op != Operation.COPY:
+        def expand_leaf(node: CLeafNode) -> CLeafNode | CBranchNode:
+            if not node.src.is_dir() or node.op != CLeafOp.COPY:
                 return node
             return self._branchify_leaf(node, exclude_dirs=[".git"])
 
         callbacks = Callbacks(root=None, branch=None, leaf=expand_leaf)
 
-        return walk_tree(root, callbacks=callbacks, order=Order.PRE, update=True)
+        return walk_tree(ctree, callbacks=callbacks, order=Order.PRE, update=True)
 
-    def _branchify_leaf(self, leaf: LeafNode, exclude_dirs: list[str]) -> BranchNode:
+    def _branchify_leaf(self, leaf: CLeafNode, exclude_dirs: list[str]) -> CBranchNode:
         """Transform a leaf node into branch node and return it.
 
         The leaf node should be a directory with COPY operation.
@@ -51,9 +52,9 @@ class CTreeExpander:
         """
         src = leaf.src
         dst = leaf.dst
-        branch = BranchNode(dst=dst, op=Operation.CREATE)
+        branch = CBranchNode(dst=dst, op=CBranchOp.CREATE)
 
-        parents: dict[Path, BranchNode] = {branch.dst: branch}
+        parents: dict[Path, CBranchNode] = {branch.dst: branch}
 
         for dir_path, dir_names, file_names in src.walk(top_down=True):  # DFS
             for name in exclude_dirs:
@@ -64,7 +65,7 @@ class CTreeExpander:
             if branch_dst in parents:
                 parent = parents[branch_dst]
             else:
-                node = BranchNode(dst=branch_dst, op=Operation.CREATE)
+                node = CBranchNode(dst=branch_dst, op=CBranchOp.CREATE)
                 parents[branch_dst] = node
                 parent.children[branch_dst] = node
                 parent = node
@@ -72,7 +73,7 @@ class CTreeExpander:
             for file_name in file_names:
                 leaf_src = dir_path / file_name
                 leaf_dst = dst / leaf_src.relative_to(src)
-                node = LeafNode(src=leaf_src, dst=leaf_dst, op=Operation.COPY)
+                node = CLeafNode(src=leaf_src, dst=leaf_dst, op=CLeafOp.COPY)
                 parent.children[leaf_dst] = node
 
         return branch

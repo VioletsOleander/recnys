@@ -1,9 +1,10 @@
 """Provide `CTreeBuilder`."""
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
-from recnys.backend.model import BranchNode, LeafNode, Operation, RootNode
+from recnys.backend.model.node import CBranchNode, CLeafNode, CRootNode, LeafNode
+from recnys.backend.model.op import CBranchOp, CLeafOp
 from recnys.backend.utils.exception import handle_fnf
 from recnys.frontend.model import EntryValue, Policy, ScannedConfig
 from recnys.utils.platform import Platform
@@ -36,7 +37,7 @@ class CTreeBuilder:
         self.paths = paths
         self.platform = platform
 
-    def build(self, scanned_config: ScannedConfig) -> RootNode:
+    def build(self, scanned_config: ScannedConfig) -> CRootNode:
         """Construct a creation tree from the scanned configuration.
 
         During the parsing process, features from features/deconflict are satisfied.
@@ -45,9 +46,9 @@ class CTreeBuilder:
             scanned_config (ScannedConfig): The scanned configuration to be parsed.
 
         Returns:
-            RootNode: The root node of the constructed creation tree.
+            CRootNode: The root node of the constructed creation tree.
         """
-        root = RootNode(dst=self.paths.home)
+        root = CRootNode(dst=self.paths.home)
 
         for key, val in scanned_config.root.items():
             dst = self._get_dst(key, val)
@@ -60,7 +61,7 @@ class CTreeBuilder:
 
         return root
 
-    def _make_nodes(self, src: Path, dst: Path, op: Operation, root: RootNode) -> None:
+    def _make_nodes(self, src: Path, dst: Path, op: CLeafOp, root: CRootNode) -> None:
         """Make leaf node and branch nodes on its way to the root node.
 
         If conflict leaf nodes are met during making branch nodes, they will be recursively branchified.
@@ -72,8 +73,8 @@ class CTreeBuilder:
         Args:
             src (Path): The source path of the leaf node to be made.
             dst (Path): The destination path of the leaf node to be made.
-            op (Operation): The operation of the leaf node to be made.
-            root (RootNode): The root node of the node tree.
+            op (CLeafOp): The operation of the leaf node to be made.
+            root (CRootNode): The root node of the node tree.
         """
         parent = root
 
@@ -81,29 +82,29 @@ class CTreeBuilder:
         for branch_dst in reversed(dst.parents[:-num_exclude]):
             if branch_dst in parent.children:
                 node = parent.children[branch_dst]
-                branch = self._branchify_leaf(node, src) if isinstance(node, LeafNode) else node
+                branch = self._branchify_leaf(node, src) if isinstance(node, CLeafNode) else node
             else:
-                branch = BranchNode(dst=branch_dst, op=Operation.CREATE)
+                branch = CBranchNode(dst=branch_dst, op=CBranchOp.CREATE)
 
             parent.children[branch_dst] = branch
             parent = branch
 
-        leaf = LeafNode(src=src, dst=dst, op=op)
+        leaf = CLeafNode(src=src, dst=dst, op=op)
         parent.children[dst] = leaf
 
     @handle_fnf
-    def _branchify_leaf(self, leaf: LeafNode, terminal_src: Path) -> BranchNode:
+    def _branchify_leaf(self, leaf: CLeafNode, terminal_src: Path) -> CBranchNode:
         """Transform a leaf node into a branch node.
 
         The leaf node should be a directory. Only one level is expanded.
         """
-        branch = BranchNode(dst=leaf.dst, op=Operation.CREATE)
+        branch = CBranchNode(dst=leaf.dst, op=CBranchOp.CREATE)
 
         for child_src in leaf.src.iterdir():
             if child_src == terminal_src:  # terminal node will be made by the caller
                 continue
             child_dst = branch.dst / child_src.name
-            node = LeafNode(src=child_src, dst=child_dst, op=leaf.op)
+            node = CLeafNode(src=child_src, dst=child_dst, op=leaf.op)
             branch.children[child_dst] = node
 
         return branch
@@ -126,7 +127,7 @@ class CTreeBuilder:
 
         return self.paths.home / Path(dst) if dst != "" else None
 
-    def _get_op(self, key: str, val: EntryValue | None) -> Operation:
+    def _get_op(self, key: str, val: EntryValue | None) -> CLeafOp:
         """Return the resolved operation."""
         default_policy = Policy.RENDER if key.endswith(".template") else Policy.SYMLINK
 
@@ -134,8 +135,8 @@ class CTreeBuilder:
 
         match policy:
             case Policy.COPY:
-                return Operation.COPY
+                return CLeafOp.COPY
             case Policy.RENDER:
-                return Operation.RENDER
+                return CLeafOp.RENDER
             case Policy.SYMLINK:
-                return Operation.LINK
+                return CLeafOp.LINK

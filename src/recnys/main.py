@@ -2,9 +2,9 @@ import argparse
 import logging
 from importlib.metadata import version
 
-from .backend.creation.builder import CTreeBuilder
-from .backend.creation.expander import CTreeExpander
-from .backend.deletion.builder import DTreeBuilder
+from .backend.ctree.builder import CTreeBuilder
+from .backend.ctree.expander import CTreeExpander
+from .backend.dtree.builder import DTreeBuilder
 from .backend.utils.serializer import deserialize_tree, serialize_tree
 from .backend.utils.visualizer import print_tree
 from .frontend.loader import load_yaml
@@ -75,11 +75,13 @@ def main(argv: argparse.Namespace | None = None) -> int:
 
     if ctree_fexist != dtree_fexist:
         e = RuntimeError(
-            "Ctree file and dtree file are not consistent."
-            "Please ensure that both ctree file and dtree file exist, or both of them do not exist."
+            "Ctree file and dtree file are not consistent. "
+            f"Please ensure that both {paths.ctree_file} and {paths.dtree_file} exist, "
+            "or both of them do not exist."
         )
         e.add_note(
-            "Hint: Use backup file to recover them. If backup file is not available, please delete them."
+            "Hint: If backup files are available, please use them to recover the missing file. "
+            "Otherwise, delete the existing file."
         )
         raise e
 

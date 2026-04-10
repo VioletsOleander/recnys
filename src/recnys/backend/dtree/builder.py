@@ -56,7 +56,8 @@ class DTreeBuilder:
         if ctree_empty == dtree_empty:
             e = RuntimeError("Ctree file and dtree file does not met the expected state.")
             e.add_note(
-                "Hint: Please use backup file to recover them. If backup file is not available, please delete them."
+                "Hint: Please use backup file to recover them. "
+                "If backup file is not available, please delete them."
             )
             raise e
 
