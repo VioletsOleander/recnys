@@ -4,7 +4,7 @@ from importlib.metadata import version
 
 from .backend.creation.builder import CTreeBuilder
 from .backend.creation.expander import CTreeExpander
-from .backend.deletion.deriver import DTreeDeriver
+from .backend.deletion.builder import DTreeBuilder
 from .backend.utils.serializer import deserialize_tree, serialize_tree
 from .backend.utils.visualizer import print_tree
 from .frontend.loader import load_yaml
@@ -61,27 +61,35 @@ def main(argv: argparse.Namespace | None = None) -> int:
     scanned_config = scan_config(loaded_config)
 
     # Backend
-    # Build: liner model -> creation tree
+    # Build ctree
     builder = CTreeBuilder(paths, platform)
     ctree = builder.build(scanned_config)
 
-    # Expand: expand 'copy' dir nodes
+    # Expand ctree
     expander = CTreeExpander()
     ctree = expander.expand(ctree)
 
-    print_tree(ctree, verbose=True)
+    # Build dtree
+    ctree_fexist = paths.ctree_file.exists()
+    dtree_fexist = paths.dtree_file.exists()
 
-    # Derive: construct deletion tree
-    prev_ctree = deserialize_tree(paths.ctree_file)
-    if prev_ctree is not None:
-        print_tree(prev_ctree, verbose=True)
-        deriver = DTreeDeriver()
-        dtree = deriver.derive(ctree, prev_ctree)
+    if ctree_fexist != dtree_fexist:
+        e = RuntimeError(
+            "Ctree file and dtree file are not consistent."
+            "Please ensure that both ctree file and dtree file exist, or both of them do not exist."
+        )
+        e.add_note(
+            "Hint: Use backup file to recover them. If backup file is not available, please delete them."
+        )
+        raise e
 
-    # Merge: graft unfinished deletion nodes
-    prev_dtree = deserialize_tree(paths.dtree_file)
-    if prev_dtree is not None:
-        print_tree(prev_dtree, verbose=True)
+    if ctree_fexist:
+        prev_ctree = deserialize_tree(paths.ctree_file)
+        prev_dtree = deserialize_tree(paths.dtree_file)
+        builder = DTreeBuilder()
+        dtree = builder.build(ctree, prev_ctree, prev_dtree)
+    else:
+        pass
 
     print_tree(dtree, verbose=True)
 

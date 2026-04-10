@@ -19,19 +19,20 @@ def serialize_tree(root: RootNode, file_path: Path) -> None:
     logger.debug("Successfully serialized data to %s", file_path)
 
 
-def deserialize_tree(file_path: Path) -> RootNode | None:
-    """Load a root node from a json file, return None if unsuccessful."""
+def deserialize_tree(file_path: Path) -> RootNode:
+    """Load a root node from a json file."""
     try:
         logger.debug("Deserializing data from %s", file_path)
         data = file_path.read_text(encoding="utf-8")
         root = RootNode.model_validate_json(data)
         root = _concretize(root)
-    except FileNotFoundError:
-        logger.debug("File %s not found, return None", file_path)
-        return None
-    except ValidationError:
-        logger.debug("Data in file %s is invalid, return None", file_path)
-        return None
+    except ValidationError as e:
+        message = (
+            f"Hint: Data in {file_path} is corrupted, please use backup file to recover it. "
+            "If backup file is not available, please delete it."
+        )
+        e.add_note(message)
+        raise
     else:
         logger.debug("Successfully deserialized data from %s", file_path)
         return root

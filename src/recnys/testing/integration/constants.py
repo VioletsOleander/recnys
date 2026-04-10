@@ -1,10 +1,12 @@
 from functools import cached_property
 from pathlib import Path
 
-__all__ = ["RECNYS_FNAME", "VARIABLES_FNAME", "LazyConstants"]
+__all__ = ["CTREE_FNAME", "DTREE_FNAME", "RECNYS_FNAME", "VARIABLES_FNAME", "LazyConstants"]
 
 RECNYS_FNAME = "recnys.yaml"
 VARIABLES_FNAME = "variables.yaml"
+CTREE_FNAME = "prev_ctree.json"
+DTREE_FNAME = "prev_dtree.json"
 
 
 class _LazyConstants:
@@ -27,6 +29,16 @@ class _LazyConstants:
     def variables_file(self) -> Path:
         """Path to the variables.yaml file."""
         return self.cwd / VARIABLES_FNAME
+
+    @cached_property
+    def ctree_file(self) -> Path:
+        """Path to the prev_ctree.json file."""
+        return self.data_dir / CTREE_FNAME
+
+    @cached_property
+    def dtree_file(self) -> Path:
+        """Path to the prev_dtree.json file."""
+        return self.data_dir / DTREE_FNAME
 
     @cached_property
     def files_to_create(self) -> tuple[Path, ...]:

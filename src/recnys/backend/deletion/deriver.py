@@ -12,6 +12,11 @@ __all__ = ["DTreeDeriver"]
 
 
 class DTreeDeriver:
+    """DTreeDeriver derives a deletion tree from the current creation tree and the previous creation tree.
+
+    The main provided method is `derive`.
+    """
+
     def derive(self, root: RootNode, prev_root: RootNode) -> RootNode:
         """Derive a deletion tree from creation tree `root` and `prev_root`.
 

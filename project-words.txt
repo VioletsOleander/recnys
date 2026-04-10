@@ -15,6 +15,7 @@ dsts
 dtree
 EAFP
 FCONTENT
+fexist
 fnames
 ftplugin
 inputrc
