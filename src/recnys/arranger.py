@@ -1,11 +1,21 @@
 import logging
+from pathlib import Path
 from typing import TYPE_CHECKING, override
 
 if TYPE_CHECKING:
+    import argparse
     from logging import _SysExcInfoType
-    from pathlib import Path
 
-__all__ = ["setup_logging"]
+__all__ = ["arrange"]
+
+
+def arrange(args: argparse.Namespace) -> None:
+    """Do the necessary arrangements before executing the main logic.
+
+    Args:
+        args: The parsed command-line arguments.
+    """
+    _setup_logger(Path.cwd() / "recnys.log", silent=args.silent, debug=args.debug)
 
 
 class _NoTrackBackFormatter(logging.Formatter):
@@ -37,7 +47,7 @@ def _get_file_handler(log_file: Path) -> logging.FileHandler:
     return handler
 
 
-def setup_logging(log_file: Path, *, silent: bool, debug: bool) -> None:
+def _setup_logger(log_file: Path, *, silent: bool, debug: bool) -> None:
     """Configure the top-level logger for recnys.
 
     Logging level:

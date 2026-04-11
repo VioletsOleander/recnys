@@ -3,9 +3,9 @@
 import logging
 from typing import TYPE_CHECKING
 
-from recnys.backend.model import BranchNode, DBranchOp, DLeafOp, DTree, LeafNode, Node
-from recnys.backend.utils.collector import collect_nodes
-from recnys.backend.utils.walker import Callbacks, VisitOrder, walk_tree
+from recnys.tree.model import BranchNode, DBranchOp, DLeafOp, DTree, LeafNode, Node
+from recnys.tree.utils.collector import collect_nodes
+from recnys.tree.utils.walker import Callbacks, VisitOrder, walk_tree
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -21,11 +21,12 @@ class DTreeExecutor:
     The main provided method is `execute`.
 
     Attributes:
-        dtree (RootNode): The root node of the deletion tree after execution.
+        tree (DTree): The deletion tree instance constructed during the execution.
         dry_run (bool): Whether to perform a dry run of the execution.
             If True, the execution will only log the operations without actually performing them.
     """
 
+    tree: DTree
     dry_run: bool
 
     def __init__(self, *, dry_run: bool) -> None:
@@ -48,9 +49,9 @@ class DTreeExecutor:
         Returns:
             RootNode: The root node of the deletion tree with the executed nodes detached from the tree
         """
-        tree = dtree.model_copy(deep=True)
-        parents = collect_nodes(tree, collect_leaf=False)
-        ops = tree.ops
+        self.tree = dtree.model_copy(deep=True)
+        parents = collect_nodes(self.tree, collect_leaf=False)
+        ops = self.tree.ops
 
         def detach_node(node: Node) -> None:
             parent = parents[node.dst.parent]
@@ -78,26 +79,26 @@ class DTreeExecutor:
             return detach_node(node)
 
         callbacks = Callbacks(branch=execute_branch, leaf=execute_leaf)
-        walk_tree(tree, callbacks=callbacks, order=VisitOrder.POST)
-        return tree
+        walk_tree(self.tree, callbacks=callbacks, order=VisitOrder.POST)
+        return self.tree
 
-    def _rmdir(self, path: Path) -> None:
+    def _rmdir(self, dst: Path) -> None:
+        if next(dst.iterdir(), None) is not None:
+            return logger.debug("Directory %s is not empty, skip removing it", dst)
+
         if self.dry_run:
-            return logger.info("Remove directory %s, no effect if it is not empty", path)
+            return logger.info("Remove empty directory %s.", dst)
 
-        if next(path.iterdir(), None) is None:
-            path.rmdir()
-            return logger.info("Removed empty directory %s", path)
+        dst.rmdir()
+        return logger.info("Removed empty directory %s", dst)
 
-        return logger.debug("Directory %s is not empty, skip removing it", path)
-
-    def _unlink(self, path: Path) -> None:
+    def _unlink(self, dst: Path) -> None:
         if self.dry_run:
-            return logger.info("Unlink %s, no effect if it does not exist.", path)
+            return logger.info("Unlink %s, no effect if it does not exist.", dst)
 
         try:
-            path.unlink()
+            dst.unlink()
         except FileNotFoundError:
-            return logger.debug("File %s does not exist, skip unlinking it", path)
+            return logger.debug("File %s does not exist, skip unlinking it", dst)
         else:
-            return logger.info("Unlinked %s", path)
+            return logger.info("Unlinked %s", dst)

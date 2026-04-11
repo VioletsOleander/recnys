@@ -2,9 +2,9 @@
 
 from typing import TYPE_CHECKING
 
-from recnys.backend.model import BranchNode, CLeafOp, CTree, LeafNode
-from recnys.backend.utils.collector import collect_nodes
-from recnys.backend.utils.walker import Callbacks, VisitOrder, walk_tree
+from recnys.tree.model import BranchNode, CLeafOp, CTree, LeafNode
+from recnys.tree.utils.collector import collect_nodes
+from recnys.tree.utils.walker import Callbacks, VisitOrder, walk_tree
 
 from .utils import handle_fnf
 

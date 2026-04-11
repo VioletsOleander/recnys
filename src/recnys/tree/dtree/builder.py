@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from .deriver import DTreeDeriver
 
 if TYPE_CHECKING:
-    from recnys.backend.model import CTree, DTree
+    from recnys.tree.model import CTree, DTree
 
 __all__ = ["DTreeBuilder"]
 

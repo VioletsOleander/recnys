@@ -6,8 +6,6 @@ from typing import TYPE_CHECKING
 
 from pydantic import ValidationError
 
-from .platform import UnsupportedPlatformError
-
 if TYPE_CHECKING:
     from collections.abc import Callable, Generator
 
@@ -41,9 +39,6 @@ def handle_exceptions[**P](func: Callable[P, int]) -> Callable[P, int]:
                 "\n".join(messages(e)),
             )
 
-            return 1
-        except UnsupportedPlatformError as e:
-            logger.exception("Error: %s", e)
             return 1
         except KeyboardInterrupt:
             logger.exception("Execution interrupted by user, program exited.")

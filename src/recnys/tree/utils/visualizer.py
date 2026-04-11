@@ -1,11 +1,11 @@
 from typing import TYPE_CHECKING
 
-from recnys.backend.model import LeafNode
+from recnys.tree.model import LeafNode
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from recnys.backend.model import BranchNode, CLeafOp, DBranchOp, DLeafOp, Tree
+    from recnys.tree.model import BranchNode, CLeafOp, DBranchOp, DLeafOp, Tree
 
 __all__ = ["print_tree"]
 

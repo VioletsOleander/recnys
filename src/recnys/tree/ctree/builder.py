@@ -1,16 +1,12 @@
 """Provide `CTreeBuilder`."""
 
+import platform
 from pathlib import Path
-from typing import TYPE_CHECKING
 
-from recnys.backend.model import BranchNode, CLeafOp, CTree, LeafNode
-from recnys.frontend.model import EntryValue, Policy, ScannedConfig
-from recnys.utils.platform import Platform
+from recnys.linear.model import EntryValue, Policy, ScannedConfig
+from recnys.tree.model import BranchNode, CLeafOp, CTree, LeafNode
 
 from .utils import handle_fnf
-
-if TYPE_CHECKING:
-    from recnys.utils.paths import Paths
 
 __all__ = ["CTreeBuilder"]
 
@@ -25,18 +21,20 @@ class CTreeBuilder:
     """
 
     _tree: CTree
-    _paths: Paths
-    _platform: Platform
+    _platform: str
+    _config_dir: Path
 
-    def __init__(self, paths: Paths, platform: Platform) -> None:
-        """Initialize the CTreeBuilder.
+    def __init__(self) -> None:
+        """Initialize the CTreeBuilder."""
+        self._platform = platform.system()
 
-        Args:
-            paths (Paths): The Paths instance containing relevant paths.
-            platform (Platform): The current platform.
-        """
-        self._paths = paths
-        self._platform = platform
+        match self._platform:
+            case "Linux":
+                self._config_dir = Path.home() / ".config/"
+            case "Windows":
+                self._config_dir = Path.home() / "AppData/Roaming/"
+            case _:
+                raise NotImplementedError(f"Unsupported platform: {self._platform}")
 
     def build(self, scanned_config: ScannedConfig) -> CTree:
         """Construct a creation tree from the scanned configuration.
@@ -49,14 +47,14 @@ class CTreeBuilder:
         Returns:
             CTree: The constructed creation tree.
         """
-        self._tree = CTree(root=BranchNode(dst=self._paths.home))
+        self._tree = CTree(root=BranchNode(dst=Path.home()))
 
         for key, val in scanned_config.root.items():
             dst = self._get_dst(key, val)
             if dst is None:
                 continue
 
-            src = self._paths.repo_dir / key
+            src = Path.cwd() / key
             op = self._get_op(key, val)
             self._make_nodes(src=src, dst=dst, op=op)
 
@@ -118,21 +116,21 @@ class CTreeBuilder:
 
     def _get_dst(self, key: str, val: EntryValue | None) -> Path | None:
         """Return the resolved destination path, or None if the entry is disabled on the platform."""
-        default_dst = self._paths.config_dir / key.removesuffix(".template")
+        default_dst = self._config_dir / key.removesuffix(".template")
 
         if val is None or val.dest is None:
             return default_dst
 
         match self._platform:
-            case Platform.LINUX:
+            case "Linux":
                 dst = val.dest.Linux
-            case Platform.WINDOWS:
+            case "Windows":
                 dst = val.dest.Windows
 
         if dst is None:
             return default_dst
 
-        return self._paths.home / Path(dst) if dst != "" else None
+        return Path.home() / dst if dst != "" else None
 
     def _get_op(self, key: str, val: EntryValue | None) -> CLeafOp:
         """Return the resolved operation."""

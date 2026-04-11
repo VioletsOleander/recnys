@@ -5,7 +5,7 @@ from .walker import Callbacks, VisitOrder, walk_tree
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from recnys.backend.model import BranchNode, LeafNode, Node, Tree
+    from recnys.tree.model import BranchNode, LeafNode, Node, Tree
 
 __all__ = ["collect_nodes"]
 

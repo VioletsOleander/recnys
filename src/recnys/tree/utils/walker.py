@@ -1,7 +1,7 @@
 from enum import Enum, auto
 from typing import TYPE_CHECKING, NamedTuple
 
-from recnys.backend.model import BranchNode, LeafNode, Node, Tree
+from recnys.tree.model import BranchNode, LeafNode, Node, Tree
 
 if TYPE_CHECKING:
     from collections.abc import Callable

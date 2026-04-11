@@ -4,7 +4,7 @@ from typing import overload
 
 from pydantic import ValidationError
 
-from recnys.backend.model import BranchNode, CTree, DTree, LeafNode, Node, Tree
+from recnys.tree.model import BranchNode, CTree, DTree, LeafNode, Node, Tree
 
 __all__ = ["deserialize_tree", "serialize_tree"]
 
