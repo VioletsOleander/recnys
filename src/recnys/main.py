@@ -5,7 +5,8 @@ from importlib.metadata import version
 from .backend.ctree.builder import CTreeBuilder
 from .backend.ctree.expander import CTreeExpander
 from .backend.dtree.builder import DTreeBuilder
-# from .backend.utils.serializer import deserialize_tree, serialize_tree
+from .backend.model import CTree, DTree
+from .backend.utils.serializer import deserialize_tree, serialize_tree
 from .backend.utils.visualizer import print_tree
 from .frontend.loader import load_yaml
 from .frontend.scanner import scan_config
@@ -69,16 +70,12 @@ def main(argv: argparse.Namespace | None = None) -> int:
     expander = CTreeExpander()
     ctree = expander.expand(ctree)
 
-    print("Creation tree to execute:")
-    print_tree(ctree, verbose=True)
-
-    raise NotImplementedError("DTree building and execution is not implemented yet.")
-
-
     # Build dtree
     ctree_fexist = paths.ctree_file.exists()
     dtree_fexist = paths.dtree_file.exists()
 
+    # Both not exist -> first run -> execute ctree
+    # Both exist -> no-first run -> execute dtree, then ctree
     if ctree_fexist != dtree_fexist:
         e = RuntimeError(
             "Ctree file and dtree file are not consistent. "
@@ -92,12 +89,10 @@ def main(argv: argparse.Namespace | None = None) -> int:
         raise e
 
     if ctree_fexist:
-        prev_ctree = deserialize_tree(paths.ctree_file)
-        prev_dtree = deserialize_tree(paths.dtree_file)
+        prev_ctree = deserialize_tree(cls=CTree, f=paths.ctree_file)
+        prev_dtree = deserialize_tree(cls=DTree, f=paths.dtree_file)
         builder = DTreeBuilder()
         dtree = builder.build(ctree, prev_ctree, prev_dtree)
-    else:
-        pass
 
     print_tree(dtree, verbose=True)
 

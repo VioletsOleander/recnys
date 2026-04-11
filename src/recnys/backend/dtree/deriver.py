@@ -1,8 +1,13 @@
 """Provide `DTreeDeriver`."""
 
-from recnys.backend.model import CTree, DTree
+from typing import TYPE_CHECKING
+
+from recnys.backend.model import BranchNode, CTree, DBranchOp, DLeafOp, DTree, LeafNode
 from recnys.backend.utils.collector import collect_nodes
 from recnys.backend.utils.walker import Callbacks, VisitOrder, walk_tree
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 __all__ = ["DTreeDeriver"]
 
@@ -12,8 +17,6 @@ class DTreeDeriver:
 
     The main provided method is `derive`.
     """
-
-    dtree: DTree
 
     def derive(self, ctree: CTree, prev_ctree: CTree) -> DTree:
         """Derive a deletion tree from `ctree` and `prev_ctree`.
@@ -32,24 +35,24 @@ class DTreeDeriver:
         Returns:
             DTree: The root node of the derived deletion tree.
         """
-        self.dtree = DRootNode(dst=prev_ctree.dst)
+        ops: dict[Path, DBranchOp | DLeafOp] = {}
         cnodes = collect_nodes(ctree)
 
-        def derive_branch(node: DBranchNode) -> DBranchNode:
+        def derive_branch(node: BranchNode) -> None:
             """Turn kept nodes to no op, deleted nodes to remove op."""
             if node == cnodes.get(node.dst):
-                return DBranchNode(dst=node.dst, op=Operation.NOP, children=node.children)
+                ops[node.dst] = DBranchOp.NOP
 
-            return DBranchNode(dst=node.dst, op=Operation.REMOVE, children=node.children)
+            ops[node.dst] = DBranchOp.REMOVE
 
-        def derive_leaf(node: DLeafNode) -> DLeafNode:
+        def derive_leaf(node: LeafNode) -> None:
             """Turn kept nodes to no op, deleted nodes to unlink op."""
             if node == cnodes.get(node.dst):
-                return DLeafNode(src=node.src, dst=node.dst, op=Operation.NOP)
+                ops[node.dst] = DLeafOp.NOP
 
-            return DLeafNode(src=node.src, dst=node.dst, op=Operation.UNLINK)
+            ops[node.dst] = DLeafOp.UNLINK
 
-        callbacks = Callbacks(root=None, branch=derive_branch, leaf=derive_leaf)
-        walk_tree(prev_ctree, callbacks=callbacks, order=VisitOrder.PRE, update=True)
+        callbacks = Callbacks(branch=derive_branch, leaf=derive_leaf)
+        walk_tree(prev_ctree, callbacks=callbacks, order=VisitOrder.PRE)
 
-        return self.dtree
+        return DTree(root=prev_ctree.root, ops=ops)

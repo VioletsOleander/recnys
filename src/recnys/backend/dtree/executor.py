@@ -3,9 +3,9 @@
 import logging
 from typing import TYPE_CHECKING, overload
 
-from recnys.backend.model.node import BranchNode, LeafNode, Operation, RootNode
+from recnys.backend.model import DTree
 from recnys.backend.utils.collector import collect_nodes
-from recnys.backend.utils.traversal import Callbacks, VisitOrder, walk_tree
+from recnys.backend.utils.walker import Callbacks, VisitOrder, walk_tree
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -38,7 +38,7 @@ class DTreeExecutor:
         """
         self.dry_run = dry_run
 
-    def execute(self, dtree: RootNode) -> RootNode:
+    def execute(self, dtree: DTree) -> DTree:
         """Execute the given dtree.
 
         Return a new dtree with the executed nodes detached from the tree. If all nodes are executed
