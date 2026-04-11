@@ -41,7 +41,6 @@ class ExecutionContext(AbstractContextManager):
         exc_type: type[BaseException] | None,
         exc_value: BaseException | None,
         traceback: TracebackType | None,
-        /,
     ) -> bool:
         if isinstance(self.executor, DTreeExecutor):
             if self.dry_run:
