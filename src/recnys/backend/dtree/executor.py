@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, overload
 
 from recnys.backend.model.node import BranchNode, LeafNode, Operation, RootNode
 from recnys.backend.utils.collector import collect_nodes
-from recnys.backend.utils.traversal import Callbacks, Order, walk_tree
+from recnys.backend.utils.traversal import Callbacks, VisitOrder, walk_tree
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -54,7 +54,7 @@ class DTreeExecutor:
         self._parent_nodes = collect_nodes(self.dtree, collect_leaf=False)
 
         callbacks = Callbacks(root=None, branch=self._execute_branch, leaf=self._execute_leaf)
-        walk_tree(dtree, callbacks=callbacks, order=Order.POST, update=False)
+        walk_tree(dtree, callbacks=callbacks, order=VisitOrder.POST, update=False)
         return dtree
 
     def _execute_branch(self, node: BranchNode) -> BranchNode:

@@ -2,7 +2,7 @@
 
 from recnys.backend.ctree.model import CRootNode
 from recnys.backend.utils.collector import collect_nodes
-from recnys.backend.utils.traversal import Callbacks, Order, walk_tree
+from recnys.backend.utils.traversal import Callbacks, VisitOrder, walk_tree
 
 from .model import DBranchNode, DLeafNode, DRootNode
 
@@ -52,6 +52,6 @@ class DTreeDeriver:
             return DLeafNode(src=node.src, dst=node.dst, op=Operation.UNLINK)
 
         callbacks = Callbacks(root=None, branch=derive_branch, leaf=derive_leaf)
-        walk_tree(prev_ctree, callbacks=callbacks, order=Order.PRE, update=True)
+        walk_tree(prev_ctree, callbacks=callbacks, order=VisitOrder.PRE, update=True)
 
         return self.dtree

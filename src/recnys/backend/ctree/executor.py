@@ -9,7 +9,7 @@ from jinja2 import Environment
 
 from recnys.backend.model import BranchNode, LeafNode, Operation, RootNode
 from recnys.backend.utils.collector import collect_nodes
-from recnys.backend.utils.traversal import Callbacks, Order, walk_tree
+from recnys.backend.utils.traversal import Callbacks, VisitOrder, walk_tree
 from recnys.frontend.model import ScannedVariables
 
 if TYPE_CHECKING:
@@ -60,7 +60,7 @@ class CTreeExecutor:
         self._parent_nodes = {self.ctree.dst: self.ctree}
 
         callbacks = Callbacks(root=None, branch=self._execute_branch, leaf=self._execute_leaf)
-        walk_tree(ctree, callbacks=callbacks, order=Order.POST, update=False)
+        walk_tree(ctree, callbacks=callbacks, order=VisitOrder.POST, update=False)
         return ctree
 
     def _execute_branch(self, node: BranchNode) -> BranchNode:

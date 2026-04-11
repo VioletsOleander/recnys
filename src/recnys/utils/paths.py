@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 from .platform import Platform
 
-__all__ = ["Paths", "make_paths"]
+__all__ = ["Paths", "get_paths"]
 
 
 class Paths(BaseModel):
@@ -27,7 +27,7 @@ class Paths(BaseModel):
     variables_file: Path
 
 
-def make_paths(platform: Platform) -> Paths:
+def get_paths(platform: Platform) -> Paths:
     """Construct and return the Paths object with appropriate file paths."""
     # Dirs
     home = Path.home()

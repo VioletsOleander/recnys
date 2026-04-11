@@ -3,11 +3,11 @@
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from recnys.backend.utils.exception import handle_fnf
+from recnys.backend.model import BranchNode, CBranchOp, CLeafOp, CTree, LeafNode
 from recnys.frontend.model import EntryValue, Policy, ScannedConfig
 from recnys.utils.platform import Platform
 
-from .model import CBranchNode, CBranchOp, CLeafNode, CLeafOp, CRootNode
+from .utils import handle_fnf
 
 if TYPE_CHECKING:
     from recnys.utils.paths import Paths
@@ -24,8 +24,9 @@ class CTreeBuilder:
     The main provided method is `build`.
     """
 
-    paths: Paths
-    platform: Platform
+    _tree: CTree
+    _paths: Paths
+    _platform: Platform
 
     def __init__(self, paths: Paths, platform: Platform) -> None:
         """Initialize the CTreeBuilder.
@@ -34,10 +35,10 @@ class CTreeBuilder:
             paths (Paths): The Paths instance containing relevant paths.
             platform (Platform): The current platform.
         """
-        self.paths = paths
-        self.platform = platform
+        self._paths = paths
+        self._platform = platform
 
-    def build(self, scanned_config: ScannedConfig) -> CRootNode:
+    def build(self, scanned_config: ScannedConfig) -> CTree:
         """Construct a creation tree from the scanned configuration.
 
         During the parsing process, features from features/deconflict are satisfied.
@@ -46,22 +47,23 @@ class CTreeBuilder:
             scanned_config (ScannedConfig): The scanned configuration to be parsed.
 
         Returns:
-            CRootNode: The root node of the constructed creation tree.
+            CTree: The constructed creation tree.
         """
-        root = CRootNode(dst=self.paths.home)
+        root = BranchNode(dst=self._paths.home)
+        self._tree = CTree(root=root)
 
         for key, val in scanned_config.root.items():
             dst = self._get_dst(key, val)
             if dst is None:
                 continue
 
-            src = self.paths.repo_dir / key
+            src = self._paths.repo_dir / key
             op = self._get_op(key, val)
-            self._make_nodes(src=src, dst=dst, op=op, root=root)
+            self._make_nodes(src=src, dst=dst, op=op)
 
-        return root
+        return self._tree
 
-    def _make_nodes(self, src: Path, dst: Path, op: CLeafOp, root: CRootNode) -> None:
+    def _make_nodes(self, src: Path, dst: Path, op: CLeafOp) -> None:
         """Make leaf node and branch nodes on its way to the root node.
 
         If conflict leaf nodes are met during making branch nodes, they will be recursively branchified.
@@ -74,49 +76,57 @@ class CTreeBuilder:
             src (Path): The source path of the leaf node to be made.
             dst (Path): The destination path of the leaf node to be made.
             op (CLeafOp): The operation of the leaf node to be made.
-            root (CRootNode): The root node of the node tree.
         """
-        parent = root
+        root = self._tree.root
+        ops = self._tree.ops
 
+        parent = root
         num_exclude = len(root.dst.parents) + 1  # exclude home and its parents
+
         for branch_dst in reversed(dst.parents[:-num_exclude]):
             if branch_dst in parent.children:
                 node = parent.children[branch_dst]
-                branch = self._branchify_leaf(node, src) if isinstance(node, CLeafNode) else node
+                branch = self._branchify_leaf(node, src) if isinstance(node, LeafNode) else node
             else:
-                branch = CBranchNode(dst=branch_dst, op=CBranchOp.CREATE)
+                branch = BranchNode(dst=branch_dst)
 
             parent.children[branch_dst] = branch
+            ops[branch_dst] = CBranchOp.CREATE
+
             parent = branch
 
-        leaf = CLeafNode(src=src, dst=dst, op=op)
-        parent.children[dst] = leaf
+        parent.children[dst] = LeafNode(src=src, dst=dst)
+        ops[dst] = op
 
     @handle_fnf
-    def _branchify_leaf(self, leaf: CLeafNode, terminal_src: Path) -> CBranchNode:
+    def _branchify_leaf(self, leaf: LeafNode, terminal_src: Path) -> BranchNode:
         """Transform a leaf node into a branch node.
 
         The leaf node should be a directory. Only one level is expanded.
         """
-        branch = CBranchNode(dst=leaf.dst, op=CBranchOp.CREATE)
+        ops = self._tree.ops
+        branch = BranchNode(dst=leaf.dst)
 
         for child_src in leaf.src.iterdir():
             if child_src == terminal_src:  # terminal node will be made by the caller
                 continue
+
             child_dst = branch.dst / child_src.name
-            node = CLeafNode(src=child_src, dst=child_dst, op=leaf.op)
+            node = LeafNode(src=child_src, dst=child_dst)
+
             branch.children[child_dst] = node
+            ops[child_dst] = ops[leaf.dst]
 
         return branch
 
     def _get_dst(self, key: str, val: EntryValue | None) -> Path | None:
         """Return the resolved destination path, or None if the entry is disabled on the platform."""
-        default_dst = self.paths.config_dir / key.removesuffix(".template")
+        default_dst = self._paths.config_dir / key.removesuffix(".template")
 
         if val is None or val.dest is None:
             return default_dst
 
-        match self.platform:
+        match self._platform:
             case Platform.LINUX:
                 dst = val.dest.Linux
             case Platform.WINDOWS:
@@ -125,7 +135,7 @@ class CTreeBuilder:
         if dst is None:
             return default_dst
 
-        return self.paths.home / Path(dst) if dst != "" else None
+        return self._paths.home / Path(dst) if dst != "" else None
 
     def _get_op(self, key: str, val: EntryValue | None) -> CLeafOp:
         """Return the resolved operation."""

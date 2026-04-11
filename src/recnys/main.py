@@ -11,7 +11,7 @@ from .frontend.loader import load_yaml
 from .frontend.scanner import scan_config
 from .utils.exception import handle_exceptions
 from .utils.logging import setup_logging
-from .utils.paths import make_paths
+from .utils.paths import get_paths
 from .utils.platform import get_platform
 
 logger = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ def main(argv: argparse.Namespace | None = None) -> int:
     args = parse_arguments() if argv is None else argv
 
     platform = get_platform()
-    paths = make_paths(platform)
+    paths = get_paths(platform)
     setup_logging(paths.log_file, silent=args.silent, debug=args.debug)
 
     # Frontend

@@ -1,40 +1,44 @@
-from recnys.backend.model import BranchNode, LeafNode, RootNode
+from typing import TYPE_CHECKING
 
-__all__ = ["print_subtree", "print_tree"]
+from recnys.backend.model import LeafNode
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from recnys.backend.model import BranchNode, CBranchOp, CLeafOp, DBranchOp, DLeafOp, Tree
+
+__all__ = ["print_tree"]
 
 
-def print_tree(root: RootNode, *, verbose: bool = False) -> None:
-    message = str(root.dst)
-    if verbose:
-        message += " (root)"
+def print_tree(tree: Tree, *, verbose: bool = False) -> None:
+    root = tree.root
 
+    message = f"{root.dst} (root)" if verbose else str(root.dst)
     print(message)
 
     for i, child in enumerate(root.children.values()):
         is_last = i == len(root.children) - 1
-        print_subtree(child, prefix="", is_last=is_last, verbose=verbose)
+        _print_subtree(child, tree.ops, prefix="", is_last=is_last, verbose=verbose)
 
 
-def print_subtree(
-    node: BranchNode | LeafNode, prefix: str, *, is_last: bool, verbose: bool
+def _print_subtree(
+    node: BranchNode | LeafNode,
+    ops: dict[Path, CBranchOp | CLeafOp] | dict[Path, DBranchOp | DLeafOp],
+    prefix: str,
+    *,
+    is_last: bool,
+    verbose: bool,
 ) -> None:
     marker = "└── " if is_last else "├── "
-
     message = f"{prefix}{marker}{node.dst}"
-    if verbose:
-        suffix = (
-            f" (leaf, src: {node.src}, op: {node.op})"
-            if isinstance(node, LeafNode)
-            else f" (branch, op: {node.op})"
-        )
-        message += suffix
-
-    print(message)
 
     if isinstance(node, LeafNode):
+        print(f"{message} (leaf, src: {node.src}, op: {ops[node.dst]})" if verbose else message)
         return
+
+    print(f"{message} (branch, op: {ops[node.dst]})" if verbose else message)
 
     next_prefix = prefix + ("    " if is_last else "│   ")
     for i, child in enumerate(node.children.values()):
         is_last = i == len(node.children) - 1
-        print_subtree(child, prefix=next_prefix, is_last=is_last, verbose=verbose)
+        _print_subtree(child, ops, prefix=next_prefix, is_last=is_last, verbose=verbose)
