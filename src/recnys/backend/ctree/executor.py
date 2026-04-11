@@ -68,12 +68,6 @@ class CTreeExecutor:
 
         Attach the executed node to self.ctree and return it.
         """
-        if node.op != Operation.CREATE:
-            raise RuntimeError(
-                f"Invalid ctree, expect operation for branch node to be {Operation.CREATE}, "
-                f"but encounter {node.op}"
-            )
-
         if self.dry_run:
             logger.info("Create %s, no effect if it already exists", node.dst)
 
@@ -87,13 +81,6 @@ class CTreeExecutor:
 
     def _execute_leaf(self, node: LeafNode) -> LeafNode:
         """Execute creation op (copy/render/link) on leaf node (file or dir)."""
-        valid_ops = (Operation.COPY, Operation.LINK, Operation.RENDER)
-        if node.op not in valid_ops:
-            raise RuntimeError(
-                f"Invalid ctree, expect operation for leaf node to be one of {valid_ops}, "
-                f"but encounter {node.op}"
-            )
-
         if node.op == Operation.NOP:
             return self._attach_node(node)
 

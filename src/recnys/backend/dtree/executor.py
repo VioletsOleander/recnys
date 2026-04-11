@@ -3,7 +3,7 @@
 import logging
 from typing import TYPE_CHECKING, overload
 
-from recnys.backend.model import BranchNode, LeafNode, Operation, RootNode
+from recnys.backend.model.node import BranchNode, LeafNode, Operation, RootNode
 from recnys.backend.utils.collector import collect_nodes
 from recnys.backend.utils.traversal import Callbacks, Order, walk_tree
 

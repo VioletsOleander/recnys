@@ -40,7 +40,7 @@ class CTreeExpander:
 
         callbacks = Callbacks(root=None, branch=None, leaf=expand_leaf)
 
-        return walk_tree(ctree, callbacks=callbacks, order=Order.PRE, update=True)
+        return walk_tree(ctree, callbacks=callbacks, order=Order.PRE)
 
     def _branchify_leaf(self, leaf: CLeafNode, exclude_dirs: list[str]) -> CBranchNode:
         """Transform a leaf node into branch node and return it.

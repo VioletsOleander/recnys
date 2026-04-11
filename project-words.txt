@@ -2,6 +2,7 @@ autouse
 branchified
 branchify
 Canonicalizer
+cnodes
 ctree
 deconflict
 Deconflict

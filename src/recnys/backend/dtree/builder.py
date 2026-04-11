@@ -5,7 +5,9 @@ from typing import TYPE_CHECKING
 from .deriver import DTreeDeriver
 
 if TYPE_CHECKING:
-    from recnys.backend.model import RootNode
+    from recnys.backend.ctree.model import CRootNode
+
+    from .model import DRootNode
 
 __all__ = ["DTreeBuilder"]
 
@@ -39,16 +41,16 @@ class DTreeBuilder:
     dtree, the dtree to execute is the derived dtree.
     """
 
-    def build(self, ctree: RootNode, prev_ctree: RootNode, prev_dtree: RootNode) -> RootNode:
+    def build(self, ctree: CRootNode, prev_ctree: CRootNode, prev_dtree: DRootNode) -> DRootNode:
         """Build a deletion tree to execute based on the built ctree and the previous ctree and dtree.
 
         Args:
-            ctree (RootNode): The built creation tree.
-            prev_ctree (RootNode): The previous creation tree.
-            prev_dtree (RootNode): The previous deletion tree.
+            ctree (CRootNode): The built creation tree.
+            prev_ctree (CRootNode): The previous creation tree.
+            prev_dtree (DRootNode): The previous deletion tree.
 
         Returns:
-            RootNode: The root node of the deletion tree to execute.
+            DRootNode: The root node of the deletion tree to execute.
         """
         ctree_empty = not prev_ctree.children
         dtree_empty = not prev_dtree.children

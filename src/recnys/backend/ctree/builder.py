@@ -1,13 +1,13 @@
 """Provide `CTreeBuilder`."""
 
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
-from recnys.backend.model.node import CBranchNode, CLeafNode, CRootNode, LeafNode
-from recnys.backend.model.op import CBranchOp, CLeafOp
 from recnys.backend.utils.exception import handle_fnf
 from recnys.frontend.model import EntryValue, Policy, ScannedConfig
 from recnys.utils.platform import Platform
+
+from .model import CBranchNode, CBranchOp, CLeafNode, CLeafOp, CRootNode
 
 if TYPE_CHECKING:
     from recnys.utils.paths import Paths

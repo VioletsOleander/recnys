@@ -1,8 +1,10 @@
 """Provide `DTreeDeriver`."""
 
-from recnys.backend.model import BranchNode, LeafNode, Operation, RootNode
+from recnys.backend.ctree.model import CRootNode
 from recnys.backend.utils.collector import collect_nodes
 from recnys.backend.utils.traversal import Callbacks, Order, walk_tree
+
+from .model import DBranchNode, DLeafNode, DRootNode
 
 __all__ = ["DTreeDeriver"]
 
@@ -13,7 +15,9 @@ class DTreeDeriver:
     The main provided method is `derive`.
     """
 
-    def derive(self, ctree: RootNode, prev_ctree: RootNode) -> RootNode:
+    dtree: DRootNode
+
+    def derive(self, ctree: CRootNode, prev_ctree: CRootNode) -> DRootNode:
         """Derive a deletion tree from `ctree` and `prev_ctree`.
 
         The deletion tree aims to resolve the deletion operations brought by:
@@ -24,29 +28,30 @@ class DTreeDeriver:
             the expected result of current execution.
 
         Args:
-            ctree (RootNode): The root node of the current creation tree.
-            prev_ctree (RootNode): The root node of the previous creation tree.
+            ctree (CRootNode): The root node of the current creation tree.
+            prev_ctree (CRootNode): The root node of the previous creation tree.
 
         Returns:
-            RootNode: The root node of the derived deletion tree.
+            DRootNode: The root node of the derived deletion tree.
         """
-        curr_nodes = collect_nodes(ctree, collect_root=False)
+        self.dtree = DRootNode(dst=prev_ctree.dst)
+        cnodes = collect_nodes(ctree, collect_root=False)
 
-        def derive_branch(node: BranchNode) -> BranchNode:
+        def derive_branch(node: DBranchNode) -> DBranchNode:
             """Turn kept nodes to no op, deleted nodes to remove op."""
-            if node == curr_nodes.get(node.dst):
-                return BranchNode(dst=node.dst, op=Operation.NOP, children=node.children)
+            if node == cnodes.get(node.dst):
+                return DBranchNode(dst=node.dst, op=Operation.NOP, children=node.children)
 
-            return BranchNode(dst=node.dst, op=Operation.REMOVE, children=node.children)
+            return DBranchNode(dst=node.dst, op=Operation.REMOVE, children=node.children)
 
-        def derive_leaf(node: LeafNode) -> LeafNode:
+        def derive_leaf(node: DLeafNode) -> DLeafNode:
             """Turn kept nodes to no op, deleted nodes to unlink op."""
-            if node == curr_nodes.get(node.dst):
-                return LeafNode(src=node.src, dst=node.dst, op=Operation.NOP)
+            if node == cnodes.get(node.dst):
+                return DLeafNode(src=node.src, dst=node.dst, op=Operation.NOP)
 
-            return LeafNode(src=node.src, dst=node.dst, op=Operation.UNLINK)
+            return DLeafNode(src=node.src, dst=node.dst, op=Operation.UNLINK)
 
         callbacks = Callbacks(root=None, branch=derive_branch, leaf=derive_leaf)
         walk_tree(prev_ctree, callbacks=callbacks, order=Order.PRE, update=True)
 
-        return prev_ctree
+        return self.dtree
