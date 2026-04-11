@@ -1,1 +1,1 @@
-"""DTree., bottom-up."""
+"""DTree related modules."""

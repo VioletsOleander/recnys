@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from recnys.backend.model import BranchNode, CBranchOp, CLeafOp, CTree, LeafNode
+from recnys.backend.model import BranchNode, CLeafOp, CTree, LeafNode
 from recnys.frontend.model import EntryValue, Policy, ScannedConfig
 from recnys.utils.platform import Platform
 
@@ -49,8 +49,7 @@ class CTreeBuilder:
         Returns:
             CTree: The constructed creation tree.
         """
-        root = BranchNode(dst=self._paths.home)
-        self._tree = CTree(root=root)
+        self._tree = CTree(root=BranchNode(dst=self._paths.home))
 
         for key, val in scanned_config.root.items():
             dst = self._get_dst(key, val)
@@ -91,8 +90,6 @@ class CTreeBuilder:
                 branch = BranchNode(dst=branch_dst)
 
             parent.children[branch_dst] = branch
-            ops[branch_dst] = CBranchOp.CREATE
-
             parent = branch
 
         parent.children[dst] = LeafNode(src=src, dst=dst)

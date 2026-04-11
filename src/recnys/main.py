@@ -5,7 +5,7 @@ from importlib.metadata import version
 from .backend.ctree.builder import CTreeBuilder
 from .backend.ctree.expander import CTreeExpander
 from .backend.dtree.builder import DTreeBuilder
-from .backend.utils.serializer import deserialize_tree, serialize_tree
+# from .backend.utils.serializer import deserialize_tree, serialize_tree
 from .backend.utils.visualizer import print_tree
 from .frontend.loader import load_yaml
 from .frontend.scanner import scan_config
@@ -68,6 +68,12 @@ def main(argv: argparse.Namespace | None = None) -> int:
     # Expand ctree
     expander = CTreeExpander()
     ctree = expander.expand(ctree)
+
+    print("Creation tree to execute:")
+    print_tree(ctree, verbose=True)
+
+    raise NotImplementedError("DTree building and execution is not implemented yet.")
+
 
     # Build dtree
     ctree_fexist = paths.ctree_file.exists()

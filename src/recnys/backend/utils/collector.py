@@ -31,7 +31,7 @@ def collect_nodes(
 def collect_nodes(
     tree: Tree, *, collect_branch: bool = True, collect_leaf: bool = True
 ) -> dict[Path, Node]:
-    """Collect all non-root nodes under `tree` into a dictionary and return it.
+    """Collect non-root nodes under `tree` into a dictionary and return it.
 
     Dict keys are `node.dst`, values are the corresponding nodes.
 

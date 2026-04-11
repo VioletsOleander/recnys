@@ -1,10 +1,8 @@
 """Provide `DTreeDeriver`."""
 
-from recnys.backend.ctree.model import CRootNode
+from recnys.backend.model import CTree, DTree
 from recnys.backend.utils.collector import collect_nodes
-from recnys.backend.utils.traversal import Callbacks, VisitOrder, walk_tree
-
-from .model import DBranchNode, DLeafNode, DRootNode
+from recnys.backend.utils.walker import Callbacks, VisitOrder, walk_tree
 
 __all__ = ["DTreeDeriver"]
 
@@ -15,9 +13,9 @@ class DTreeDeriver:
     The main provided method is `derive`.
     """
 
-    dtree: DRootNode
+    dtree: DTree
 
-    def derive(self, ctree: CRootNode, prev_ctree: CRootNode) -> DRootNode:
+    def derive(self, ctree: CTree, prev_ctree: CTree) -> DTree:
         """Derive a deletion tree from `ctree` and `prev_ctree`.
 
         The deletion tree aims to resolve the deletion operations brought by:
@@ -28,14 +26,14 @@ class DTreeDeriver:
             the expected result of current execution.
 
         Args:
-            ctree (CRootNode): The root node of the current creation tree.
-            prev_ctree (CRootNode): The root node of the previous creation tree.
+            ctree (CTree): The root node of the current creation tree.
+            prev_ctree (CTree): The root node of the previous creation tree.
 
         Returns:
-            DRootNode: The root node of the derived deletion tree.
+            DTree: The root node of the derived deletion tree.
         """
         self.dtree = DRootNode(dst=prev_ctree.dst)
-        cnodes = collect_nodes(ctree, collect_root=False)
+        cnodes = collect_nodes(ctree)
 
         def derive_branch(node: DBranchNode) -> DBranchNode:
             """Turn kept nodes to no op, deleted nodes to remove op."""

@@ -5,8 +5,6 @@ from pydantic import BaseModel
 
 __all__ = [
     "BranchNode",
-    "BranchOp",
-    "CBranchOp",
     "CLeafOp",
     "CTree",
     "DBranchOp",
@@ -19,7 +17,6 @@ __all__ = [
 
 type Tree = CTree | DTree
 type Node = BranchNode | LeafNode
-type BranchOp = CBranchOp | DBranchOp
 type LeafOp = CLeafOp | DLeafOp
 
 
@@ -28,12 +25,12 @@ class CTree(BaseModel):
 
     Attributes:
         root (BranchNode): The root node of the creation tree.
-        ops (dict[Path, CBranchOp | CLeafOp]): The operations for each node in the creation tree, keyed by
+        ops (dict[Path, CLeafOp]): The operations for leaf nodes in the creation tree, keyed by
             their destination paths.
     """
 
     root: BranchNode
-    ops: dict[Path, CBranchOp | CLeafOp] = {}
+    ops: dict[Path, CLeafOp] = {}
 
 
 class DTree(BaseModel):
@@ -73,17 +70,6 @@ class LeafNode(BaseModel):
 
     src: Path
     dst: Path
-
-
-class CBranchOp(StrEnum):
-    """Category of an operation for branch nodes in ctree.
-
-    Attributes:
-        CREATE: Create a node at the destination path.
-            Corresponds to `Path.mkdir`, no effect if the node already exists.
-    """
-
-    CREATE = auto()
 
 
 class CLeafOp(StrEnum):

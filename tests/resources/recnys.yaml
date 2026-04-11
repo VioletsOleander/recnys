@@ -10,7 +10,7 @@
 {
     ".vimrc": { dest: { Windows: "_vimrc", Linux: ".vimrc" } },
     ".bashrc.template": { dest: { Windows: "", Linux: "my_bashrc" } },
-    "nvim/": { dest: { Windows: "AppData/Local/nvim" } },
+    "nvim/": { dest: { Windows: "AppData/Local/nvim" }, policy: "copy" },
     "yazi/config/",
     "nushell/",
 }

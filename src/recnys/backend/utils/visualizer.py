@@ -5,7 +5,7 @@ from recnys.backend.model import LeafNode
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from recnys.backend.model import BranchNode, CBranchOp, CLeafOp, DBranchOp, DLeafOp, Tree
+    from recnys.backend.model import BranchNode, CLeafOp, DBranchOp, DLeafOp, Tree
 
 __all__ = ["print_tree"]
 
@@ -23,7 +23,7 @@ def print_tree(tree: Tree, *, verbose: bool = False) -> None:
 
 def _print_subtree(
     node: BranchNode | LeafNode,
-    ops: dict[Path, CBranchOp | CLeafOp] | dict[Path, DBranchOp | DLeafOp],
+    ops: dict[Path, CLeafOp] | dict[Path, DBranchOp | DLeafOp],
     prefix: str,
     *,
     is_last: bool,
@@ -36,7 +36,7 @@ def _print_subtree(
         print(f"{message} (leaf, src: {node.src}, op: {ops[node.dst]})" if verbose else message)
         return
 
-    print(f"{message} (branch, op: {ops[node.dst]})" if verbose else message)
+    print(f"{message} (branch, op: {ops.get(node.dst, 'create')})" if verbose else message)
 
     next_prefix = prefix + ("    " if is_last else "│   ")
     for i, child in enumerate(node.children.values()):

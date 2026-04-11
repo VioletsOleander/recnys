@@ -2,8 +2,9 @@
 
 from typing import TYPE_CHECKING
 
-from recnys.backend.model import BranchNode, BranchOp, CBranchOp, CLeafOp, CTree, LeafNode, LeafOp
-from recnys.backend.utils.walker import Callbacks, walk_tree
+from recnys.backend.model import BranchNode, CLeafOp, CTree, LeafNode
+from recnys.backend.utils.collector import collect_nodes
+from recnys.backend.utils.walker import Callbacks, VisitOrder, walk_tree
 
 from .utils import handle_fnf
 
@@ -19,7 +20,7 @@ class CTreeExpander:
     The main provided method is `expand`.
     """
 
-    _ops: dict[Path, CBranchOp | CLeafOp]
+    _tree: CTree
 
     def expand(self, ctree: CTree) -> CTree:
         """Expand the creation tree.
@@ -33,19 +34,21 @@ class CTreeExpander:
         Returns:
             CTree: The expanded creation tree.
         """
-        self._ops = ctree.ops
+        self._tree = ctree
+        parents = collect_nodes(ctree, collect_leaf=False)
+        parents[ctree.root.dst] = ctree.root
 
         @handle_fnf
         def expand_leaf(node: LeafNode) -> None:
-            if not node.src.is_dir() or node.op != LeafOp.COPY:
-                return node
-            return self._branchify_leaf(node, exclude_dirs=[".git"])
+            if node.src.is_dir() and ctree.ops[node.dst] == CLeafOp.COPY:
+                branch = self._branchify_leaf(node, exclude_dirs=[".git"])
+                parent = parents[node.dst.parent]
+                parent.children[node.dst] = branch
 
-        callbacks = Callbacks(root=None, branch=None, leaf=expand_leaf)
-
+        callbacks = Callbacks(branch=None, leaf=expand_leaf)
         walk_tree(ctree, callbacks=callbacks, order=VisitOrder.PRE)
 
-        return tree
+        return self._tree
 
     def _branchify_leaf(self, leaf: LeafNode, exclude_dirs: list[str]) -> BranchNode:
         """Transform a leaf node into branch node and return it.
@@ -55,9 +58,11 @@ class CTreeExpander:
         All files under the directory and its subdirectories (excluding those specified in
         `exclude_dirs`) will be expanded into leaf nodes.
         """
+        ops = self._tree.ops
+
         src = leaf.src
         dst = leaf.dst
-        branch = BranchNode(dst=dst, op=BranchOp.CREATE)
+        branch = BranchNode(dst=dst)
 
         parents: dict[Path, BranchNode] = {branch.dst: branch}
 
@@ -70,7 +75,7 @@ class CTreeExpander:
             if branch_dst in parents:
                 parent = parents[branch_dst]
             else:
-                node = BranchNode(dst=branch_dst, op=BranchOp.CREATE)
+                node = BranchNode(dst=branch_dst)
                 parents[branch_dst] = node
                 parent.children[branch_dst] = node
                 parent = node
@@ -78,7 +83,8 @@ class CTreeExpander:
             for file_name in file_names:
                 leaf_src = dir_path / file_name
                 leaf_dst = dst / leaf_src.relative_to(src)
-                node = LeafNode(src=leaf_src, dst=leaf_dst, op=LeafOp.COPY)
-                parent.children[leaf_dst] = node
+
+                parent.children[leaf_dst] = LeafNode(src=leaf_src, dst=leaf_dst)
+                ops[leaf_dst] = CLeafOp.COPY
 
         return branch
