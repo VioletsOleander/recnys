@@ -84,9 +84,6 @@ class DTreeExecutor:
         return self.tree
 
     def _rmdir(self, dst: Path) -> None:
-        if not dst.exists():
-            return logger.debug("Directory %s does not exist, skip removing it", dst)
-
         if next(dst.iterdir(), None) is not None:
             return logger.debug("Directory %s is not empty, skip removing it", dst)
 

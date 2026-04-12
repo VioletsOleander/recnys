@@ -1,8 +1,6 @@
 from argparse import Namespace
 from typing import TYPE_CHECKING
 
-import pytest
-
 from recnys.main import main
 from recnys.testing.integration.arrange import change_cwd, create_config_files, create_source_files
 
@@ -12,7 +10,6 @@ if TYPE_CHECKING:
     from pyfakefs.fake_filesystem import FakeFilesystem
 
 
-@pytest.mark.usefixtures("system")
 def test_integration(resources_dir: Path, filesystem: FakeFilesystem) -> None:
     change_cwd(filesystem)
     create_config_files(filesystem, resources_dir)
