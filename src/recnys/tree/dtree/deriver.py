@@ -44,13 +44,13 @@ class DTreeDeriver:
         cnodes = collect_nodes(ctree)
 
         def derive_branch(node: BranchNode) -> None:
-            """Turn kept nodes to no op, deleted nodes to remove op."""
+            """Turn deleted nodes to remove op."""
             if isinstance(cnodes.get(node.dst), BranchNode):
                 return
             ops[node.dst] = DBranchOp.REMOVE
 
         def derive_leaf(node: LeafNode) -> None:
-            """Turn kept nodes to no op, deleted/op-changed nodes to unlink op."""
+            """Turn deleted/op-changed nodes to unlink op."""
             if cnodes.get(node.dst) == node and ctree.ops.get(node.dst) == prev_ctree.ops[node.dst]:
                 return
             ops[node.dst] = DLeafOp.UNLINK

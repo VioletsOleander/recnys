@@ -22,7 +22,7 @@ class DTreeExecutor:
 
     Attributes:
         tree (DTree): The deletion tree instance constructed during the execution.
-        num_executed_ops (int): The number of operations that actually executed during the execution.
+        num_executed_ops (int): The number of operations executed during the execution.
         dry_run (bool): Whether to perform a dry run of the execution.
     """
 
@@ -97,11 +97,10 @@ class DTreeExecutor:
         if not dst.exists():
             return logger.debug("Directory %s does not exist, skip removing it", dst)
 
-        if not dst.is_dir():
+        if not dst.is_dir(follow_symlinks=False):
             raise RuntimeError(
                 f"Path {dst} is occupied, failed to remove the directory.\n"
-                "Hint: To make recnys work correctly, please remove the file or symbolic link at the path, "
-                "and manually create an empty directory at the path."
+                "Hint: Please remove the file or symbolic link at the path."
             )
 
         if next(dst.iterdir(), None) is not None:
@@ -118,14 +117,13 @@ class DTreeExecutor:
         return logger.info("%s empty directory %s.", verb, dst)
 
     def _unlink(self, dst: Path) -> None:
-        if not dst.exists():
+        if not dst.exists(follow_symlinks=False):
             return logger.debug("File/Symlink %s does not exist, skip unlinking it", dst)
 
         if not dst.is_symlink() and not dst.is_file():
             raise RuntimeError(
                 f"Path {dst} is occupied, failed to unlink the file or symbolic link.\n"
-                "Hint: To make recnys work correctly, please remove the directory at the path, "
-                "and manually create an empty file at the path."
+                "Hint: Please remove the directory at the path."
             )
 
         self.num_executed_ops += 1

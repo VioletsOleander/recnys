@@ -64,10 +64,10 @@ class BackendPipeline:
 
         num_ops = c_executor.num_executed_ops + d_executor.num_executed_ops
         if num_ops == 0:
-            verb = "will be executed" if dry_run else "to execute"
+            verb = "would be executed" if dry_run else "to execute"
             logger.info("Everything is up to date, no operations %s.", verb)
         else:
-            verb = "will complete" if dry_run else "completed"
+            verb = "would complete" if dry_run else "completed"
             logger.info("Execution %s with %d operations executed.", verb, num_ops)
 
         logger.debug("Finished running backend pipeline.")

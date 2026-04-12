@@ -23,7 +23,7 @@ class CTreeExecutor:
 
     Attributes:
         tree (CTree): The creation tree instance constructed during the execution.
-        num_executed_ops (int): The number of operations that actually executed during the execution.
+        num_executed_ops (int): The number of operations executed during the execution.
         dry_run (bool): Whether to perform a dry run of the execution.
             If True, the execution will only log the operations without actually performing them.
     """
