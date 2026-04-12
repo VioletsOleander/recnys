@@ -25,7 +25,7 @@ class Callbacks(NamedTuple):
     """Callbacks to be called when visiting nodes during tree traversal.
 
     Attributes:
-        branch: The function to be called when visiting a branch node, or `None`.
+        branch: The function to be called when visiting a (non-root) branch node, or `None`.
         leaf: The function to be called when visiting a leaf node, or `None`.
     """
 

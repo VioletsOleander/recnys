@@ -53,7 +53,9 @@ class CTreeExpander:
         callbacks = Callbacks(branch=None, leaf=expand_leaf)
         walk_tree(ctree, callbacks=callbacks, order=VisitOrder.PRE)
 
-        logger.debug("Expanded creation tree to: %s", self._tree)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("Expanded creation tree to: %s", self._tree.model_dump_json(indent=2))
+
         return self._tree
 
     def _branchify_leaf(self, leaf: LeafNode, exclude_dirs: list[str]) -> BranchNode:

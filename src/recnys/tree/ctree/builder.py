@@ -63,7 +63,9 @@ class CTreeBuilder:
             op = self._get_op(key, val)
             self._make_nodes(src=src, dst=dst, op=op)
 
-        logger.debug("Built creation tree: %s", self._tree)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("Built creation tree: %s", self._tree.model_dump_json(indent=2))
+
         return self._tree
 
     def _make_nodes(self, src: Path, dst: Path, op: CLeafOp) -> None:
