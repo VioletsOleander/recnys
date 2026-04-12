@@ -117,15 +117,8 @@ class BackendPipeline:
 
     def _arrange(self) -> None:
         self._variables_file = Path.cwd() / "variables.yaml"
-
-        data_dir = Path.home() / ".recnys"
-        self._ctree_file = data_dir / "prev_ctree.json"
-        self._dtree_file = data_dir / "prev_dtree.json"
-
-        data_dir.mkdir(exist_ok=True)
-        gitignore = data_dir / ".gitignore"
-        if not gitignore.exists():
-            gitignore.write_text("# Created by recnys\n*\n", encoding="utf-8")
+        self._ctree_file = Path.cwd() / ".recnys" / "prev_ctree.json"
+        self._dtree_file = Path.cwd() / ".recnys" / "prev_dtree.json"
 
 
 class _ExecutionContent(AbstractContextManager):
@@ -158,6 +151,13 @@ class _ExecutionContent(AbstractContextManager):
             return False
 
         logger.debug("Execution context exiting, saving the tree to files")
+
+        parent = self.tree_file.parent
+        parent.mkdir(exist_ok=True)
+
+        ignore = parent / ".gitignore"
+        if not ignore.exists():
+            ignore.write_text("# Created by recnys\n*\n", encoding="utf-8")
 
         f = self.tree_file
         serialize_tree(self.executor.tree, f)

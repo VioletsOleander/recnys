@@ -84,6 +84,18 @@ class DTreeExecutor:
         return self.tree
 
     def _rmdir(self, dst: Path) -> None:
+        if not dst.exists():
+            return logger.debug("Directory %s does not exist, skip removing it", dst)
+
+        if not dst.is_dir():
+            e = RuntimeError(f"Expected {dst} to be a directory, but it is not.")
+            e.add_note(
+                "Hint: This may be caused by a file or symbolic link that has "
+                "the same path as the directory to be removed. "
+                "Please check if there is a file or symbolic link at the path and remove it first."
+            )
+            raise e
+
         if next(dst.iterdir(), None) is not None:
             return logger.debug("Directory %s is not empty, skip removing it", dst)
 
@@ -94,12 +106,19 @@ class DTreeExecutor:
         return logger.info("Removed empty directory %s", dst)
 
     def _unlink(self, dst: Path) -> None:
-        if self.dry_run:
-            return logger.info("Unlink %s, no effect if it does not exist.", dst)
-
-        try:
-            dst.unlink()
-        except FileNotFoundError:
+        if not dst.exists():
             return logger.debug("File %s does not exist, skip unlinking it", dst)
-        else:
-            return logger.info("Unlinked %s", dst)
+
+        if not dst.is_symlink() and not dst.is_file():
+            e = RuntimeError(f"Expected {dst} to be a file or symbolic link, but it is not.")
+            e.add_note(
+                "Hint: This may be caused by a directory that has the same path as the file to be unlinked. "
+                "Please check if there is a directory at the path and remove it first."
+            )
+            raise e
+
+        if self.dry_run:
+            return logger.info("Unlink %s.", dst)
+
+        dst.unlink()
+        return logger.info("Unlinked %s", dst)

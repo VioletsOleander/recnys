@@ -12,19 +12,19 @@ __all__ = ["collect_nodes"]
 
 @overload
 def collect_nodes(
-    tree: Tree, *, collect_branch: Literal[True] = True, collect_leaf: Literal[False] = False
+    tree: Tree, *, collect_branch: Literal[True] = ..., collect_leaf: Literal[False] = ...
 ) -> dict[Path, BranchNode]: ...
 
 
 @overload
 def collect_nodes(
-    tree: Tree, *, collect_branch: Literal[False] = False, collect_leaf: Literal[True] = True
+    tree: Tree, *, collect_branch: Literal[False] = ..., collect_leaf: Literal[True] = ...
 ) -> dict[Path, LeafNode]: ...
 
 
 @overload
 def collect_nodes(
-    tree: Tree, *, collect_branch: Literal[True] = True, collect_leaf: Literal[True] = True
+    tree: Tree, *, collect_branch: Literal[True] = ..., collect_leaf: Literal[True] = ...
 ) -> dict[Path, Node]: ...
 
 
