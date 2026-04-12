@@ -22,11 +22,12 @@ class DTreeExecutor:
 
     Attributes:
         tree (DTree): The deletion tree instance constructed during the execution.
+        num_executed_ops (int): The number of operations that actually executed during the execution.
         dry_run (bool): Whether to perform a dry run of the execution.
-            If True, the execution will only log the operations without actually performing them.
     """
 
     tree: DTree
+    num_executed_ops: int
     dry_run: bool
 
     def __init__(self, *, dry_run: bool) -> None:
@@ -36,6 +37,7 @@ class DTreeExecutor:
             dry_run (bool): Whether to perform a dry run of the execution.
         """
         self.dry_run = dry_run
+        self.num_executed_ops = 0
 
     def execute(self, dtree: DTree) -> DTree:
         """Execute the given dtree.
@@ -59,24 +61,24 @@ class DTreeExecutor:
         def detach_node(node: Node) -> None:
             parent = parents[node.dst.parent]
             parent.children.pop(node.dst)
-            ops.pop(node.dst)
+            ops.pop(node.dst, None)
 
         def execute_branch(node: BranchNode) -> None:
-            """Execute deletion op (nop or remove) on branch node (dir).
+            """Execute deletion op (remove) on branch node (dir).
 
             Detach the node after execution.
             """
-            if ops[node.dst] == DBranchOp.REMOVE:
+            if ops.get(node.dst) == DBranchOp.REMOVE:
                 self._rmdir(node.dst)
 
             return detach_node(node)
 
         def execute_leaf(node: LeafNode) -> None:
-            """Execute deletion op (nop or unlink) on leaf node (file or symlink).
+            """Execute deletion op (unlink) on leaf node (file or symlink).
 
             Detach the node after execution.
             """
-            if ops[node.dst] == DLeafOp.UNLINK:
+            if ops.get(node.dst) == DLeafOp.UNLINK:
                 self._unlink(node.dst)
 
             return detach_node(node)
@@ -96,37 +98,42 @@ class DTreeExecutor:
             return logger.debug("Directory %s does not exist, skip removing it", dst)
 
         if not dst.is_dir():
-            e = RuntimeError(f"Expected {dst} to be a directory, but it is not.")
-            e.add_note(
-                "Hint: This may be caused by a file or symbolic link that has "
-                "the same path as the directory to be removed. "
-                "Please check if there is a file or symbolic link at the path and remove it first."
+            raise RuntimeError(
+                f"Path {dst} is occupied, failed to remove the directory.\n"
+                "Hint: To make recnys work correctly, please remove the file or symbolic link at the path, "
+                "and manually create an empty directory at the path."
             )
-            raise e
 
         if next(dst.iterdir(), None) is not None:
             return logger.debug("Directory %s is not empty, skip removing it", dst)
 
-        if self.dry_run:
-            return logger.info("Remove empty directory %s.", dst)
+        self.num_executed_ops += 1
 
-        dst.rmdir()
-        return logger.info("Removed empty directory %s", dst)
+        if self.dry_run:
+            verb = "Remove"
+        else:
+            dst.rmdir()
+            verb = "Removed"
+
+        return logger.info("%s empty directory %s.", verb, dst)
 
     def _unlink(self, dst: Path) -> None:
         if not dst.exists():
-            return logger.debug("File %s does not exist, skip unlinking it", dst)
+            return logger.debug("File/Symlink %s does not exist, skip unlinking it", dst)
 
         if not dst.is_symlink() and not dst.is_file():
-            e = RuntimeError(f"Expected {dst} to be a file or symbolic link, but it is not.")
-            e.add_note(
-                "Hint: This may be caused by a directory that has the same path as the file to be unlinked. "
-                "Please check if there is a directory at the path and remove it first."
+            raise RuntimeError(
+                f"Path {dst} is occupied, failed to unlink the file or symbolic link.\n"
+                "Hint: To make recnys work correctly, please remove the directory at the path, "
+                "and manually create an empty file at the path."
             )
-            raise e
+
+        self.num_executed_ops += 1
 
         if self.dry_run:
-            return logger.info("Unlink %s.", dst)
+            verb = "Unlink"
+        else:
+            dst.unlink()
+            verb = "Unlinked"
 
-        dst.unlink()
-        return logger.info("Unlinked %s", dst)
+        return logger.info("%s %s.", verb, dst)

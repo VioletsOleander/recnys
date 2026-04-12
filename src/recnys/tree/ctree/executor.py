@@ -23,11 +23,13 @@ class CTreeExecutor:
 
     Attributes:
         tree (CTree): The creation tree instance constructed during the execution.
+        num_executed_ops (int): The number of operations that actually executed during the execution.
         dry_run (bool): Whether to perform a dry run of the execution.
             If True, the execution will only log the operations without actually performing them.
     """
 
     tree: CTree
+    num_executed_ops: int
     dry_run: bool
     _renderer: _Renderer | None
 
@@ -39,6 +41,7 @@ class CTreeExecutor:
             dry_run (bool): Whether to perform a dry run of the execution.
         """
         self.dry_run = dry_run
+        self.num_executed_ops = 0
         self._renderer = _Renderer(variables) if variables is not None else None
 
     def execute(self, ctree: CTree) -> CTree:
@@ -105,43 +108,52 @@ class CTreeExecutor:
     def _mkdir(self, dst: Path) -> None:
         if dst.exists():
             if not dst.is_dir():
-                e = FileExistsError(f"Path {dst} is occupied, failed to create directory there.")
-                e.add_note("Hint: Please remove the file or symbolic link at the path.")
-                raise e
+                raise FileExistsError(
+                    f"Path {dst} is occupied, failed to create directory there.\n"
+                    "Hint: Please remove the file or symbolic link at the path."
+                )
 
             return logger.debug("Directory %s already exists, skip creation.", dst)
 
+        self.num_executed_ops += 1
+
         if self.dry_run:
-            return logger.info("Create directory %s", dst)
+            verb = "Create"
+        else:
+            dst.mkdir()
+            verb = "Created"
 
-        dst.mkdir()
-        return logger.info("Created directory %s", dst)
+        return logger.info("%s directory %s", verb, dst)
 
-    def _write(self, dst: Path, content: str) -> bool:
-        """Return False if written is skipped, otherwise True."""
+    def _skip_write(self, dst: Path, content: str) -> bool:
         if dst.exists():
             if not dst.is_file():
-                e = FileExistsError(f"Path {dst} is occupied, failed to write file there.")
-                e.add_note("Hint: Please remove the directory or symbolic link at the path.")
-                raise e
+                raise FileExistsError(
+                    f"Path {dst} is occupied, failed to write file there.\n"
+                    "Hint: Please remove the directory or symbolic link at the path."
+                )
 
             if dst.read_text(encoding="utf-8") == content:
                 logger.debug("File %s already exists with the same content, skip writing.", dst)
-                return False
+                return True
 
-        if self.dry_run:
-            return True
-
-        _atomic_write(dst, content)
-        return True
+        return False
 
     def _copy(self, src: Path, dst: Path) -> None:
         content = src.read_text(encoding="utf-8")
-        written = self._write(dst, content)
 
-        if written:
-            action = "Copy" if self.dry_run else "Copied"
-            logger.info("%s %s to %s.", action, src, dst)
+        if self._skip_write(dst, content):
+            return None
+
+        self.num_executed_ops += 1
+
+        if self.dry_run:
+            verb = "Copy"
+        else:
+            _atomic_write(dst, content)
+            verb = "Copied"
+
+        return logger.info("%s %s to %s.", verb, src, dst)
 
     def _render(self, src: Path, dst: Path) -> None:
         if self._renderer is None:
@@ -149,33 +161,43 @@ class CTreeExecutor:
 
         template_content = src.read_text(encoding="utf-8")
         content = self._renderer.render(template_content)
-        written = self._write(dst, content)
 
-        if written:
-            action = "Render" if self.dry_run else "Rendered"
+        if self._skip_write(dst, content):
+            return None
 
-            logger.info("%s %s to %s.", action, src, dst)
+        self.num_executed_ops += 1
+
+        if self.dry_run:
+            verb = "Render"
+        else:
+            _atomic_write(dst, content)
+            verb = "Rendered"
+
+        return logger.info("%s %s to %s.", verb, src, dst)
 
     def _link(self, src: Path, dst: Path) -> None:
         if dst.exists(follow_symlinks=False):
             if not dst.is_symlink():
-                e = FileExistsError(
-                    f"Path {dst} is occupied, failed to create symbolic link there."
+                raise FileExistsError(
+                    f"Path {dst} is occupied, failed to create symbolic link there.\n"
+                    "Hint: Please remove the file or directory at the path."
                 )
-                e.add_note("Hint: Please remove the file or directory at the path.")
-                raise e
 
             if dst.resolve() == src.resolve():
                 return logger.debug(
                     "Link %s already exists with the same target, skip linking.", dst
                 )
 
-        if self.dry_run:
-            return logger.info("Link %s to %s.", src, dst)
+        self.num_executed_ops += 1
 
-        dst.unlink(missing_ok=True)
-        dst.symlink_to(src)
-        return logger.info("Linked %s to %s.", src, dst)
+        if self.dry_run:
+            verb = "Link"
+        else:
+            dst.unlink(missing_ok=True)
+            dst.symlink_to(src)
+            verb = "Linked"
+
+        return logger.info("%s %s to %s.", verb, src, dst)
 
 
 def _atomic_write(f: Path, content: str) -> None:
