@@ -53,14 +53,22 @@ class BackendPipeline:
         ctree = self._grow_ctree(scanned_config)
         dtree = self._grow_dtree(ctree)
 
-        executor = DTreeExecutor(dry_run=dry_run)
-        with _ExecutionContent(executor, self._dtree_file, dry_run=dry_run):
-            executor.execute(dtree)
+        d_executor = DTreeExecutor(dry_run=dry_run)
+        with _ExecutionContent(d_executor, self._dtree_file, dry_run=dry_run):
+            d_executor.execute(dtree)
 
         variables = self._get_variables(ctree)
-        executor = CTreeExecutor(variables=variables, dry_run=dry_run)
-        with _ExecutionContent(executor, self._ctree_file, dry_run=dry_run):
-            executor.execute(ctree)
+        c_executor = CTreeExecutor(variables=variables, dry_run=dry_run)
+        with _ExecutionContent(c_executor, self._ctree_file, dry_run=dry_run):
+            c_executor.execute(ctree)
+
+        num_ops = c_executor.num_executed_ops + d_executor.num_executed_ops
+        if num_ops == 0:
+            verb = "would be executed" if dry_run else "to execute"
+            logger.info("Everything is up to date, no operations %s.", verb)
+        else:
+            verb = "would complete" if dry_run else "completed"
+            logger.info("Execution %s with %d operations executed.", verb, num_ops)
 
         logger.debug("Finished running backend pipeline.")
 
