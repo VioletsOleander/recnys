@@ -48,11 +48,16 @@ def scan_config(loaded_config: dict) -> ScannedConfig:
     Raises:
         ValidationError: If the given configuration data does not conform to the expected schema.
     """
-    return _validate_data(
+    logger.debug("Scanning configuration data.")
+
+    data = _validate_data(
         cls=ScannedConfig,
         data=loaded_config,
         note="Hint: Please check the contents of your recnys.yaml file.",
     )
+
+    logger.debug("Scanned configuration: %s", data)
+    return data
 
 
 def scan_variables(loaded_variables: dict) -> ScannedVariables:
@@ -67,8 +72,13 @@ def scan_variables(loaded_variables: dict) -> ScannedVariables:
     Raises:
         ValidationError: If the given variables data does not conform to the expected schema.
     """
-    return _validate_data(
+    logger.debug("Scanning variables data.")
+
+    data = _validate_data(
         cls=ScannedVariables,
         data=loaded_variables,
         note="Hint: Please check the contents of your variables.yaml file.",
     )
+
+    logger.debug("Scanned variables: %s", data)
+    return data

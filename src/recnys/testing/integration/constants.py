@@ -13,7 +13,7 @@ class _LazyConstants:
     @cached_property
     def cwd(self) -> Path:
         """Current working directory."""
-        return (Path.home() / "repo").absolute()
+        return Path.home() / "repo"
 
     @cached_property
     def data_dir(self) -> Path:

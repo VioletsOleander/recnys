@@ -48,6 +48,8 @@ class BackendPipeline:
             dry_run (bool): Whether to perform a dry run of the execution. If True, the execution will only
                 log the operations without actually performing them.
         """
+        logger.debug("Running backend pipeline.")
+
         ctree = self._grow_ctree(scanned_config)
         dtree = self._grow_dtree(ctree)
 
@@ -60,6 +62,8 @@ class BackendPipeline:
         executor = CTreeExecutor(variables=variables, dry_run=dry_run)
         with _ExecutionContent(executor, self._ctree_file, dry_run=dry_run):
             executor.execute(ctree)
+
+        logger.debug("Finished running backend pipeline.")
 
     def _grow_ctree(self, scanned_config: ScannedConfig) -> CTree:
         # Build ctree
@@ -90,11 +94,14 @@ class BackendPipeline:
             raise e
 
         if ctree_fexist:
+            logger.debug("Previous ctree and dtree found.")
+
             prev_ctree = deserialize_tree(cls=CTree, f=self._ctree_file)
             prev_dtree = deserialize_tree(cls=DTree, f=self._dtree_file)
             builder = DTreeBuilder()
             return builder.build(ctree, prev_ctree, prev_dtree)
 
+        logger.debug("No previous ctree and dtree found, skipping dtree generation.")
         return None
 
     def _get_variables(self, ctree: CTree) -> ScannedVariables | None:
@@ -109,10 +116,11 @@ class BackendPipeline:
         return None
 
     def _arrange(self) -> None:
+        self._variables_file = Path.cwd() / "variables.yaml"
+
         data_dir = Path.home() / ".recnys"
         self._ctree_file = data_dir / "prev_ctree.json"
         self._dtree_file = data_dir / "prev_dtree.json"
-        self._variables_file = data_dir / "variables.yaml"
 
         data_dir.mkdir(exist_ok=True)
         gitignore = data_dir / ".gitignore"

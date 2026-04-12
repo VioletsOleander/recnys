@@ -23,7 +23,7 @@ def serialize_tree(tree: Tree, f: Path) -> None:
     content = tree.model_dump_json(indent=2)
     f.write_text(content, encoding="utf-8")
 
-    logger.debug("Successfully serialized data to %s", f)
+    logger.debug("Serialized data to %s", f)
 
 
 def deserialize_tree[T: (CTree, DTree)](cls: type[T], f: Path) -> T:
@@ -51,7 +51,7 @@ def deserialize_tree[T: (CTree, DTree)](cls: type[T], f: Path) -> T:
         e.add_note(message)
         raise
     else:
-        logger.debug("Successfully deserialized data from %s", f)
+        logger.debug("Deserialized data from %s", f)
         return tree
 
 

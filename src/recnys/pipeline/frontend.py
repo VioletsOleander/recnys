@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -9,6 +10,8 @@ if TYPE_CHECKING:
     from recnys.linear.model import ScannedConfig
 
 __all__ = ["FrontendPipeline"]
+
+logger = logging.getLogger(__name__)
 
 
 class FrontendPipeline:
@@ -31,6 +34,8 @@ class FrontendPipeline:
         Returns:
             ScannedConfig: The scanned configuration.
         """
+        logger.debug("Running frontend pipeline.")
+
         # Load: yaml -> dict
         loaded_config = load_yaml(
             self._recnys_file,
@@ -39,7 +44,10 @@ class FrontendPipeline:
         )
 
         # Scan: dict -> linear model
-        return scan_config(loaded_config)
+        scanned_config = scan_config(loaded_config)
+
+        logger.debug("Finished running frontend pipeline.")
+        return scanned_config
 
     def _arrange(self) -> None:
         self._recnys_file = Path.cwd() / "recnys.yaml"

@@ -53,6 +53,8 @@ class CTreeExecutor:
         Returns:
             CTree: The creation tree with the non-executed nodes detached from the tree.
         """
+        logger.debug("Executing creation tree.")
+
         self.tree = CTree(root=BranchNode(dst=ctree.root.dst))
         parents: dict[Path, BranchNode] = {self.tree.root.dst: self.tree.root}
         ops = self.tree.ops
@@ -70,7 +72,8 @@ class CTreeExecutor:
             Attach the executed node after execution.
             """
             self._mkdir(node.dst)
-            return attach_node(node)
+            branch = BranchNode(dst=node.dst)
+            return attach_node(branch)
 
         def execute_leaf(node: LeafNode) -> None:
             """Execute creation op (copy/render/link) on leaf node (file or dir).
@@ -88,10 +91,13 @@ class CTreeExecutor:
                     self._link(node.src, node.dst)
 
             ops[node.dst] = op
-            return attach_node(node)
+            leaf = LeafNode(src=node.src, dst=node.dst)
+            return attach_node(leaf)
 
         callbacks = Callbacks(branch=execute_branch, leaf=execute_leaf)
-        walk_tree(ctree, callbacks=callbacks, order=VisitOrder.POST)
+        walk_tree(ctree, callbacks=callbacks, order=VisitOrder.PRE)
+
+        logger.debug("Executed creation tree.")
         return self.tree
 
     def _mkdir(self, dst: Path) -> None:
@@ -114,7 +120,7 @@ class CTreeExecutor:
             return logger.info("Copy %s to %s.", src, dst)
 
         _atomic_write(dst, content)
-        return logger.info("Copied %s to %s", src, dst)
+        return logger.info("Copied %s to %s.", src, dst)
 
     def _render(self, src: Path, dst: Path) -> None:
         if self._renderer is None:
@@ -132,7 +138,7 @@ class CTreeExecutor:
             return logger.info("Render %s to %s.", src, dst)
 
         _atomic_write(dst, content)
-        return logger.info("Rendered %s to %s", src, dst)
+        return logger.info("Rendered %s to %s.", src, dst)
 
     def _link(self, src: Path, dst: Path) -> None:
         if dst.exists(follow_symlinks=False) and dst.resolve() == src.resolve():
@@ -142,7 +148,7 @@ class CTreeExecutor:
             return logger.info("Link %s to %s.", src, dst)
 
         dst.symlink_to(src)
-        return logger.info("Linked %s to %s", src, dst)
+        return logger.info("Linked %s to %s.", src, dst)
 
 
 def _atomic_write(f: Path, content: str) -> None:

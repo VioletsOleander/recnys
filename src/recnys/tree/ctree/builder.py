@@ -1,5 +1,6 @@
 """Provide `CTreeBuilder`."""
 
+import logging
 import platform
 from pathlib import Path
 
@@ -9,6 +10,8 @@ from recnys.tree.model import BranchNode, CLeafOp, CTree, LeafNode
 from .utils import handle_fnf
 
 __all__ = ["CTreeBuilder"]
+
+logger = logging.getLogger(__name__)
 
 
 class CTreeBuilder:
@@ -47,6 +50,8 @@ class CTreeBuilder:
         Returns:
             CTree: The constructed creation tree.
         """
+        logger.debug("Building creation tree from scanned configuration.")
+
         self._tree = CTree(root=BranchNode(dst=Path.home()))
 
         for key, val in scanned_config.root.items():
@@ -58,6 +63,7 @@ class CTreeBuilder:
             op = self._get_op(key, val)
             self._make_nodes(src=src, dst=dst, op=op)
 
+        logger.debug("Built creation tree: %s", self._tree)
         return self._tree
 
     def _make_nodes(self, src: Path, dst: Path, op: CLeafOp) -> None:

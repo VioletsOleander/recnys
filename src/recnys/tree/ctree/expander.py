@@ -1,5 +1,6 @@
 """Provide `CTreeExpander`."""
 
+import logging
 from typing import TYPE_CHECKING
 
 from recnys.tree.model import BranchNode, CLeafOp, CTree, LeafNode
@@ -12,6 +13,8 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 __all__ = ["CTreeExpander"]
+
+logger = logging.getLogger(__name__)
 
 
 class CTreeExpander:
@@ -34,6 +37,8 @@ class CTreeExpander:
         Returns:
             CTree: The expanded creation tree.
         """
+        logger.debug("Expanding creation tree.")
+
         self._tree = ctree
         parents = collect_nodes(ctree, collect_leaf=False)
         parents[ctree.root.dst] = ctree.root
@@ -48,6 +53,7 @@ class CTreeExpander:
         callbacks = Callbacks(branch=None, leaf=expand_leaf)
         walk_tree(ctree, callbacks=callbacks, order=VisitOrder.PRE)
 
+        logger.debug("Expanded creation tree to: %s", self._tree)
         return self._tree
 
     def _branchify_leaf(self, leaf: LeafNode, exclude_dirs: list[str]) -> BranchNode:
