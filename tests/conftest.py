@@ -1,11 +1,8 @@
+import platform
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import pytest
 from pyfakefs.fake_filesystem import FakeFilesystem, OSType
-
-if TYPE_CHECKING:
-    from pytest_mock import MockFixture
 
 
 @pytest.fixture
@@ -14,8 +11,8 @@ def resources_dir(pytestconfig: pytest.Config) -> Path:
 
 
 @pytest.fixture(params=["Linux", "Windows"])
-def system(mocker: MockFixture, request: pytest.FixtureRequest) -> str:
-    mocker.patch("recnys.tree.ctree.builder.platform.system", return_value=request.param)
+def system(monkeypatch: pytest.MonkeyPatch, request: pytest.FixtureRequest) -> str:
+    monkeypatch.setattr(platform, "system", lambda: request.param)
     return request.param
 
 
