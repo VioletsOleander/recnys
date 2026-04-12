@@ -53,12 +53,12 @@ class BackendPipeline:
 
         if dtree is not None:
             executor = DTreeExecutor(dry_run=dry_run)
-            with ExecutionContext(executor, self._dtree_file, dry_run=dry_run):
+            with _ExecutionContent(executor, self._dtree_file, dry_run=dry_run):
                 executor.execute(dtree)
 
         variables = self._get_variables(ctree)
         executor = CTreeExecutor(variables=variables, dry_run=dry_run)
-        with ExecutionContext(executor, self._ctree_file, dry_run=dry_run):
+        with _ExecutionContent(executor, self._ctree_file, dry_run=dry_run):
             executor.execute(ctree)
 
     def _grow_ctree(self, scanned_config: ScannedConfig) -> CTree:
@@ -120,14 +120,8 @@ class BackendPipeline:
             gitignore.write_text("# Created by recnys\n*\n", encoding="utf-8")
 
 
-class ExecutionContext(AbstractContextManager):
-    """Context manager for executing a tree.
-
-    Attributes:
-        executor (DTreeExecutor | CTreeExecutor): The executor to execute the tree.
-        tree_file (Path): The file path for storing the tree after execution.
-        dry_run (bool): Whether to perform a dry run of the execution.
-    """
+class _ExecutionContent(AbstractContextManager):
+    """Context manager for executing a tree."""
 
     executor: DTreeExecutor | CTreeExecutor
     tree_file: Path
@@ -136,13 +130,6 @@ class ExecutionContext(AbstractContextManager):
     def __init__(
         self, executor: DTreeExecutor | CTreeExecutor, tree_file: Path, *, dry_run: bool
     ) -> None:
-        """Initialize the ExecutionContext.
-
-        Args:
-            executor (DTreeExecutor | CTreeExecutor): The executor to execute the tree.
-            tree_file (Path): The file path for storing the tree after execution.
-            dry_run (bool): Whether to perform a dry run of the execution.
-        """
         self.executor = executor
         self.tree_file = tree_file
         self.dry_run = dry_run
