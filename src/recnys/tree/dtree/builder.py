@@ -59,12 +59,11 @@ class DTreeBuilder:
         dtree_empty = not prev_dtree.root.children
 
         if ctree_empty == dtree_empty:
-            e = RuntimeError("Ctree file and dtree file does not meet the expected state.")
-            e.add_note(
+            raise RuntimeError(
+                "Ctree file and dtree file does not meet the expected state.\n"
                 "Hint: Please use backup file to recover them. "
                 "If backup file is not available, please delete them."
             )
-            raise e
 
         if dtree_empty:
             logger.debug("Previous ctree is not empty, derive deletion tree from it.")
