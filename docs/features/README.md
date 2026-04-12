@@ -107,26 +107,20 @@ match platform.system():
 
 ## Glossary
 
-_File_:
-
-- Static file: A file without `.template` suffix.
-- Dynamic file: A file with `.template` suffix, also called template file. Dynamic files may contain [Jinja2 variables syntax](https://jinja.palletsprojects.com/en/stable/templates/#variables), and will be rendered using the provided variables before syncing to the destination.
-
 _Counterpart path_:
 
-- For file: a path under the destination directory whose relative path to the destination directory is the same as the relative path of the file to the source directory, without `.template` suffix if the file is a dynamic file.
+- For file: a path under the destination directory whose relative path to the destination directory is the same as the relative path of the file to the source directory, without `.template` suffix if the file is a template file.
 - For directory: a path under the destination directory whose relative path to the destination directory is the same as the relative path of the directory to the source directory.
 
 _Counterpart symlink_:
 
-- For static file: a symlink in the counterpart path pointing to the static file.
-- For dynamic file: undefined, because dynamic files do not support symlinks.
+- For normal file: a symlink in the counterpart path pointing to the file.
 - For directory: a symlink in the counterpart path pointing to the directory.
 
 _Counterpart content_:
 
-- For static file: the same content as the static file.
-- For dynamic file: the content rendered from the dynamic file with variables defined in `variables.yaml`
+- For normal file: the same content as the normal file.
+- For template file: the content rendered from the template file with variables defined in `variables.yaml`
 
 _Counterpart file_: A file in the counterpart path, containing the counterpart content.
 
@@ -137,6 +131,6 @@ _Counterpart directory_: A directory in the counterpart path, containing:
 
 _Artifact_:
 
-- For static file: the resulting counterpart file or symlink of last `recnys` execution.
-- For dynamic file: the resulting counterpart file of last `recnys` execution.
+- For normal file: the resulting counterpart file or symlink of last `recnys` execution.
+- For template file: the resulting counterpart file of last `recnys` execution.
 - For directory: the resulting counterpart directory or symlink of last `recnys` execution.

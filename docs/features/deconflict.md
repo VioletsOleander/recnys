@@ -14,7 +14,7 @@ According to the YAML specification, keys in a yaml file should be unique. There
 
 ## 1. File and File
 
-**Scenario**: Static and dynamic file entries
+**Scenario**: Normal and template file entries
 
 _Condition_: The content of `recnys.yaml` is:
 

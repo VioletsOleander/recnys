@@ -40,7 +40,7 @@ The template files will be rendered using the provided variables, and its render
 
 `dest` describes the destination path on different platforms.
 
-`dest` is optional. For a certain platform, if the destination path is not provided, it will be derived from the source path:
+`dest` is optional. For each platform, if the destination path is not provided, its default value will be derived from the source path:
 
 - In Linux, it defaults to `~/.config/src` (without `.template` suffix if `<src>` is a template file).
 - In Windows it defaults to `~/AppData/Roaming/src` (without `.template` suffix if `<src>` is a template file).
@@ -49,15 +49,15 @@ The template files will be rendered using the provided variables, and its render
 
 Destination path should be surrounded by double quotes (`"`), and should be a relative path to the user's home directory.
 
-For a certain platform, if the destination path is an empty string (`""`), it means the entry is disabled on the platform, and no operation will be performed for the entry on the platform.
+For each platform, if the destination path is an empty string (`""`), it means the entry is disabled on the platform, and no operation will be performed for the entry on the platform.
 
 #### `policy`
 
 `policy` describes how to sync the source file/directory to the destination, which can be:
 
-- `copy` means copy the file/directory from the source to the destination, and overwrite the destination if it already exists.
-- `symlink` means create a symlink at the destination pointing to the source, and overwrite the destination if it already exists.
-- `render` means render the source file (only applicable for template files) and copy the rendered result to the destination, and overwrite the destination if it already exists.
+- `copy`: copy the file/directory from the source to the destination, and overwrite the destination if it already exists.
+- `symlink`: create a symlink at the destination pointing to the source, and overwrite the destination if it already exists.
+- `render`: render the source file (only applicable for template files) and copy the rendered result to the destination, overwrite the destination if it already exists.
 
 `policy` is optional. It defaults to `symlink` for normal file and directory, and defaults to `render` for template file.
 
