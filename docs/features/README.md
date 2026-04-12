@@ -33,6 +33,54 @@ Define `<<any>>` as:
 any = .*
 ```
 
+Define `<<file>>` as:
+
+```regex
+file = ([^/]+/)*[^/]+
+```
+
+For example, `foo`, `foo/bar` and `foo/bar/baz` are all valid `<<file>>`, but `foo/` and `/foo` are not valid `<<file>>`.
+
+Define `<<root_file>>` as:
+
+```regex
+root_file = [^/]+
+```
+
+For example, `foo` is a valid `<<root_file>>`, but `foo/bar` and `/foo` are not valid `<<root_file>>`.
+
+Define `<<leaf_file>>` as:
+
+```regex
+leaf_file = ([^/]+/)+[^/]+
+```
+
+For example, `foo/bar` and `foo/bar/baz` are valid `<<leaf_file>>`, but `foo` and `/foo` are not valid `<<leaf_file>>`.
+
+Define `<<directory>>` as:
+
+```regex
+directory = ([^/]+/)+
+```
+
+For example, `foo/`, `foo/bar/` and `foo/bar/baz/` are all valid `<<directory>>`, but `foo` and `/foo/` are not valid `<<directory>>`.
+
+Define `<<root_directory>>` as:
+
+```regex
+root_directory = [^/]+/
+```
+
+For example, `foo/` is a valid `<<root_directory>>`, but `foo/bar/` and `/foo/` are not valid `<<root_directory>>`.
+
+Define `<<leaf_directory>>` as:
+
+```regex
+leaf_directory = ([^/]+/)+
+```
+
+For example, `foo/bar/` and `foo/bar/baz/` are valid `<<leaf_directory>>`, but `foo/` and `/foo/` are not valid `<<leaf_directory>>`.
+
 ## Variable Definition
 
 Define `<os>` as:
@@ -41,6 +89,20 @@ Define `<os>` as:
 match platform.system():
     case "Windows": os = "Windows"
     case "Linux": os = "Linux"
+```
+
+Define `<home>` as:
+
+```python
+home = pathlib.Path.home()
+```
+
+Define `<config_directory>` as:
+
+```python
+match platform.system():
+    case "Windows": config_directory = "~/AppData/Roaming/"
+    case "Linux": config_directory = "~/.config/"
 ```
 
 ## Glossary
@@ -52,24 +114,26 @@ _File_:
 
 _Counterpart path_:
 
+- For file: a path under the destination directory whose relative path to the destination directory is the same as the relative path of the file to the source directory, without `.template` suffix if the file is a dynamic file.
 - For directory: a path under the destination directory whose relative path to the destination directory is the same as the relative path of the directory to the source directory.
-- For static file: a path under the destination directory whose relative path to the destination directory is the same as the relative path of the static file to the source directory.
-- For dynamic file: a path under the destination directory whose relative path to the destination directory is the same as the relative path of the dynamic file to the source directory, but without `.template` suffix.
+
+_Counterpart symlink_:
+
+- For static file: a symlink in the counterpart path pointing to the static file.
+- For dynamic file: undefined, because dynamic files do not support symlinks.
+- For directory: a symlink in the counterpart path pointing to the directory.
+
+_Counterpart content_:
+
+- For static file: the same content as the static file.
+- For dynamic file: the content rendered from the dynamic file with variables defined in `variables.yaml`
+
+_Counterpart file_: A file in the counterpart path, containing the counterpart content.
 
 _Counterpart directory_: A directory in the counterpart path, containing:
 
 - counterpart files and/or symlinks for files under the directory
 - counterpart directories and/or symlinks for subdirectories under the directory
-
-_Counterpart file_:
-
-- For static file: a file in the counterpart path with the same content.
-- For dynamic file: a file in the counterpart path with content rendered from the dynamic file.
-
-_Counterpart symlink_:
-
-- For directory: a symlink in the counterpart path pointing to the directory.
-- For static file: a symlink in the counterpart path pointing to the static file.
 
 _Artifact_:
 

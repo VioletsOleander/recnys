@@ -1,21 +1,31 @@
-from typing import TYPE_CHECKING
+import platform
+from pathlib import Path
 
 import pytest
 from pyfakefs.fake_filesystem import FakeFilesystem, OSType
 
-if TYPE_CHECKING:
-    from pytest_mock import MockerFixture
+
+@pytest.fixture
+def resources_dir(pytestconfig: pytest.Config) -> Path:
+    return pytestconfig.rootpath / "tests" / "resources"
 
 
 @pytest.fixture(params=["Linux", "Windows"])
-def system(mocker: MockerFixture, request: pytest.FixtureRequest) -> str:
-    mock = mocker.patch(
-        "recnys.canonicalize.canonicalizer.platform.system", return_value=request.param
-    )
-    return mock.return_value
+def system(monkeypatch: pytest.MonkeyPatch, request: pytest.FixtureRequest) -> str:
+    monkeypatch.setattr(platform, "system", lambda: request.param)
+    return request.param
 
 
 @pytest.fixture
-def filesystem(fs: FakeFilesystem, system: str) -> FakeFilesystem:
+def filesystem(fs: FakeFilesystem, monkeypatch: pytest.MonkeyPatch, system: str) -> FakeFilesystem:
     fs.os = OSType(system.lower())
+
+    match system:
+        case "Linux":
+            monkeypatch.setattr(Path, "home", lambda: Path("/home/bob"))
+            fs.create_dir("/home/bob")
+        case "Windows":
+            monkeypatch.setattr(Path, "home", lambda: Path("C:/Users/bob"))
+            fs.create_dir("C:/Users/bob")
+
     return fs

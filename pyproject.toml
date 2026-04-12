@@ -5,14 +5,13 @@ description = "A simple dotfile synchronization helper"
 authors = [{ name = "VioletsOleander", email = "1377232072@qq.com" }]
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = ["jinja2>=3.1.6", "pyyaml>=6.0.3"]
+dependencies = ["jinja2>=3.1.6", "pydantic>=2.12.5", "pyyaml>=6.0.3"]
 
 [project.scripts]
 recnys = "recnys.main:main"
-syncer = "recnys.main:main"
 
 [build-system]
-requires = ["uv_build>=0.9.10,<0.10.0"]
+requires = ["uv_build>=0.9.10,<0.11"]
 build-backend = "uv_build"
 
 [dependency-groups]
@@ -30,7 +29,9 @@ line-length = 100
 
 [tool.ruff.lint]
 select = [
+    "YTT",
     "ANN",
+    "ASYNC",
     "S",
     "BLE",
     "FBT",
@@ -38,14 +39,19 @@ select = [
     "A",
     "COM",
     "C4",
+    "DTZ",
+    "T10",
     "EM",
+    "INT",
     "ISC",
     "ICN",
     "LOG",
     "G",
     "PIE",
+    "PYI",
     "PT",
     "Q",
+    "RSE",
     "RET",
     "SLF",
     "SIM",
@@ -55,6 +61,7 @@ select = [
     "ARG",
     "PTH",
     "FLY",
+    "I",
     "C90",
     "N",
     "PERF",
