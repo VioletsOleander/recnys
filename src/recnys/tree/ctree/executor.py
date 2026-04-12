@@ -97,30 +97,51 @@ class CTreeExecutor:
         callbacks = Callbacks(branch=execute_branch, leaf=execute_leaf)
         walk_tree(ctree, callbacks=callbacks, order=VisitOrder.PRE)
 
-        logger.debug("Executed creation tree.")
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("Executed creation tree: %s", self.tree.model_dump_json(indent=2))
+
         return self.tree
 
     def _mkdir(self, dst: Path) -> None:
-        if self.dry_run and not dst.exists():
+        if dst.exists():
+            if not dst.is_dir():
+                e = FileExistsError(f"Path {dst} is occupied, failed to create directory there.")
+                e.add_note("Hint: Please remove the file or symbolic link at the path.")
+                raise e
+
+            return logger.debug("Directory %s already exists, skip creation.", dst)
+
+        if self.dry_run:
             return logger.info("Create directory %s", dst)
 
-        try:
-            dst.mkdir()
-        except FileExistsError:
-            return logger.debug("Directory %s already exists, skip creation.", dst)
-        else:
-            return logger.info("Created directory %s", dst)
+        dst.mkdir()
+        return logger.info("Created directory %s", dst)
+
+    def _write(self, dst: Path, content: str) -> bool:
+        """Return False if written is skipped, otherwise True."""
+        if dst.exists():
+            if not dst.is_file():
+                e = FileExistsError(f"Path {dst} is occupied, failed to write file there.")
+                e.add_note("Hint: Please remove the directory or symbolic link at the path.")
+                raise e
+
+            if dst.read_text(encoding="utf-8") == content:
+                logger.debug("File %s already exists with the same content, skip writing.", dst)
+                return False
+
+        if self.dry_run:
+            return True
+
+        _atomic_write(dst, content)
+        return True
 
     def _copy(self, src: Path, dst: Path) -> None:
         content = src.read_text(encoding="utf-8")
-        if dst.exists() and dst.read_text(encoding="utf-8") == content:
-            return logger.debug("File %s already exists with the same content, skip copying.", dst)
+        written = self._write(dst, content)
 
-        if self.dry_run:
-            return logger.info("Copy %s to %s.", src, dst)
-
-        _atomic_write(dst, content)
-        return logger.info("Copied %s to %s.", src, dst)
+        if written:
+            action = "Copy" if self.dry_run else "Copied"
+            logger.info("%s %s to %s.", action, src, dst)
 
     def _render(self, src: Path, dst: Path) -> None:
         if self._renderer is None:
@@ -128,21 +149,26 @@ class CTreeExecutor:
 
         template_content = src.read_text(encoding="utf-8")
         content = self._renderer.render(template_content)
+        written = self._write(dst, content)
 
-        if dst.exists() and dst.read_text(encoding="utf-8") == content:
-            return logger.debug(
-                "File %s already exists with the same content, skip rendering.", dst
-            )
+        if written:
+            action = "Render" if self.dry_run else "Rendered"
 
-        if self.dry_run:
-            return logger.info("Render %s to %s.", src, dst)
-
-        _atomic_write(dst, content)
-        return logger.info("Rendered %s to %s.", src, dst)
+            logger.info("%s %s to %s.", action, src, dst)
 
     def _link(self, src: Path, dst: Path) -> None:
-        if dst.exists(follow_symlinks=False) and dst.resolve() == src.resolve():
-            return logger.debug("Link %s already exists with the same target, skip linking.", dst)
+        if dst.exists(follow_symlinks=False):
+            if not dst.is_symlink():
+                e = FileExistsError(
+                    f"Path {dst} is occupied, failed to create symbolic link there."
+                )
+                e.add_note("Hint: Please remove the file or directory at the path.")
+                raise e
+
+            if dst.resolve() == src.resolve():
+                return logger.debug(
+                    "Link %s already exists with the same target, skip linking.", dst
+                )
 
         if self.dry_run:
             return logger.info("Link %s to %s.", src, dst)

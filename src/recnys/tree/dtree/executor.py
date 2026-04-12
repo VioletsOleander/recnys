@@ -49,6 +49,8 @@ class DTreeExecutor:
         Returns:
             RootNode: The root node of the deletion tree with the executed nodes detached from the tree
         """
+        logger.debug("Executing deletion tree.")
+
         self.tree = dtree.model_copy(deep=True)
         parents = collect_nodes(self.tree, collect_leaf=False)
         parents[self.tree.root.dst] = self.tree.root
@@ -80,7 +82,13 @@ class DTreeExecutor:
             return detach_node(node)
 
         callbacks = Callbacks(branch=execute_branch, leaf=execute_leaf)
-        walk_tree(self.tree, callbacks=callbacks, order=VisitOrder.POST)
+        walk_tree(dtree, callbacks=callbacks, order=VisitOrder.POST)
+
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug(
+                "Executed deletion tree, remaining tree: %s", self.tree.model_dump_json(indent=2)
+            )
+
         return self.tree
 
     def _rmdir(self, dst: Path) -> None:

@@ -1,5 +1,6 @@
 """Provide `DTreeBuilder`."""
 
+import logging
 from typing import TYPE_CHECKING
 
 from .deriver import DTreeDeriver
@@ -8,6 +9,8 @@ if TYPE_CHECKING:
     from recnys.tree.model import CTree, DTree
 
 __all__ = ["DTreeBuilder"]
+
+logger = logging.getLogger(__name__)
 
 
 class DTreeBuilder:
@@ -50,6 +53,8 @@ class DTreeBuilder:
         Returns:
             DTree: The root node of the deletion tree to execute.
         """
+        logger.debug("Building deletion tree.")
+
         ctree_empty = not prev_ctree.root.children
         dtree_empty = not prev_dtree.root.children
 
@@ -62,9 +67,16 @@ class DTreeBuilder:
             raise e
 
         if dtree_empty:
+            logger.debug("Previous ctree is not empty, derive deletion tree from it.")
             deriver = DTreeDeriver()
             dtree = deriver.derive(ctree, prev_ctree)
         else:
+            logger.debug(
+                "Previous ctree is empty, use previous dtree as the deletion tree to execute."
+            )
             dtree = prev_dtree
+
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("Built deletion tree: %s", dtree.model_dump_json(indent=2))
 
         return dtree

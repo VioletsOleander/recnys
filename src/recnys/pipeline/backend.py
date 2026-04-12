@@ -9,7 +9,7 @@ from recnys.tree.ctree.executor import CTreeExecutor
 from recnys.tree.ctree.expander import CTreeExpander
 from recnys.tree.dtree.builder import DTreeBuilder
 from recnys.tree.dtree.executor import DTreeExecutor
-from recnys.tree.model import CLeafOp, CTree, DTree
+from recnys.tree.model import BranchNode, CLeafOp, CTree, DTree
 from recnys.tree.utils.serializer import deserialize_tree, serialize_tree
 
 from .loader import load_yaml
@@ -53,10 +53,9 @@ class BackendPipeline:
         ctree = self._grow_ctree(scanned_config)
         dtree = self._grow_dtree(ctree)
 
-        if dtree is not None:
-            executor = DTreeExecutor(dry_run=dry_run)
-            with _ExecutionContent(executor, self._dtree_file, dry_run=dry_run):
-                executor.execute(dtree)
+        executor = DTreeExecutor(dry_run=dry_run)
+        with _ExecutionContent(executor, self._dtree_file, dry_run=dry_run):
+            executor.execute(dtree)
 
         variables = self._get_variables(ctree)
         executor = CTreeExecutor(variables=variables, dry_run=dry_run)
@@ -74,7 +73,7 @@ class BackendPipeline:
         expander = CTreeExpander()
         return expander.expand(ctree)
 
-    def _grow_dtree(self, ctree: CTree) -> DTree | None:
+    def _grow_dtree(self, ctree: CTree) -> DTree:
         # Build dtree
         ctree_fexist = self._ctree_file.exists()
         dtree_fexist = self._dtree_file.exists()
@@ -99,10 +98,12 @@ class BackendPipeline:
             prev_ctree = deserialize_tree(cls=CTree, f=self._ctree_file)
             prev_dtree = deserialize_tree(cls=DTree, f=self._dtree_file)
             builder = DTreeBuilder()
-            return builder.build(ctree, prev_ctree, prev_dtree)
+            dtree = builder.build(ctree, prev_ctree, prev_dtree)
+        else:
+            dtree = DTree(root=BranchNode(dst=Path.home()))
+            logger.debug("No previous ctree and dtree found, build an empty root dtree.")
 
-        logger.debug("No previous ctree and dtree found, skipping dtree generation.")
-        return None
+        return dtree
 
     def _get_variables(self, ctree: CTree) -> ScannedVariables | None:
         if CLeafOp.RENDER in ctree.ops.values():

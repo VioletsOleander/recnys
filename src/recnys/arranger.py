@@ -63,13 +63,12 @@ def _setup_logger(log_file: Path, *, silent: bool, debug: bool) -> None:
     console_handler = _get_console_handler()
     logger.addHandler(console_handler)
 
-    file_handler = _get_file_handler(log_file)
-    logger.addHandler(file_handler)
-
     if silent:
         logger.setLevel(logging.WARNING)
     else:
         logger.setLevel(logging.INFO)
 
     if debug:
+        file_handler = _get_file_handler(log_file)
+        logger.addHandler(file_handler)
         logger.setLevel(logging.DEBUG)

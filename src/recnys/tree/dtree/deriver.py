@@ -1,5 +1,6 @@
 """Provide `DTreeDeriver`."""
 
+import logging
 from typing import TYPE_CHECKING
 
 from recnys.tree.model import BranchNode, CTree, DBranchOp, DLeafOp, DTree, LeafNode
@@ -10,6 +11,8 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 __all__ = ["DTreeDeriver"]
+
+logger = logging.getLogger(__name__)
 
 
 class DTreeDeriver:
@@ -35,19 +38,21 @@ class DTreeDeriver:
         Returns:
             DTree: The root node of the derived deletion tree.
         """
+        logger.debug("Deriving deletion tree from current and previous creation trees.")
+
         ops: dict[Path, DBranchOp | DLeafOp] = {}
         cnodes = collect_nodes(ctree)
 
         def derive_branch(node: BranchNode) -> None:
             """Turn kept nodes to no op, deleted nodes to remove op."""
-            if node == cnodes.get(node.dst):
+            if isinstance(cnodes.get(node.dst), BranchNode):
                 ops[node.dst] = DBranchOp.NOP
             else:
                 ops[node.dst] = DBranchOp.REMOVE
 
         def derive_leaf(node: LeafNode) -> None:
-            """Turn kept nodes to no op, deleted nodes to unlink op."""
-            if node == cnodes.get(node.dst):
+            """Turn kept nodes to no op, deleted/op-changed nodes to unlink op."""
+            if cnodes.get(node.dst) == node and ctree.ops.get(node.dst) == prev_ctree.ops[node.dst]:
                 ops[node.dst] = DLeafOp.NOP
             else:
                 ops[node.dst] = DLeafOp.UNLINK
@@ -55,4 +60,9 @@ class DTreeDeriver:
         callbacks = Callbacks(branch=derive_branch, leaf=derive_leaf)
         walk_tree(prev_ctree, callbacks=callbacks, order=VisitOrder.PRE)
 
-        return DTree(root=prev_ctree.root, ops=ops)
+        dtree = DTree(root=prev_ctree.root, ops=ops)
+
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("Derived deletion tree: %s", dtree.model_dump_json(indent=2))
+
+        return dtree
