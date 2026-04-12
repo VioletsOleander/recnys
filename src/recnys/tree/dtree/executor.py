@@ -51,6 +51,7 @@ class DTreeExecutor:
         """
         self.tree = dtree.model_copy(deep=True)
         parents = collect_nodes(self.tree, collect_leaf=False)
+        parents[self.tree.root.dst] = self.tree.root
         ops = self.tree.ops
 
         def detach_node(node: Node) -> None:
@@ -83,6 +84,9 @@ class DTreeExecutor:
         return self.tree
 
     def _rmdir(self, dst: Path) -> None:
+        if not dst.exists():
+            return logger.debug("Directory %s does not exist, skip removing it", dst)
+
         if next(dst.iterdir(), None) is not None:
             return logger.debug("Directory %s is not empty, skip removing it", dst)
 

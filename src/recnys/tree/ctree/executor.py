@@ -147,6 +147,7 @@ class CTreeExecutor:
         if self.dry_run:
             return logger.info("Link %s to %s.", src, dst)
 
+        dst.unlink(missing_ok=True)
         dst.symlink_to(src)
         return logger.info("Linked %s to %s.", src, dst)
 

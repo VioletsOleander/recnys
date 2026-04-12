@@ -42,15 +42,15 @@ class DTreeDeriver:
             """Turn kept nodes to no op, deleted nodes to remove op."""
             if node == cnodes.get(node.dst):
                 ops[node.dst] = DBranchOp.NOP
-
-            ops[node.dst] = DBranchOp.REMOVE
+            else:
+                ops[node.dst] = DBranchOp.REMOVE
 
         def derive_leaf(node: LeafNode) -> None:
             """Turn kept nodes to no op, deleted nodes to unlink op."""
             if node == cnodes.get(node.dst):
                 ops[node.dst] = DLeafOp.NOP
-
-            ops[node.dst] = DLeafOp.UNLINK
+            else:
+                ops[node.dst] = DLeafOp.UNLINK
 
         callbacks = Callbacks(branch=derive_branch, leaf=derive_leaf)
         walk_tree(prev_ctree, callbacks=callbacks, order=VisitOrder.PRE)
