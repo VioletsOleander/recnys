@@ -45,7 +45,7 @@ class DTreeDeriver:
 
         def derive_branch(node: BranchNode) -> None:
             """Turn kept nodes to no op, deleted nodes to remove op."""
-            if node.dst in cnodes:
+            if isinstance(cnodes.get(node.dst), BranchNode):
                 ops[node.dst] = DBranchOp.NOP
             else:
                 ops[node.dst] = DBranchOp.REMOVE
