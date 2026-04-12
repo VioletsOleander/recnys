@@ -1,5 +1,7 @@
+import logging
+from contextlib import AbstractContextManager
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Self, override
 
 from recnys.linear.scanner import scan_variables
 from recnys.tree.ctree.builder import CTreeBuilder
@@ -8,12 +10,18 @@ from recnys.tree.ctree.expander import CTreeExpander
 from recnys.tree.dtree.builder import DTreeBuilder
 from recnys.tree.dtree.executor import DTreeExecutor
 from recnys.tree.model import CLeafOp, CTree, DTree
-from recnys.tree.utils.serializer import deserialize_tree
-from recnys.utils.context import ExecutionContext
-from recnys.utils.loader import load_yaml
+from recnys.tree.utils.serializer import deserialize_tree, serialize_tree
+
+from .loader import load_yaml
 
 if TYPE_CHECKING:
-    from recnys.linear.model import ScannedConfig
+    from types import TracebackType
+
+    from recnys.linear.model import ScannedConfig, ScannedVariables
+
+__all__ = ["BackendPipeline"]
+
+logger = logging.getLogger(__name__)
 
 
 class BackendPipeline:
@@ -48,16 +56,7 @@ class BackendPipeline:
             with ExecutionContext(executor, self._dtree_file, dry_run=dry_run):
                 executor.execute(dtree)
 
-        if CLeafOp.RENDER in ctree.ops.values():
-            loaded_variables = load_yaml(
-                self._variables_file,
-                note="Hint: Please run this command in the root of your dotfiles repository, "
-                "where the variables.yaml file is located.",
-            )
-            variables = scan_variables(loaded_variables)
-        else:
-            variables = None
-
+        variables = self._get_variables(ctree)
         executor = CTreeExecutor(variables=variables, dry_run=dry_run)
         with ExecutionContext(executor, self._ctree_file, dry_run=dry_run):
             executor.execute(ctree)
@@ -98,6 +97,17 @@ class BackendPipeline:
 
         return None
 
+    def _get_variables(self, ctree: CTree) -> ScannedVariables | None:
+        if CLeafOp.RENDER in ctree.ops.values():
+            loaded_variables = load_yaml(
+                self._variables_file,
+                note="Hint: Please run this command in the root of your dotfiles repository, "
+                "where the variables.yaml file is located.",
+            )
+            return scan_variables(loaded_variables)
+
+        return None
+
     def _arrange(self) -> None:
         data_dir = Path.home() / ".recnys"
         self._ctree_file = data_dir / "prev_ctree.json"
@@ -108,3 +118,59 @@ class BackendPipeline:
         gitignore = data_dir / ".gitignore"
         if not gitignore.exists():
             gitignore.write_text("# Created by recnys\n*\n", encoding="utf-8")
+
+
+class ExecutionContext(AbstractContextManager):
+    """Context manager for executing a tree.
+
+    Attributes:
+        executor (DTreeExecutor | CTreeExecutor): The executor to execute the tree.
+        tree_file (Path): The file path for storing the tree after execution.
+        dry_run (bool): Whether to perform a dry run of the execution.
+    """
+
+    executor: DTreeExecutor | CTreeExecutor
+    tree_file: Path
+    dry_run: bool
+
+    def __init__(
+        self, executor: DTreeExecutor | CTreeExecutor, tree_file: Path, *, dry_run: bool
+    ) -> None:
+        """Initialize the ExecutionContext.
+
+        Args:
+            executor (DTreeExecutor | CTreeExecutor): The executor to execute the tree.
+            tree_file (Path): The file path for storing the tree after execution.
+            dry_run (bool): Whether to perform a dry run of the execution.
+        """
+        self.executor = executor
+        self.tree_file = tree_file
+        self.dry_run = dry_run
+
+    def __enter__(self) -> Self:
+        logger.debug("Execution context entered")
+        return self
+
+    @override
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> bool:
+        if self.dry_run:
+            logger.debug("Execution context exited with dry run, no tree will be saved")
+            return False
+
+        logger.debug("Execution context exiting, saving the tree to files")
+
+        f = self.tree_file
+        serialize_tree(self.executor.tree, f)
+        logger.debug("Tree saved to %s", f)
+
+        f_backup = f.with_suffix(f.suffix + ".backup")
+        f.copy(f_backup)
+        logger.debug("Backup of the tree saved to %s", f_backup)
+
+        logger.debug("Execution context exited")
+        return False

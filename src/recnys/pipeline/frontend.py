@@ -2,7 +2,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from recnys.linear.scanner import scan_config
-from recnys.utils.loader import load_yaml
+
+from .loader import load_yaml
 
 if TYPE_CHECKING:
     from recnys.linear.model import ScannedConfig
