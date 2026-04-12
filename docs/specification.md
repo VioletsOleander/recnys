@@ -57,7 +57,7 @@ For each platform, if the destination path is an empty string (`""`), it means t
 
 - `copy`: copy the file/directory from the source to the destination, and overwrite the destination if it already exists.
 - `symlink`: create a symlink at the destination pointing to the source, and overwrite the destination if it already exists.
-- `render`: render the source file (only applicable for template files) and copy the rendered result to the destination, overwrite the destination if it already exists.
+- `render`: render the source file (only applicable for template files) and copy the rendered result to the destination, and overwrite the destination if it already exists.
 
 `policy` is optional. It defaults to `symlink` for normal file and directory, and defaults to `render` for template file.
 

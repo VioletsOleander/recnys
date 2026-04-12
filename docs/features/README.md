@@ -107,6 +107,11 @@ match platform.system():
 
 ## Glossary
 
+_File_:
+
+- Normal file: A file without `.template` suffix.
+- Template file: A file with `.template` suffix. Template files may contain [Jinja2 variables syntax](https://jinja.palletsprojects.com/en/stable/templates/#variables), and will be rendered using the provided variables before syncing to the destination.
+
 _Counterpart path_:
 
 - For file: a path under the destination directory whose relative path to the destination directory is the same as the relative path of the file to the source directory, without `.template` suffix if the file is a template file.
