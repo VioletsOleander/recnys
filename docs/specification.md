@@ -28,15 +28,13 @@ where `<src>` is required, `dest` and `policy` are optional.
 
 `<src>` describes the source path of the file/directory to sync in the dotfiles repository, which can be:
 
-- a static file, e.g. `".vimrc"`
-- a dynamic file (ending with `.template`), e.g. `".bashrc.template"`
+- a normal file, e.g. `".vimrc"`
+- a template file (ending with `.template`), e.g. `".bashrc.template"`
 - a directory (ending with `/`), e.g. `"nvim/"`
 
 `<src>` should be surrounded by double quotes (`"`), and should be a path relative to the dotfiles repository root, i.e. the parent directory of `recnys.yaml`.
 
-The dynamic files will be rendered using the provided variables, and its rendered result will be synced to the destination.
-
-See [glossaries](features/README.md#glossary) for the definition of static and dynamic files.
+The template files will be rendered using the provided variables, and its rendered result will be synced to the destination.
 
 #### `dest`
 
@@ -44,8 +42,8 @@ See [glossaries](features/README.md#glossary) for the definition of static and d
 
 `dest` is optional. For a certain platform, if the destination path is not provided, it will be derived from the source path:
 
-- In Linux, it defaults to `~/.config/src` (without `.template` suffix if `<src>` is a dynamic file).
-- In Windows it defaults to `~/AppData/Roaming/src` (without `.template` suffix if `<src>` is a dynamic file).
+- In Linux, it defaults to `~/.config/src` (without `.template` suffix if `<src>` is a template file).
+- In Windows it defaults to `~/AppData/Roaming/src` (without `.template` suffix if `<src>` is a template file).
 
 > Tip: `~/` means the user's home directory
 
@@ -59,17 +57,17 @@ For a certain platform, if the destination path is an empty string (`""`), it me
 
 - `copy` means copy the file/directory from the source to the destination, and overwrite the destination if it already exists.
 - `symlink` means create a symlink at the destination pointing to the source, and overwrite the destination if it already exists.
-- `render` means render the source file (only applicable for dynamic files) and copy the rendered result to the destination, and overwrite the destination if it already exists.
+- `render` means render the source file (only applicable for template files) and copy the rendered result to the destination, and overwrite the destination if it already exists.
 
-`policy` is optional. It defaults to `symlink` for static file and directory, and defaults to `render` for dynamic file.
+`policy` is optional. It defaults to `symlink` for normal file and directory, and defaults to `render` for template file.
 
-Dynamic files do not support `copy` policy (`render` policy already does copy) and `symlink` policy (to maintain a single source of truth).
+Template files do not support `copy` policy (`render` policy already does copy) and `symlink` policy (to maintain a single source of truth).
 
 ### 1.2. Conflict Resolution
 
 In a word, the latter wins.
 
-Refer to [the corresponding feature](features/deduplicate.md) for details.
+Refer to [the corresponding feature](features/deconflict.md) for details.
 
 ## 2. `variables.yaml`
 
@@ -77,7 +75,7 @@ This file should be placed in the root of the dotfiles repository.
 
 This file consists of a dictionary, each key-value pair in it describing a variable for template rendering. The key is the variable name, and the corresponding value is the variable value.
 
-These variables will be for rendering the dynamic files (ending with `.template`) in `recnys.yaml`.
+These variables will be for rendering the template files (ending with `.template`) in `recnys.yaml`.
 
 ```yaml
 { proxy_url: "http://proxy.example.com:8080" }
