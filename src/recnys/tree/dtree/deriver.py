@@ -52,7 +52,7 @@ class DTreeDeriver:
 
         def derive_leaf(node: LeafNode) -> None:
             """Turn kept nodes to no op, deleted/op-changed nodes to unlink op."""
-            if node.dst in cnodes and ctree.ops[node.dst] == prev_ctree.ops[node.dst]:
+            if ctree.ops.get(node.dst) == prev_ctree.ops[node.dst]:
                 ops[node.dst] = DLeafOp.NOP
             else:
                 ops[node.dst] = DLeafOp.UNLINK
