@@ -201,4 +201,4 @@ class _Renderer:
     def render(self, template_content: str) -> str:
         """Render `template_content` and return the result."""
         template = self._environment.from_string(template_content)
-        return template.render(self._variables)
+        return template.render(self._variables.root)
