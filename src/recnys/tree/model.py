@@ -1,7 +1,7 @@
 from enum import StrEnum, auto
 from pathlib import Path  # noqa: TC003, Path is required by pydantic in runtime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 __all__ = [
     "BranchNode",
@@ -30,7 +30,7 @@ class CTree(BaseModel):
     """
 
     root: BranchNode
-    ops: dict[Path, CLeafOp] = {}
+    ops: dict[Path, CLeafOp] = Field(default_factory=dict)
 
 
 class DTree(BaseModel):
@@ -43,7 +43,7 @@ class DTree(BaseModel):
     """
 
     root: BranchNode
-    ops: dict[Path, DBranchOp | DLeafOp] = {}
+    ops: dict[Path, DBranchOp | DLeafOp] = Field(default_factory=dict)
 
 
 class BranchNode(BaseModel):
@@ -57,7 +57,7 @@ class BranchNode(BaseModel):
     """
 
     dst: Path
-    children: dict[Path, BranchNode | LeafNode] = {}
+    children: dict[Path, BranchNode | LeafNode] = Field(default_factory=dict)
 
 
 class LeafNode(BaseModel):

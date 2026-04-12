@@ -58,6 +58,8 @@ def _setup_logger(log_file: Path, *, silent: bool, debug: bool) -> None:
     """
     logger = logging.getLogger("recnys")
 
+    logger.handlers.clear()
+
     console_handler = _get_console_handler()
     logger.addHandler(console_handler)
 

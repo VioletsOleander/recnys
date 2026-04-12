@@ -106,8 +106,15 @@ class CTreeExecutor:
 
         try:
             dst.mkdir()
-        except FileExistsError:
-            return logger.debug("Directory %s already exists, skip creation.", dst)
+        except FileExistsError as e:
+            if dst.is_dir():
+                return logger.debug("Directory %s already exists, skip creation.", dst)
+
+            e.add_note(
+                f"Hint: A file with the same name already exists at {dst} "
+                "Please remove or rename the file and try again."
+            )
+            raise
         else:
             return logger.info("Created directory %s", dst)
 

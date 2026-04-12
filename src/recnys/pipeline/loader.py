@@ -29,7 +29,7 @@ def load_yaml(file_path: Path, note: str) -> dict:
     logger.debug("Loading YAML file %s", file_path)
 
     try:
-        with file_path.open("r") as f:
+        with file_path.open("r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
     except FileNotFoundError as e:
         e.add_note(note)
