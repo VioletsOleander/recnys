@@ -6,16 +6,10 @@ It supports Windows and Linux platforms.
 
 ## Installation
 
-Use [uv](https://github.com/astral-sh/uv) or [pipx](https://github.com/pypa/pipx) for installation:
+Use [uv](https://github.com/astral-sh/uv) for installation:
 
 ```shell
 uv tool install git+https://github.com/VioletsOleander/recnys
-```
-
-or
-
-```shell
-pipx install git+https://github.com/VioletsOleander/recnys
 ```
 
 After installation, there will be a executable named `recnys`.
