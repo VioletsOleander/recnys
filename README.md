@@ -12,7 +12,7 @@ Use [uv](https://github.com/astral-sh/uv) for installation:
 uv tool install git+https://github.com/VioletsOleander/recnys
 ```
 
-After installation, there will be a executable named `recnys`.
+After installation, there will be an executable named `recnys`.
 
 ## Usage
 
@@ -23,18 +23,18 @@ Recnys supports using variables to render template files. This requires a `varia
 
 See the [specification document](./docs/specification.md) for more details about the syntax of the configuration file and the variables file.
 
-With configuration file correctly set, run `recnys` in the dotfile repository root, the
+With the configuration file correctly set, run `recnys` in the dotfile repository root, then the
 synchronization will start:
 
 ```shell
 recnys
 ```
 
-> Tip: It is recommended to add an alias for `recnys`, since this name is not very intuitive. I personally alias it to `re` :).
+> Tip: Consider adding an alias for `recnys`, since this name is not very intuitive. I personally alias it to `re` :).
 
-Recnys supports dry-run mode. In this mode, no actual file operations will be performed, but the actions that would be taken are printed to the console. If there would be any issues about the synchronization, they will be printed to the console as well.
+Recnys supports dry-run mode. In this mode, no actual file operations will be performed, but the actions that would be execute will be printed to the console. If there would be any issues about the synchronization, they will be printed to the console as well.
 
-Therefore, it is highly recommended to first run `recnys` in a dry-run mode first to check if it will perform the desired actions.
+Therefore, it is highly recommended to first run `recnys` in a dry-run mode to check if it will perform the desired actions.
 
 ```shell
 recnys --dry-run
