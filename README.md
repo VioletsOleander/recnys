@@ -19,6 +19,8 @@ After installation, there will be an executable named `recnys`.
 Recnys requires a `recnys.yaml` configuration file defined in the root of the dotfile repository.
 This configuration file gives instructions on which files to sync, where to sync, and how to sync.
 
+Recnys supports using variables to render template files. This requires a `variables.yaml` file in the root of the dotfile repository. Files that are to be rendered using these variables must have a `.template` suffix.
+
 An example `recnys.yaml` configuration file:
 
 ```yaml
@@ -44,23 +46,14 @@ An example `recnys.yaml` configuration file:
 }
 ```
 
-The keys in the configuration file are the paths of the files or directories to be synchronized, relative to the root of the dotfile repository. The value of each key is an object that contains a `dest` field, which specifies the destination path for each platform.
+The keys in the configuration file are the paths of the files or directories to be synchronized, relative to the root of the dotfile repository. The value of each key is an object that contains a `dest` field, which specifies the destination path for each platform, and a `policy` field, which specifies the synchronization policy for that file or directory.
 
-As shown above, the destination of a file or directory can be specified for different platforms. If the destination for a platform is an empty string, then the file or directory will not be synchronized on that platform.
+The destination paths are specified as relative to the user's home directory. If the destination for a platform is an empty string, then the file or directory will not be synchronized on that platform.
 
-Notice that the paths in the destination field should be specified as relative to the user's home directory. For example, if the destination is `AppData/Local/nvim`, then the actual destination path will be `C:/Users/Username/AppData/Local/nvim` on Windows.
+Both `dest` and `policy` fields are optional:
 
-For normal file or directory, the default synchronization policy is to create a symbolic link at the destination pointing to the source file in the dotfile repository. For template files (files with `.template` suffix), the default synchronization policy is to render the template file using variables defined in `variables.yaml`, then write the rendered content to the destination.
-
-It is support to use `policy` field to specify the synchronization policy for each file or directory. The value of the `policy` field can be either `symlink` or `copy`. If the `policy` field is not specified, then the default synchronization policy will be used.
-
-For example, we can specify the synchronization policy for the `nushell/` directory to be `copy`:
-
-```yaml
-{ "nushell/": { dest: { Windows: "AppData/Local/nushell" }, policy: "copy" } }
-```
-
-Recnys supports using variables to render template files. This requires a `variables.yaml` file in the root of the dotfile repository. Files that are to be rendered using these variables must have a `.template` suffix.
+- If `dest` for a platform is not specified, the default destination will be inferred from the key. The default destination for Linux is `~/.config/key`, and for Windows is `~/AppData/Roaming/key`. For example, the default destination for `nushell/` directory is `~/.config/nushell/` on Linux and `~/AppData/Roaming/nushell/` on Windows.
+- If `policy` is not specified, the default synchronization policy will be inferred from the key. If the key ends with `.template` (i.e. it is a template file), the default synchronization policy will be `render`. Otherwise, the default synchronization policy will be `symlink`.
 
 Recnys uses "Last Win" strategy for deconflicting configuration entries. For example, when these two entries exist in the configuration file:
 
