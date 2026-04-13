@@ -90,8 +90,8 @@ class BackendPipeline:
         # Both exist -> no-first run -> execute dtree, then ctree
         if ctree_fexist != dtree_fexist:
             raise RuntimeError(
-                f"The existence state of {self._ctree_file} and {self._dtree_file} is not expected.\n"
-                "Expecting that both of them exist, or both of them do not exist.\n"
+                f"Inconsistent existence of {self._ctree_file} and {self._dtree_file}.\n"
+                "Both files must either exist or not exist.\n"
                 "Hint: If backup files are available, please use them to recover the missing file. "
                 "Otherwise, delete the existing file."
             )
