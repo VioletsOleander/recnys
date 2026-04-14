@@ -16,57 +16,7 @@ After installation, there will be an executable named `recnys`.
 
 ## Usage
 
-Recnys requires a `recnys.yaml` configuration file defined in the root of the dotfile repository.
-This configuration file gives instructions on which files to sync, where to sync, and how to sync.
-
-Recnys supports using variables to render template files. This requires a `variables.yaml` file in the root of the dotfile repository. Files that are to be rendered using these variables must have a `.template` suffix.
-
-An example `recnys.yaml` configuration file:
-
-```yaml
-{
-  ".vimrc": { dest: { Windows: "_vimrc", Linux: ".vimrc" } },
-  ".bashrc.template": { dest: { Windows: "", Linux: "my_bashrc" } },
-  ".inputrc": { dest: { Windows: "", Linux: ".inputrc" } },
-  ".tmux.conf": { dest: { Windows: "", Linux: ".tmux.conf" } },
-  ".gitconfig": { dest: { Windows: ".gitconfig", Linux: ".gitconfig" } },
-  "nvim/": { dest: { Windows: "AppData/Local/nvim" } },
-  "yazi/",
-  "lazygit/",
-  "Microsoft/Windows Terminal/":
-    {
-      dest: { Linux: "", Windows: "AppData/Local/Microsoft/Windows Terminal/" },
-    },
-  "Code/User/settings.json",
-  "Code/User/keybindings.json",
-  "alacritty/",
-  "vivid/",
-  "nushell/",
-  "nushell/autoload/net.nu.template",
-}
-```
-
-The keys in the configuration file are the paths of the files or directories to be synchronized, relative to the root of the dotfile repository. The value of each key is an object that contains a `dest` field, which specifies the destination path for each platform, and a `policy` field, which specifies the synchronization policy for that file or directory.
-
-The destination paths are specified as relative to the user's home directory. If the destination for a platform is an empty string, then the file or directory will not be synchronized on that platform.
-
-Both `dest` and `policy` fields are optional:
-
-- If `dest` for a platform is not specified, the default destination will be inferred from the key. The default destination for Linux is `~/.config/key`, and for Windows is `~/AppData/Roaming/key`. For example, the default destination for `nushell/` directory is `~/.config/nushell/` on Linux and `~/AppData/Roaming/nushell/` on Windows.
-- If `policy` is not specified, the default synchronization policy will be inferred from the key. If the key ends with `.template` (i.e. it is a template file), the default synchronization policy will be `render`. Otherwise, the default synchronization policy will be `symlink`.
-
-Recnys uses "Last Win" strategy for deconflicting configuration entries. For example, when these two entries exist in the configuration file:
-
-```yaml
-{
-  "nushell/", # sync the nushell directory
-  "nushell/autoload/net.nu.template", # sync the net.nu.template file in the nushell directory
-}
-```
-
-Recnys will make symbolic links for subdirectories and files in the `nushell/` directory, except for the `nushell/autoload/net.nu.template` file. Because this file is specified in latter entry, Recnys will render the `net.nu.template` file and write the rendered content to the destination.
-
-For more information, please see the [specification document](./docs/specification.md) and the also the features document under `/docs/features/` directory.
+See the [specification document](./docs/specification.md) for the configuration file format. See the [features document](./docs/features/) for the supported features.
 
 With the configuration file correctly set, run `recnys` in the dotfile repository root, then the
 synchronization will start:
