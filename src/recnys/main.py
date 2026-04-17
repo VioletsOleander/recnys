@@ -1,14 +1,10 @@
 import argparse
 
+from recnys import __version__
+
 from .arranger import arrange
 from .handler import handle_exceptions
 from .pipeline import BackendPipeline, FrontendPipeline
-
-
-def version() -> str:
-    import importlib.metadata  # noqa: PLC0415
-
-    return f"v{importlib.metadata.version('recnys')}"
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -34,7 +30,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--version",
         action="version",
-        version=version(),
+        version=__version__,
         help="Show version and exit",
     )
     return parser.parse_args()
