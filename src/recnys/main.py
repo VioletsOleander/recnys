@@ -1,9 +1,14 @@
 import argparse
-from importlib.metadata import version
 
 from .arranger import arrange
 from .handler import handle_exceptions
 from .pipeline import BackendPipeline, FrontendPipeline
+
+
+def version() -> str:
+    import importlib.metadata  # noqa: PLC0415
+
+    return f"v{importlib.metadata.version('recnys')}"
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -29,7 +34,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--version",
         action="version",
-        version=f"v{version('recnys')}",
+        version=version(),
         help="Show version and exit",
     )
     return parser.parse_args()
