@@ -1,5 +1,6 @@
 import argparse
-from importlib.metadata import version
+
+from recnys import __version__
 
 from .arranger import arrange
 from .handler import handle_exceptions
@@ -29,7 +30,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--version",
         action="version",
-        version=f"v{version('recnys')}",
+        version=__version__,
         help="Show version and exit",
     )
     return parser.parse_args()
