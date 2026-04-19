@@ -73,21 +73,16 @@ class BackendPipeline:
         logger.debug("Finished running backend pipeline.")
 
     def _grow_ctree(self, scanned_config: ScannedConfig) -> CTree:
-        # Build ctree
         builder = CTreeBuilder()
         ctree = builder.build(scanned_config)
 
-        # Expand ctree
         expander = CTreeExpander()
         return expander.expand(ctree)
 
     def _grow_dtree(self, ctree: CTree) -> DTree:
-        # Build dtree
         ctree_fexist = self._ctree_file.exists()
         dtree_fexist = self._dtree_file.exists()
 
-        # Both not exist -> first run -> execute ctree
-        # Both exist -> no-first run -> execute dtree, then ctree
         if ctree_fexist != dtree_fexist:
             raise RuntimeError(
                 f"Inconsistent existence of {self._ctree_file} and {self._dtree_file}.\n"
@@ -104,8 +99,9 @@ class BackendPipeline:
             builder = DTreeBuilder()
             dtree = builder.build(ctree, prev_ctree, prev_dtree)
         else:
-            dtree = DTree(root=BranchNode(dst=Path.home()))
             logger.debug("No previous ctree and dtree found, build an empty root dtree.")
+
+            dtree = DTree(root=BranchNode(dst=Path.home()))
 
         return dtree
 

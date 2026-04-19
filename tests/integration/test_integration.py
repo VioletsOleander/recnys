@@ -2,7 +2,7 @@ from argparse import Namespace
 from typing import TYPE_CHECKING
 
 from recnys.main import main
-from recnys.testing.integration.arrange import change_cwd, create_config_files, create_source_files
+from recnys.testing.integration.arranger import change_cwd, create_config_files, create_source_files
 
 if TYPE_CHECKING:
     from pathlib import Path
