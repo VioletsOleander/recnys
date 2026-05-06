@@ -43,7 +43,7 @@ The template files will be rendered using the provided variables, and its render
 `dest` is optional. For each platform, if the destination path is not provided, its default value will be derived from the source path:
 
 - In Linux, it defaults to `~/.config/<src>` (without `.template` suffix if `<src>` is a template file).
-- In Windows it defaults to `~/AppData/Roaming/<src>` (without `.template` suffix if `<src>` is a template file).
+- In Windows, it defaults to `~/AppData/Roaming/<src>` (without `.template` suffix if `<src>` is a template file).
 
 > Tip: `~/` means the user's home directory
 
