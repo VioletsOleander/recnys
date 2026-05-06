@@ -42,4 +42,4 @@ repos:
         name: Prettier Check
         entry: prettier --check
         language: unsupported
-        types: [markdown, json, yaml]
+        types_or: [markdown, json, yaml]
