@@ -27,9 +27,9 @@ recnys
 
 > Tip: Consider adding an alias for `recnys`, since this name is not very intuitive. I personally alias it to `re` :).
 
-Recnys supports dry-run mode. In this mode, no actual file operations will be performed, but the actions that would be executed will be printed to the console. If there are any issues with synchronization, they will be printed to the console as well.
+Recnys supports dry-run mode. In this mode, no actual file operations will be performed, but the actions that would be executed will be printed to the console. If there will be any issues with synchronization, they will be printed to the console as well.
 
-Therefore, it is highly recommended to first run `recnys` in a dry-run mode to check if it will perform the desired actions.
+Therefore, it is highly recommended to first run `recnys` in dry-run mode to check if it will perform the desired actions.
 
 ```shell
 recnys --dry-run
