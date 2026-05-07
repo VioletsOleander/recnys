@@ -14,7 +14,7 @@ def test_integration(resources_dir: Path, filesystem: FakeFilesystem) -> None:
     change_cwd(filesystem)
     create_config_files(filesystem, resources_dir)
     create_source_files(filesystem)
-    args = Namespace(silent=False, debug=True, dry_run=False)
+    args = Namespace(silent=True, debug=False, dry_run=False)
 
     # Un-decorate the main function
     main.__wrapped__(args)  # type: ignore[unresolved-attribute]
