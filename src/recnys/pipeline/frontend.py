@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from recnys.linear.scanner import scan_config
+from recnys.linear.validator import validate_config
 
 from .loader import load_yaml
 
@@ -45,6 +46,7 @@ class FrontendPipeline:
 
         # Scan: dict -> linear model
         scanned_config = scan_config(loaded_config)
+        validate_config(scanned_config)
 
         logger.debug("Finished running frontend pipeline.")
         return scanned_config

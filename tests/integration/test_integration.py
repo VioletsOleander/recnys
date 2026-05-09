@@ -2,7 +2,8 @@ from argparse import Namespace
 from typing import TYPE_CHECKING
 
 from recnys.main import main
-from recnys.testing.integration.arranger import change_cwd, create_config_files, create_source_files
+from recnys.testing.arranger import create_config_files, create_cwd, create_source_files
+from recnys.testing.integration.constants import SOURCE_FILES
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -11,9 +12,9 @@ if TYPE_CHECKING:
 
 
 def test_integration(resources_dir: Path, filesystem: FakeFilesystem) -> None:
-    change_cwd(filesystem)
-    create_config_files(filesystem, resources_dir)
-    create_source_files(filesystem)
+    create_cwd(filesystem)
+    create_config_files(filesystem, resources_dir=resources_dir)
+    create_source_files(filesystem, source_files=SOURCE_FILES)
     args = Namespace(silent=True, debug=False, dry_run=False)
 
     # Un-decorate the main function
