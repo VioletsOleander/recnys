@@ -35,11 +35,11 @@ def _validate_key(key: str) -> None:
     if key.endswith("/"):
         if src.is_dir():
             return
-        message = "Specified source directory does not exists"
+        message = "Specified source directory does not exist"
     else:
         if src.is_file():
             return
-        message = "Specified source file does not exists"
+        message = "Specified source file does not exist"
 
     message += "\nHint: Please check recnys.yaml to ensure the specified path exists"
 
@@ -55,7 +55,7 @@ def _validate_key(key: str) -> None:
 def validate_config(scanned_config: ScannedConfig) -> None:
     """Validate the scanned configuration.
 
-    This validation process focuses on the semantic of the scanned configuration,
+    This validation process focuses on the semantics of the scanned configuration,
     as compared to the type safety validation provided by Pydantic.
 
     Args:

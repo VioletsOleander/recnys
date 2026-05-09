@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.parametrize("scanned_config", SCANNED_CONFIGS)
-def test_scan_config(filesystem: FakeFilesystem, scanned_config: ScannedConfig) -> None:
+def test_validate_config(filesystem: FakeFilesystem, scanned_config: ScannedConfig) -> None:
     create_cwd(filesystem)
     create_source_files(filesystem, source_files=SOURCE_FILES)
 
