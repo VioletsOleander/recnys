@@ -42,7 +42,7 @@ def deserialize_tree[T: (CTree, DTree)](cls: type[T], f: Path) -> T:
         content = f.read_text(encoding="utf-8")
         tree = cls.model_validate_json(content)
         tree.root = _concretize(tree.root)
-        tree.ops = {Path(dst): op for dst, op in tree.ops.items()}  # type: ignore[invalid-assignment]
+        tree.ops = {Path(dst): op for dst, op in tree.ops.items()}  # type: ignore[ty:invalid-assignment]
     except ValidationError as e:
         message = (
             f"Hint: Data in {f} is corrupted, please use backup file to recover it. "

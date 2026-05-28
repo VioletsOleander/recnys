@@ -1,13 +1,13 @@
 from recnys.linear.model import ScannedConfig
 
-__all__ = ["SCANNED_CONFIGS", "SOURCE_FILES"]
+__all__ = ["INVALID_CONFIGS", "SOURCE_FILES"]
 
 SOURCE_FILES = (
     ".foo",
     ".foo.template",
 )
 
-_LOADED_CONFIGS = (
+_INVALID_LOADED_CONFIGS = (
     # Invalid policy
     {".foo": {"policy": "render"}},
     {".foo.template": {"policy": "symlink"}},
@@ -18,4 +18,6 @@ _LOADED_CONFIGS = (
     {"foo/bar": None},
 )
 
-SCANNED_CONFIGS = map(ScannedConfig.model_validate, _LOADED_CONFIGS)
+_INVALID_SCANNED_CONFIGS = map(ScannedConfig.model_validate, _INVALID_LOADED_CONFIGS)
+
+INVALID_CONFIGS = _INVALID_SCANNED_CONFIGS

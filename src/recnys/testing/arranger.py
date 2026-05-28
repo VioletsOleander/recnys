@@ -11,11 +11,11 @@ if TYPE_CHECKING:
 
     from pyfakefs.fake_filesystem import FakeFilesystem
 
-__all__ = ["create_config_files", "create_cwd", "create_source_files"]
+__all__ = ["create_config_files", "create_source_files", "setup_cwd"]
 
 
-def create_cwd(fs: FakeFilesystem) -> None:
-    """Create and change the current working directory to the test repo in the fake filesystem."""
+def setup_cwd(fs: FakeFilesystem) -> None:
+    """Create the test repo directory in the fake filesystem and change current working directory to it."""
     fs.create_dir(LazyConstants.cwd)
     os.chdir(LazyConstants.cwd)
 
