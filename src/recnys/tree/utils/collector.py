@@ -9,13 +9,16 @@ if TYPE_CHECKING:
 
 __all__ = ["collect_nodes"]
 
+# The type invariance of dict makes dict[Path, LeafNode (or BranchNode)] not assignable to dict[Path, Node]
+# suppress the type error here, because I think current implementation is fairly good enough
+
 
 @overload
-def collect_nodes(tree: Tree, *, collect_leaf: Literal[False]) -> dict[Path, BranchNode]: ...
+def collect_nodes(tree: Tree, *, collect_leaf: Literal[False]) -> dict[Path, BranchNode]: ...  # type: ignore[ty:invalid-overload]
 
 
 @overload
-def collect_nodes(tree: Tree, *, collect_branch: Literal[False]) -> dict[Path, LeafNode]: ...
+def collect_nodes(tree: Tree, *, collect_branch: Literal[False]) -> dict[Path, LeafNode]: ...  # type: ignore[ty:invalid-overload]
 
 
 @overload
