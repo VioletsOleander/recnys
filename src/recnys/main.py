@@ -2,8 +2,8 @@ import argparse
 
 from recnys import __version__
 
-from .arranger import arrange
 from .handler import handle_exceptions
+from .logger import setup_logger
 from .pipeline import BackendPipeline, FrontendPipeline
 
 
@@ -39,13 +39,12 @@ def parse_arguments() -> argparse.Namespace:
 @handle_exceptions
 def main(argv: argparse.Namespace | None = None) -> int:
     args = parse_arguments() if argv is None else argv
+    setup_logger(silent=args.silent, debug=args.debug)
 
-    arrange(args)
+    frontend = FrontendPipeline()
+    scanned_config = frontend.run()
 
-    pipeline = FrontendPipeline()
-    scanned_config = pipeline.run()
-
-    pipeline = BackendPipeline()
-    pipeline.run(scanned_config, dry_run=args.dry_run)
+    backend = BackendPipeline()
+    backend.run(scanned_config, dry_run=args.dry_run)
 
     return 0
