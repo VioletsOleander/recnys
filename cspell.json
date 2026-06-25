@@ -1,14 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
   "version": "0.2",
-  "dictionaryDefinitions": [
-    {
-      "name": "project-words",
-      "path": "./project-words.txt",
-      "addWords": true
-    }
-  ],
-  "dictionaries": ["project-words"],
   "ignorePaths": [
     "cspell.json",
     "project-words.txt",
@@ -18,5 +10,51 @@
     ".gitignore",
     "cliff.toml",
     "CHANGELOG.md"
+  ],
+  "words": [
+    "autouse",
+    "branchified",
+    "branchify",
+    "Canonicalizer",
+    "cnodes",
+    "ctree",
+    "deconflict",
+    "Deconflict",
+    "deconflicted",
+    "deconflicting",
+    "Deconfliction",
+    "dentries",
+    "dnames",
+    "dpaths",
+    "dsts",
+    "dtree",
+    "EAFP",
+    "FCONTENT",
+    "fexist",
+    "fnames",
+    "ftplugin",
+    "inputrc",
+    "LBYL",
+    "Lowerer",
+    "Materializer",
+    "nonleaf",
+    "nvim",
+    "pathlib",
+    "pipx",
+    "prek",
+    "prevtree",
+    "pylint",
+    "pypi",
+    "pytest",
+    "pytestconfig",
+    "recnys",
+    "RMFILE",
+    "Syncer",
+    "syscall",
+    "syscalls",
+    "usefixtures",
+    "undecorate",
+    "vimrc",
+    "yazi"
   ]
 }

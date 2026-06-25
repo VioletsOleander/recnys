@@ -38,8 +38,8 @@ repos:
         language: unsupported
         types: [python]
         pass_filenames: false
-      - id: prettier-check
-        name: Prettier Check
-        entry: prettier --check
+      - id: dprint-check
+        name: Dprint Check
+        entry: dprint check
         language: unsupported
-        types_or: [markdown, json, yaml]
+        types_or: [markdown]

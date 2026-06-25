@@ -1,0 +1,10 @@
+{
+  # Shell
+  ".bashrc.template": { dest: { Windows: "", Linux: "my_bashrc" } },
+  "nushell/",
+  "nushell/autoload/commands/net.nu.template",
+  # Editor
+  "nvim/": { dest: { Windows: "AppData/Local/nvim" } },
+  # Tool
+  ".gitconfig": { dest: { Windows: ".gitconfig", Linux: ".gitconfig" } },
+}
