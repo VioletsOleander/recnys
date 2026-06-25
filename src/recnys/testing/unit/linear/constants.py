@@ -1,10 +1,12 @@
 from recnys.linear.model import ScannedConfig
+from recnys.testing.constants import NORMAL_CONTENT, TEMPLATE_CONTENT
+from recnys.testing.node import File
 
-__all__ = ["INVALID_CONFIGS", "SOURCE_FILES"]
+__all__ = ["INVALID_CONFIGS", "SOURCES"]
 
-SOURCE_FILES = (
-    ".foo",
-    ".foo.template",
+SOURCES = (
+    File(path=".foo", content=NORMAL_CONTENT),
+    File(path=".foo.template", content=TEMPLATE_CONTENT),
 )
 
 _INVALID_LOADED_CONFIGS = (
