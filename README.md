@@ -9,7 +9,7 @@ It supports Windows and Linux platforms.
 Use [uv](https://github.com/astral-sh/uv) for installation:
 
 ```shell
-uv tool install git+https://github.com/VioletsOleander/recnys
+uv tool install recnys
 ```
 
 After installation, there will be an executable named `recnys`.
