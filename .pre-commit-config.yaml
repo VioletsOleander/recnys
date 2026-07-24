@@ -40,6 +40,6 @@ repos:
         pass_filenames: false
       - id: dprint-check
         name: Dprint Check
-        entry: dprint check
+        entry: dprint check --allow-no-files
         language: unsupported
         types_or: [markdown]
