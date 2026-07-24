@@ -56,7 +56,9 @@ details.
 
 ### Summary
 
-This release mainly introduces some bug fixes.
+Fix issues about configuration file parsing.
+
+Support --clean option.
 
 ### Features
 
@@ -75,7 +77,15 @@ This release mainly introduces some bug fixes.
 
 ### Summary
 
-This release mainly introduces variables support and some bug fixes.
+Supports variables.
+
+The codebase is significantly refactored.
+
+Currently the implementation still has some problems, like not supporting auto-detecting configuration
+entry change for synchronization or render decision making. This is left as a further todo.
+
+BREAKING CHANGE: Configuration file requires capitalized word for platform
+BREAKING CHANGE: The "overwrite" policy is now called "copy"
 
 ### Features
 
@@ -108,7 +118,8 @@ This release mainly introduces variables support and some bug fixes.
 
 ### Summary
 
-This release mainly introduces supports for de-duplication.
+Support preliminary task de-duplication.
+'Source' policy does not maitain file hash now.
 
 ### Features
 
@@ -127,7 +138,7 @@ This release mainly introduces supports for de-duplication.
 
 ### Summary
 
-This release mainly introduces some bug fixes.
+Hot fix issue about prepend policy overwriting original content.
 
 ### Bug Fixes
 
@@ -142,11 +153,12 @@ This release mainly introduces some bug fixes.
 
 ### Summary
 
-This release mainly introduces better test suite.
+Change the configuration file format.
+Complete most test suite.
 
 ### Refactor
 
-- *(frontend)* [**breaking**] Remove .config/ structure assumption for source repository (#14)
+- _(frontend)_ [**breaking**] Remove .config/ structure assumption for source repository (#14)
 
 ### Testing
 
@@ -162,7 +174,7 @@ This release mainly introduces better test suite.
 
 ### Summary
 
-This release mainly introduces some bug fixes.
+Hot fix hash inconsistency issue.
 
 ### Bug Fixes
 
@@ -176,16 +188,16 @@ This release mainly introduces some bug fixes.
 
 ### Summary
 
-The first release, the start point.
+First release. Just enough for personal use.
 
 ### Features
 
-- *(frontend)* Add initial implementation (#2)
-- *(backend)* Add initial implementation (#3)
+- _(frontend)_ Add initial implementation (#2)
+- _(backend)_ Add initial implementation (#3)
 
 ### Bug Fixes
 
-- *(frontend)* Parse failure issue (#5)
+- _(frontend)_ Parse failure issue (#5)
 
 ### Other
 
@@ -193,12 +205,11 @@ The first release, the start point.
 
 ### Testing
 
-- *(frontend)* Add integration and unit test (#6)
-- *(backend)* Add initial backend test (#7)
+- _(frontend)_ Add integration and unit test (#6)
+- _(backend)_ Add initial backend test (#7)
 
 ### Miscellaneous Tasks
 
 - Maintaince utility update (#1)
 - Add workflows (#4)
 - Release v0.1.0 (#9)
-
